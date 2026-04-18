@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stills Manager</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #141414;
+  color: #e0e0e0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Buttons ── */
+button { cursor: pointer; border: none; font-family: inherit; font-size: 12px; border-radius: 5px; transition: background 0.15s; }
+button:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-primary   { background: #006D78; color: #fff; padding: 7px 14px; }
+.btn-primary:hover:not(:disabled)   { background: #005560; }
+.btn-secondary { background: #2e2e2e; color: #ccc; padding: 7px 14px; border: 1px solid #3e3e3e; }
+.btn-secondary:hover:not(:disabled) { background: #3a3a3a; }
+.btn-success   { background: #27ae60; color: #fff; padding: 8px 14px; width: 100%; }
+.btn-success:hover:not(:disabled)   { background: #219150; }
+.btn-ghost { background: transparent; color: #666; padding: 5px 9px; }
+.btn-ghost:hover:not(:disabled) { color: #ccc; background: rgba(255,255,255,0.06); }
+
+/* ── Header ── */
+#header {
+  background: #1e1e1e;
+  padding: 9px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+#header h1 { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
+#folderName { font-size: 12px; color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#saveStatus { font-size: 11px; color: #4a4; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
+#saveStatus.show { opacity: 1; }
+
+/* ── Tabs ── */
+#tabBar {
+  background: #1a1a1a;
+  padding: 0 12px;
+  display: flex; align-items: flex-end; gap: 3px;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+}
+#tabBar::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: flex; align-items: center; gap: 4px;
+  padding: 7px 11px 6px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer; font-size: 12px; font-family: inherit;
+  background: #252525; color: #666;
+  border: 1px solid #2e2e2e; border-bottom: none;
+  white-space: nowrap; flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.tab.active { background: #141414; color: #fff; border-color: #3a3a3a; }
+.tab:hover:not(.active) { background: #303030; color: #bbb; }
+.tab-label { outline: none; }
+.tab-x { font-size: 11px; color: #444; padding: 1px 3px; border-radius: 3px; background: transparent; border: none; cursor: pointer; line-height: 1; }
+.tab-x:hover { color: #e55; background: rgba(255,80,80,0.12); }
+#addTabBtn {
+  padding: 5px 10px 4px; font-size: 16px;
+  background: transparent; color: #555;
+  border: 1px dashed #333; border-bottom: none;
+  border-radius: 5px 5px 0 0; flex-shrink: 0;
+}
+#addTabBtn:hover { color: #aaa; border-color: #555; }
+
+/* ── Main ── */
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Gallery panel ── */
+#galleryPanel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+#galleryHeader {
+  padding: 8px 14px; border-bottom: 1px solid #222;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+#galleryHeader h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+#galleryHeader span { font-size: 11px; color: #444; }
+
+/* ── Image grid ── */
+
+@media (max-width: 1400px) {
+  #imageGrid { --cols: 5; }
+}
+
+@media (max-width: 1100px) {
+  #imageGrid { --cols: 4; }
+}
+
+@media (max-width: 800px) {
+  #imageGrid { --cols: 3; }
+}
+
+@media (max-width: 560px) {
+  #imageGrid { --cols: 2; }
+}
+#galleryPanel,
+
+#imageGrid {
+
+  min-height: 0;
+
+}
+
+#imageGrid {
+  --cols: 6;
+  --gap: 7px;
+
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-rows: calc(
+    ((100% - (var(--cols) - 1) * var(--gap)) / var(--cols)) * 9 / 16 *2
+  );
+  gap: var(--gap);
+  align-content: start;
+}
+
+.thumb-wrap {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #1e1e1e;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  transition: border-color 0.12s;
+  cursor: pointer;
+}
+.thumb-wrap.in-sel { border-color: #006D78; }
+.thumb-wrap:hover  { border-color: #444; }
+.thumb-wrap.in-sel:hover { border-color: #00919f; }
+
+.thumb-img, .tif-ph, .thumb-hover {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+}
+.thumb-img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+.tif-ph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; color: #555; font-size: 10px; background: #1e1e1e; pointer-events: none;
+}
+.thumb-hover {
+  opacity: 0; transition: opacity 0.15s; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+.thumb-wrap:hover .thumb-hover { opacity: 1; }
+
+.thumb-fname {
+  position: absolute; bottom: 5px; left: 6px; right: 32px;
+  font-size: 10px; color: #ccc;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9); pointer-events: none;
+}
+.thumb-zoom {
+  position: absolute; top: 5px; right: 5px;
+  background: rgba(0,0,0,0.6); color: #ddd;
+  border: none; border-radius: 4px; padding: 3px 6px; font-size: 12px;
+  opacity: 0; transition: opacity 0.15s; cursor: pointer;
+  pointer-events: none; z-index: 2;
+}
+.thumb-wrap:hover .thumb-zoom { opacity: 1; pointer-events: all; }
+.thumb-zoom:hover { background: rgba(0,0,0,0.85) !important; color: #fff; }
+
+.sel-badge {
+  position: absolute; top: 5px; left: 5px;
+  background: #006D78; color: #fff;
+  border-radius: 9px; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; line-height: 1.5;
+  pointer-events: none; z-index: 2;
+}
+
+/* Hover marker on selected thumbnails */
+.thumb-sel-marker {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 109, 120, 0.35);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s; pointer-events: none; z-index: 3;
+  font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.9);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+.thumb-wrap.in-sel:hover .thumb-sel-marker { opacity: 1; }
+
+/* Lightbox flash feedback on add/remove */
+#lbFlash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2001; opacity: 0;
+}
+@keyframes lbSelectFlash {
+  0%   { opacity: 0.55; background: rgba(0,109,120,0.45); }
+  100% { opacity: 0;    background: rgba(0,109,120,0); }
+}
+@keyframes lbDeselectFlash {
+  0%   { opacity: 0.4; background: rgba(200,60,60,0.38); }
+  100% { opacity: 0;   background: rgba(200,60,60,0); }
+}
+#lbFlash.flash-add    { animation: lbSelectFlash   0.45s ease-out forwards; }
+#lbFlash.flash-remove { animation: lbDeselectFlash 0.45s ease-out forwards; }
+
+/* ── Selection panel ── */
+#selPanel {
+  width: 255px; background: #1a1a1a;
+  border-left: 1px solid #2a2a2a;
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+#selHeader {
+  padding: 8px 11px; border-bottom: 1px solid #252525;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+#selHeader h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+
+#selList { flex: 1; overflow-y: auto; padding: 5px; }
+#selList::-webkit-scrollbar { width: 5px; }
+#selList::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+
+.sel-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 6px; background: #212121;
+  border-radius: 5px; margin-bottom: 3px; border: 1px solid #2a2a2a;
+}
+.sel-item:hover { background: #272727; }
+.drag-handle { color: #3a3a3a; font-size: 14px; cursor: grab; flex-shrink: 0; padding: 1px 2px; }
+.drag-handle:active { cursor: grabbing; }
+.sel-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: block; }
+.sel-thumb:hover { opacity: 0.75; }
+.sel-info { flex: 1; min-width: 0; }
+.sel-num  { font-size: 9px; color: #555; margin-bottom: 1px; }
+.sel-name { font-size: 10px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rm-btn { color: #3a3a3a; background: transparent; border: none; font-size: 13px; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; }
+.rm-btn:hover { color: #e55; background: rgba(220,80,80,0.1); }
+
+#selFooter {
+  padding: 9px 11px; border-top: 1px solid #252525;
+  display: flex; flex-direction: column; gap: 7px; flex-shrink: 0;
+}
+#selCount { font-size: 11px; color: #555; }
+
+/* ── Sortable ── */
+.sortable-ghost  { opacity: 0.2; background: #006D7822 !important; }
+.sortable-chosen { background: #2b2b2b !important; }
+
+/* ── Empty states ── */
+.empty { text-align: center; padding: 48px 20px; }
+.empty-icon { font-size: 38px; margin-bottom: 11px; }
+.empty p { font-size: 12px; color: #555; line-height: 1.7; }
+
+/* ── Lightbox ── */
+#lightbox {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.93); z-index: 2000;
+  align-items: center; justify-content: center;
+}
+#lightbox.open { display: flex; }
+#lbImg { max-width: calc(100vw - 120px); max-height: calc(100vh - 110px); object-fit: contain; border-radius: 3px; display: block; user-select: none; }
+#lbClose {
+  position: fixed; top: 15px; right: 18px; font-size: 18px; color: #888;
+  background: rgba(0,0,0,0.55); border: none; border-radius: 5px; padding: 6px 11px;
+}
+#lbClose:hover { color: #fff; background: rgba(0,0,0,0.8); }
+#lbInfo {
+  position: fixed; top: 17px; left: 18px; font-size: 11px; color: #888;
+  background: rgba(0,0,0,0.55); padding: 5px 10px; border-radius: 5px;
+  max-width: 55vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lb-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  font-size: 26px; color: #888;
+  background: rgba(0,0,0,0.4); border: none; border-radius: 5px;
+  padding: 14px 10px; transition: background 0.15s, color 0.15s;
+}
+.lb-arrow:hover { color: #fff; background: rgba(0,0,0,0.75); }
+#lbPrev { left: 12px; }
+#lbNext { right: 12px; }
+#lbBottom { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+#lbAddBtn { font-size: 13px; padding: 8px 18px; }
+#lbSelBadge {
+  display: none; position: fixed; top: 15px; right: 68px;
+  background: #006D78; color: #fff; border: 1px solid #00919f;
+  border-radius: 20px; font-size: 13px; font-weight: 700;
+  padding: 5px 13px; line-height: 1.4; z-index: 2002;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+#lbSelBadge.visible { display: block; }
+
+/* ── Folder browser modal ── */
+#modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3000;
+  align-items: center; justify-content: center;
+}
+#modal.open { display: flex; }
+.modal-box {
+  background: #1e1e1e; border: 1px solid #333; border-radius: 8px;
+  width: 520px; max-width: 95vw; max-height: 80vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head {
+  padding: 13px 16px; border-bottom: 1px solid #2a2a2a;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.modal-head h3 { font-size: 14px; color: #ddd; }
+.modal-crumb {
+  padding: 8px 14px; border-bottom: 1px solid #252525;
+  font-size: 11px; color: #666; flex-shrink: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.modal-crumb span { cursor: pointer; color: #888; }
+.modal-crumb span:hover { color: #006D78; text-decoration: underline; }
+.modal-list { flex: 1; overflow-y: auto; padding: 6px; }
+.modal-list::-webkit-scrollbar { width: 6px; }
+.modal-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+.dir-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 5px; cursor: pointer;
+  font-size: 13px; color: #ccc;
+}
+.dir-item:hover { background: #2a2a2a; color: #fff; }
+.modal-foot {
+  padding: 11px 14px; border-top: 1px solid #252525;
+  display: flex; justify-content: flex-end; gap: 9px; flex-shrink: 0;
+}
+
+/* ── Welcome ── */
+#welcome {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; text-align: center; padding: 40px;
+}
+#welcome .wi { font-size: 52px; margin-bottom: 4px; }
+#welcome h2 { font-size: 18px; color: #888; font-weight: 500; }
+#welcome p  { font-size: 13px; color: #555; line-height: 1.7; max-width: 360px; }
+#appMain { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <h1>Stills Manager</h1>
+  <span id="folderName">No folder open</span>
+  <span id="saveStatus">✓ Saved</span>
+  <button class="btn-primary" id="openBtn">📁 Open Folder</button>
+</div>
+
+<!-- Tabs (hidden until folder open) -->
+<div id="tabBar" style="display:none">
+  <button id="addTabBtn" title="New selection">＋</button>
+</div>
+
+<!-- Welcome -->
+<div id="welcome">
+  <div class="wi">🎞️</div>
+  <h2>Stills Manager</h2>
+  <p>Select a folder containing your images (JPG, PNG, TIF).<br>Selections are saved automatically as JSON in the folder.</p>
+  <button class="btn-primary" style="font-size:14px;padding:10px 22px" id="welcomeOpenBtn">📁 Open Folder</button>
+</div>
+
+<!-- App main -->
+<div id="appMain">
+  <div id="main">
+
+    <!-- Gallery -->
+    <div id="galleryPanel">
+      <div id="galleryHeader">
+        <h2 id="galleryTitle">Images</h2>
+        <span id="galleryHint">Click to select · Cmd+click to view large</span>
+      </div>
+      <div id="imageGrid"></div>
+    </div>
+
+    <!-- Selection -->
+    <div id="selPanel">
+      <div id="selHeader">
+        <h2>Selection</h2>
+        <button class="btn-ghost" id="clearSelBtn" disabled>✕ Clear</button>
+      </div>
+      <div id="selList"></div>
+      <div id="selFooter">
+        <span id="selCount">0 images</span>
+        <button class="btn-success" id="exportBtn" disabled>📄 Export PDF</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lbClose">✕</button>
+  <div id="lbInfo"></div>
+  <button class="lb-arrow" id="lbPrev">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-arrow" id="lbNext">›</button>
+  <div id="lbBottom">
+    <button id="lbAddBtn" class="btn-primary">＋ Add to selection</button>
+  </div>
+  <div id="lbSelBadge"></div>
+  <div id="lbFlash"></div>
+</div>
+
+<!-- Folder browser modal -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Open Folder</h3>
+      <button class="btn-ghost" id="modalClose">✕</button>
+    </div>
+    <div class="modal-crumb" id="modalCrumb"></div>
+    <div class="modal-list" id="modalList"></div>
+    <div class="modal-foot">
+      <button class="btn-secondary" id="modalCancel">Cancel</button>
+      <button class="btn-primary" id="modalOpen">Open This Folder</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+'use strict';
+
+// ─── State ────────────────────────────────────────────────────────────────
+let allImages   = [];  // image filenames
+let selections  = {};  // { name: [filename, ...] }
+let selOrder    = [];
+let activeSel   = '';
+
+let lbImages    = [];
+let lbIdx       = 0;
+let sortable    = null;
+let saveTimer   = null;
+let browserPath = '';
+let folderName  = '';
+
+// ─── API helpers ───────────────────────────────────────────────────────────
+async function api(url, opts = {}) {
+  const res = await fetch(url, opts);
+  return res.json();
+}
+async function apiPost(url, data) {
+  return api(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+}
+
+// ─── Auto-save (debounced) ─────────────────────────────────────────────────
+function queueSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    await apiPost('/api/selections', { selections, selOrder, activeSel });
+    showSaved();
+  }, 350);
+}
+function showSaved() {
+  const el = $('saveStatus');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ─── Load folder ───────────────────────────────────────────────────────────
+async function loadFolder(path) {
+  const res = await apiPost('/api/open', { path });
+  if (res.error) { alert(res.error); return; }
+
+  const imgRes = await api('/api/images');
+  allImages = imgRes.images || [];
+
+  folderName = res.name;
+
+  const selRes = await api('/api/selections');
+  applySelData(selRes);
+
+  // If no JSON existed yet, save an empty one immediately
+  await apiPost('/api/selections', { selections, selOrder, activeSel });
+
+  $('folderName').textContent = '📂 ' + res.name;
+  $('welcome').style.display  = 'none';
+  $('appMain').style.display  = 'flex';
+  $('tabBar').style.display   = 'flex';
+
+  renderAll();
+  showSaved();
+}
+
+function applySelData(data) {
+  if (data && data.selections && Object.keys(data.selections).length) {
+    selections = data.selections;
+    selOrder   = data.selOrder || Object.keys(selections);
+    activeSel  = data.activeSel || selOrder[0];
+    if (!selections[activeSel]) activeSel = selOrder[0];
+  } else {
+    mkDefault();
+  }
+}
+function mkDefault() {
+  const n = folderName || 'Selection 1';
+  selections = { [n]: [] };
+  selOrder   = [n];
+  activeSel  = n;
+}
+
+// ─── Folder browser ────────────────────────────────────────────────────────
+async function openBrowser() {
+  const stored = localStorage.getItem('stills-lastPath');
+  const start  = stored || (await api('/api/browse').then(r => r.path));
+  browserPath  = start;
+  $('modal').classList.add('open');
+  await browseTo(start);
+}
+async function browseTo(path) {
+  const data = await api('/api/browse?path=' + encodeURIComponent(path));
+  browserPath = data.path;
+  localStorage.setItem('stills-lastPath', data.path);
+
+  // Breadcrumb
+  const parts = data.path.split('/').filter(Boolean);
+  const crumb = $('modalCrumb');
+  crumb.innerHTML = '';
+  let built = '';
+  parts.forEach((p, i) => {
+    built += '/' + p;
+    const s = document.createElement('span');
+    s.textContent = (i === 0 ? '/' : '') + p + (i < parts.length - 1 ? ' › ' : '');
+    const cap = built;
+    s.onclick = () => browseTo(cap);
+    crumb.appendChild(s);
+  });
+
+  // List
+  const list = $('modalList');
+  list.innerHTML = '';
+
+  if (data.parent) {
+    const up = document.createElement('div');
+    up.className = 'dir-item';
+    up.innerHTML = '📁 <span style="color:#888">.. (up)</span>';
+    up.onclick = () => browseTo(data.parent);
+    list.appendChild(up);
+  }
+  if (!data.dirs.length) {
+    list.innerHTML += '<div style="padding:20px;color:#555;font-size:12px;text-align:center">No subfolders</div>';
+  }
+  data.dirs.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'dir-item';
+    item.textContent = '📁 ' + d.name;
+    item.onclick = () => browseTo(d.path);
+    list.appendChild(item);
+  });
+}
+function closeModal() { $('modal').classList.remove('open'); }
+
+// ─── Selection helpers ──────────────────────────────────────────────────────
+function curSel()    { return selections[activeSel] || []; }
+function isInSel(n)  { return curSel().includes(n); }
+
+function toggleInSel(name) {
+  const s = curSel(), i = s.indexOf(name);
+  const adding = i === -1;
+  if (adding) s.push(name); else s.splice(i, 1);
+  selections[activeSel] = s;
+  queueSave(); renderGallery(); renderSelection();
+}
+function removeFromSel(name) {
+  const s = curSel(), i = s.indexOf(name);
+  if (i !== -1) { s.splice(i, 1); selections[activeSel] = s; }
+  queueSave(); renderGallery(); renderSelection();
+}
+function clearSel() {
+  selections[activeSel] = [];
+  queueSave(); renderGallery(); renderSelection();
+}
+
+// ─── Tabs ──────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const bar = $('tabBar');
+  bar.querySelectorAll('.tab').forEach(t => t.remove());
+  const add = $('addTabBtn');
+
+  selOrder.forEach(name => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (name === activeSel ? ' active' : '');
+
+    const lbl = document.createElement('span');
+    lbl.className       = 'tab-label';
+    lbl.contentEditable = 'false';
+    lbl.textContent     = name;
+    lbl.title           = 'Double-click to rename';
+
+    const x = document.createElement('button');
+    x.className = 'tab-x'; x.textContent = '×'; x.title = 'Delete selection';
+    x.onclick = e => { e.stopPropagation(); deleteSel(name); };
+
+    tab.appendChild(lbl);
+    if (selOrder.length > 1) tab.appendChild(x);
+
+    // single click → switch; double-click → rename
+    let clickTimer = null;
+    tab.onclick = e => {
+      if (e.target === x) return;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => switchSel(name), 200);
+    };
+    tab.ondblclick = e => {
+      if (e.target === x) return;
+      clearTimeout(clickTimer);
+      startRename(lbl, name);
+    };
+
+    bar.insertBefore(tab, add);
+  });
+}
+
+function startRename(lbl, oldName) {
+  lbl.contentEditable = 'true';
+  lbl.focus();
+  // select all
+  const range = document.createRange();
+  range.selectNodeContents(lbl);
+  const sel = window.getSelection();
+  sel.removeAllRanges(); sel.addRange(range);
+
+  const commit = () => {
+    lbl.contentEditable = 'false';
+    const n = lbl.textContent.trim();
+    if (n && n !== oldName && !selections[n]) {
+      renameSel(oldName, n);
+    } else {
+      lbl.textContent = oldName;
+    }
+  };
+  lbl.onblur    = commit;
+  lbl.onkeydown = e => {
+    if (e.key === 'Enter')  { e.preventDefault(); lbl.blur(); }
+    if (e.key === 'Escape') { lbl.textContent = oldName; lbl.blur(); }
+    e.stopPropagation();
+  };
+}
+
+function switchSel(name) {
+  activeSel = name;
+  queueSave(); renderTabs(); renderGallery(); renderSelection();
+}
+function addNewSel() {
+  let n = selOrder.length + 1, name;
+  do { name = `Selection ${n++}`; } while (selections[name] !== undefined);
+  selections[name] = []; selOrder.push(name); activeSel = name;
+  queueSave(); renderAll();
+}
+function renameSel(oldName, newName) {
+  const data = selections[oldName];
+  delete selections[oldName];
+  selections[newName] = data;
+  selOrder = selOrder.map(n => n === oldName ? newName : n);
+  if (activeSel === oldName) activeSel = newName;
+  queueSave(); renderAll();
+}
+function deleteSel(name) {
+  if (selOrder.length <= 1) { alert('Cannot delete the last selection.'); return; }
+  const c = selections[name].length;
+  if (c > 0 && !confirm(`Delete "${name}" with its ${c} image(s)?`)) return;
+  const idx = selOrder.indexOf(name);
+  selOrder.splice(idx, 1); delete selections[name];
+  if (activeSel === name) activeSel = selOrder[Math.max(0, idx - 1)];
+  queueSave(); renderAll();
+}
+
+// ─── Gallery ───────────────────────────────────────────────────────────────
+function renderGallery() {
+  const grid = $('imageGrid');
+  $('galleryTitle').textContent = `Images (${allImages.length})`;
+  grid.innerHTML = '';
+
+  if (!allImages.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><p>No images found<br>(jpg, png, tif)</p></div>';
+    return;
+  }
+
+  allImages.forEach((name, i) => {
+    const inSel = isInSel(name);
+    const pos   = curSel().indexOf(name);
+    const isTif = /\.tiff?$/i.test(name);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-wrap' + (inSel ? ' in-sel' : '');
+    wrap.onclick = e => {
+      if (e.metaKey || e.ctrlKey) openLightbox(allImages, i);
+      else toggleInSel(name);
+    };
+
+    if (isTif) {
+      const ph = document.createElement('div');
+      ph.className = 'tif-ph';
+      ph.innerHTML = '<span style="font-size:26px">🖼️</span><span>TIF</span>';
+      wrap.appendChild(ph);
+    } else {
+      const img = document.createElement('img');
+      img.className = 'thumb-img';
+      img.src = `/api/image/${encodeURIComponent(name)}`;
+      img.loading = 'lazy';
+      img.alt = name;
+      wrap.appendChild(img);
+    }
+
+    // Hover overlay (gradient)
+    const hov = document.createElement('div');
+    hov.className = 'thumb-hover';
+    wrap.appendChild(hov);
+
+    // Filename
+    const fname = document.createElement('div');
+    fname.className = 'thumb-fname';
+    fname.textContent = name;
+    wrap.appendChild(fname);
+
+    // Zoom button (Shift+click shortcut reminder)
+    const zb = document.createElement('button');
+    zb.className = 'thumb-zoom'; zb.innerHTML = '⤢'; zb.title = 'View large (or Cmd+click)';
+    zb.onclick = e => { e.stopPropagation(); openLightbox(allImages, i); };
+    wrap.appendChild(zb);
+
+    // Selection badge (position)
+    if (inSel) {
+      const badge = document.createElement('div');
+      badge.className = 'sel-badge'; badge.textContent = pos + 1;
+      wrap.appendChild(badge);
+
+      // Hover marker showing selection number large & centered
+      const marker = document.createElement('div');
+      marker.className = 'thumb-sel-marker';
+      marker.textContent = pos + 1;
+      wrap.appendChild(marker);
+    }
+
+    grid.appendChild(wrap);
+  });
+}
+
+// ─── Selection panel ───────────────────────────────────────────────────────
+function renderSelection() {
+  const listEl = $('selList');
+  const sel    = curSel();
+
+  $('selCount').textContent   = sel.length === 1 ? '1 image' : `${sel.length} images`;
+  $('exportBtn').disabled     = sel.length === 0;
+  $('clearSelBtn').disabled   = sel.length === 0;
+
+  if (sortable) { sortable.destroy(); sortable = null; }
+
+  if (!sel.length) {
+    listEl.innerHTML = '<div class="empty"><p>Click the ● button on images<br>to add them here</p></div>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  sel.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = 'sel-item';
+
+    const dh = document.createElement('span');
+    dh.className = 'drag-handle'; dh.textContent = '⠿';
+
+    const thumb = document.createElement('img');
+    thumb.className = 'sel-thumb';
+    thumb.src = `/api/image/${encodeURIComponent(name)}`;
+    thumb.alt = name; thumb.draggable = false;
+    // Click on selection thumb also opens lightbox (in selection context)
+    thumb.onclick = () => {
+      const imgs = sel.map(n => n); // names
+      openLightbox(sel, i);
+    };
+
+    const info = document.createElement('div');
+    info.className = 'sel-info';
+    const num = document.createElement('div');
+    num.className = 'sel-num'; num.textContent = `#${i + 1}`;
+    const nm = document.createElement('div');
+    nm.className = 'sel-name'; nm.textContent = name; nm.title = name;
+    info.appendChild(num); info.appendChild(nm);
+
+    const rm = document.createElement('button');
+    rm.className = 'rm-btn'; rm.textContent = '✕'; rm.title = 'Remove';
+    rm.onclick = () => removeFromSel(name);
+
+    item.appendChild(dh); item.appendChild(thumb);
+    item.appendChild(info); item.appendChild(rm);
+    listEl.appendChild(item);
+  });
+
+  sortable = new Sortable(listEl, {
+    handle: '.drag-handle', animation: 150,
+    ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+    onEnd: evt => {
+      const s = curSel();
+      const [m] = s.splice(evt.oldIndex, 1);
+      s.splice(evt.newIndex, 0, m);
+      selections[activeSel] = s;
+      queueSave(); renderGallery(); renderSelection();
+    }
+  });
+}
+
+function renderAll() { renderTabs(); renderGallery(); renderSelection(); }
+
+// ─── Lightbox ──────────────────────────────────────────────────────────────
+function openLightbox(images, idx) {
+  lbImages = images; lbIdx = idx;
+  updateLb();
+  $('lightbox').classList.add('open');
+}
+function closeLb() { $('lightbox').classList.remove('open'); }
+function flashLb(adding) {
+  const el = $('lbFlash');
+  el.classList.remove('flash-add', 'flash-remove');
+  void el.offsetWidth; // reflow to restart animation
+  el.classList.add(adding ? 'flash-add' : 'flash-remove');
+}
+function updateLb() {
+  const name = lbImages[lbIdx]; if (!name) return;
+  $('lbImg').src = `/api/image/${encodeURIComponent(name)}`;
+  $('lbInfo').textContent = `${name}   ${lbIdx + 1} / ${lbImages.length}`;
+  $('lbPrev').style.visibility = lbIdx > 0 ? 'visible' : 'hidden';
+  $('lbNext').style.visibility = lbIdx < lbImages.length - 1 ? 'visible' : 'hidden';
+  const inSel = isInSel(name);
+  $('lbAddBtn').textContent = inSel ? '✓ In selection' : '＋ Add to selection';
+  $('lbAddBtn').className   = inSel ? 'btn-secondary' : 'btn-primary';
+  const pos = curSel().indexOf(name);
+  const badge = $('lbSelBadge');
+  if (pos !== -1) {
+    badge.textContent = `# ${pos + 1}`;
+    badge.classList.add('visible');
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+// ─── PDF export ─────────────────────────────────────────────────────────────
+async function exportPDF() {
+  const sel = curSel(); if (!sel.length) return;
+  const btn = $('exportBtn');
+  btn.textContent = '⏳ Exporting…'; btn.disabled = true;
+  try {
+    const { jsPDF } = window.jspdf;
+    // 16:9 landscape page (A4 width × 9/16 height)
+    const PW = 297, PH = Math.round(297 * 9 / 16 * 1000) / 1000;
+    const pdf = new jsPDF({ unit: 'mm', format: [PW, PH], orientation: 'landscape' });
+
+    for (let i = 0; i < sel.length; i++) {
+      if (i > 0) pdf.addPage([PW, PH], 'landscape');
+      const el = await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`);
+      const canvas = document.createElement('canvas');
+      canvas.width = el.naturalWidth; canvas.height = el.naturalHeight;
+      canvas.getContext('2d').drawImage(el, 0, 0);
+      const data  = canvas.toDataURL('image/jpeg', 0.92);
+      const scale = Math.min(PW / el.naturalWidth, PH / el.naturalHeight);
+      const w = el.naturalWidth * scale, h = el.naturalHeight * scale;
+      pdf.addImage(data, 'JPEG', (PW - w) / 2, (PH - h) / 2, w, h);
+    }
+
+    const fname = activeSel.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'selection';
+    pdf.save(`${fname}.pdf`);
+  } catch (e) {
+    alert('PDF export error: ' + e.message);
+  } finally {
+    btn.textContent = '📄 Export PDF';
+    btn.disabled = curSel().length === 0;
+  }
+}
+
+function loadImgEl(url) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img); img.onerror = rej; img.src = url;
+  });
+}
+
+// ─── Util ──────────────────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+
+// ─── Events ────────────────────────────────────────────────────────────────
+$('openBtn').onclick        = openBrowser;
+$('welcomeOpenBtn').onclick = openBrowser;
+$('addTabBtn').onclick      = addNewSel;
+$('clearSelBtn').onclick    = clearSel;
+$('exportBtn').onclick      = exportPDF;
+
+$('modalClose').onclick  = closeModal;
+$('modalCancel').onclick = closeModal;
+$('modal').onclick       = e => { if (e.target === $('modal')) closeModal(); };
+$('modalOpen').onclick   = async () => { closeModal(); await loadFolder(browserPath); };
+
+$('lbClose').onclick  = closeLb;
+$('lbPrev').onclick   = () => { if (lbIdx > 0) { lbIdx--; updateLb(); } };
+$('lbNext').onclick   = () => { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } };
+$('lbAddBtn').onclick = () => { const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } };
+$('lightbox').onclick = e => { if (e.target === $('lightbox')) closeLb(); };
+
+document.addEventListener('keydown', e => {
+  if ($('lightbox').classList.contains('open')) {
+    if (e.key === 'Escape')     closeLb();
+    if (e.key === 'ArrowLeft')  { if (lbIdx > 0) { lbIdx--; updateLb(); } }
+    if (e.key === 'ArrowRight') { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
+    if (e.key === ' ') { e.preventDefault(); const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } }
+  } else if ($('modal').classList.contains('open')) {
+    if (e.key === 'Escape') closeModal();
+  }
+});
+</script>
+</body>
+</html>
