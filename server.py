@@ -29,7 +29,10 @@ def browse():
             if os.path.isdir(full):
                 dirs.append({'name': name, 'path': full})
         parent = os.path.dirname(path)
-        return jsonify({'path': path, 'parent': parent if parent != path else None, 'dirs': dirs})
+        img_count = sum(1 for f in os.listdir(path)
+                        if os.path.splitext(f)[1].lower() in IMAGE_EXTS)
+        return jsonify({'path': path, 'parent': parent if parent != path else None,
+                        'dirs': dirs, 'image_count': img_count})
     except PermissionError:
         return jsonify({'path': path, 'parent': os.path.dirname(path), 'dirs': [], 'error': 'Permission denied'})
 

@@ -18,45 +18,45 @@ body {
 }
 
 /* ── Buttons ── */
-button { cursor: pointer; border: none; font-family: inherit; font-size: 12px; border-radius: 5px; transition: background 0.15s; }
+button { cursor: pointer; border: none; font-family: inherit; font-size: 13px; border-radius: 5px; transition: background 0.15s; }
 button:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-primary   { background: #006D78; color: #fff; padding: 7px 14px; }
+.btn-primary   { background: #006D78; color: #fff; padding: 8px 16px; }
 .btn-primary:hover:not(:disabled)   { background: #005560; }
-.btn-secondary { background: #2e2e2e; color: #ccc; padding: 7px 14px; border: 1px solid #3e3e3e; }
+.btn-secondary { background: #2e2e2e; color: #ccc; padding: 8px 16px; border: 1px solid #3e3e3e; }
 .btn-secondary:hover:not(:disabled) { background: #3a3a3a; }
-.btn-success   { background: #27ae60; color: #fff; padding: 8px 14px; width: 100%; }
+.btn-success   { background: #27ae60; color: #fff; padding: 10px 16px; width: 100%; }
 .btn-success:hover:not(:disabled)   { background: #219150; }
-.btn-ghost { background: transparent; color: #666; padding: 5px 9px; }
+.btn-ghost { background: transparent; color: #666; padding: 6px 10px; }
 .btn-ghost:hover:not(:disabled) { color: #ccc; background: rgba(255,255,255,0.06); }
 
 /* ── Header ── */
 #header {
   background: #1e1e1e;
-  padding: 9px 16px;
-  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0;
 }
-#header h1 { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
-#folderName { font-size: 12px; color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#saveStatus { font-size: 11px; color: #4a4; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
+#header h1 { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
+#folderName { font-size: 13px; color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#saveStatus { font-size: 12px; color: #4a4; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
 #saveStatus.show { opacity: 1; }
 
 /* ── Tabs ── */
 #tabBar {
   background: #1a1a1a;
-  padding: 0 12px;
-  display: flex; align-items: flex-end; gap: 3px;
+  padding: 0 14px;
+  display: flex; align-items: flex-end; gap: 4px;
   border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
 }
 #tabBar::-webkit-scrollbar { display: none; }
 
 .tab {
-  display: flex; align-items: center; gap: 4px;
-  padding: 7px 11px 6px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 9px 14px 8px;
   border-radius: 5px 5px 0 0;
-  cursor: pointer; font-size: 12px; font-family: inherit;
+  cursor: pointer; font-size: 13px; font-family: inherit;
   background: #252525; color: #666;
   border: 1px solid #2e2e2e; border-bottom: none;
   white-space: nowrap; flex-shrink: 0;
@@ -66,10 +66,10 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .tab.active { background: #141414; color: #fff; border-color: #3a3a3a; }
 .tab:hover:not(.active) { background: #303030; color: #bbb; }
 .tab-label { outline: none; }
-.tab-x { font-size: 11px; color: #444; padding: 1px 3px; border-radius: 3px; background: transparent; border: none; cursor: pointer; line-height: 1; }
+.tab-x { font-size: 12px; color: #444; padding: 2px 4px; border-radius: 3px; background: transparent; border: none; cursor: pointer; line-height: 1; }
 .tab-x:hover { color: #e55; background: rgba(255,80,80,0.12); }
 #addTabBtn {
-  padding: 5px 10px 4px; font-size: 16px;
+  padding: 6px 12px 5px; font-size: 18px;
   background: transparent; color: #555;
   border: 1px dashed #333; border-bottom: none;
   border-radius: 5px 5px 0 0; flex-shrink: 0;
@@ -82,11 +82,11 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 /* ── Gallery panel ── */
 #galleryPanel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 #galleryHeader {
-  padding: 8px 14px; border-bottom: 1px solid #222;
+  padding: 10px 16px; border-bottom: 1px solid #222;
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
-#galleryHeader h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
-#galleryHeader span { font-size: 11px; color: #444; }
+#galleryHeader h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+#galleryHeader span { font-size: 12px; color: #444; }
 
 /* ── Image grid ── */
 
@@ -115,11 +115,11 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 
 #imageGrid {
   --cols: 6;
-  --gap: 7px;
+  --gap: 10px;
 
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   grid-auto-rows: calc(
@@ -159,15 +159,15 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .thumb-wrap:hover .thumb-hover { opacity: 1; }
 
 .thumb-fname {
-  position: absolute; bottom: 5px; left: 6px; right: 32px;
-  font-size: 10px; color: #ccc;
+  position: absolute; bottom: 6px; left: 7px; right: 36px;
+  font-size: 11px; color: #ccc;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   text-shadow: 0 1px 4px rgba(0,0,0,0.9); pointer-events: none;
 }
 .thumb-zoom {
-  position: absolute; top: 5px; right: 5px;
+  position: absolute; top: 6px; right: 6px;
   background: rgba(0,0,0,0.6); color: #ddd;
-  border: none; border-radius: 4px; padding: 3px 6px; font-size: 12px;
+  border: none; border-radius: 4px; padding: 4px 8px; font-size: 13px;
   opacity: 0; transition: opacity 0.15s; cursor: pointer;
   pointer-events: none; z-index: 2;
 }
@@ -175,10 +175,10 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .thumb-zoom:hover { background: rgba(0,0,0,0.85) !important; color: #fff; }
 
 .sel-badge {
-  position: absolute; top: 5px; left: 5px;
+  position: absolute; top: 6px; left: 6px;
   background: #006D78; color: #fff;
-  border-radius: 9px; font-size: 10px; font-weight: 700;
-  padding: 1px 6px; line-height: 1.5;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; line-height: 1.5;
   pointer-events: none; z-index: 2;
 }
 
@@ -188,7 +188,7 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
   background: rgba(0, 109, 120, 0.35);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; transition: opacity 0.15s; pointer-events: none; z-index: 3;
-  font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.9);
+  font-size: 36px; font-weight: 900; color: rgba(255,255,255,0.9);
   text-shadow: 0 2px 8px rgba(0,0,0,0.7);
 }
 .thumb-wrap.in-sel:hover .thumb-sel-marker { opacity: 1; }
@@ -210,50 +210,50 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ── Selection panel ── */
 #selPanel {
-  width: 255px; background: #1a1a1a;
+  width: 290px; background: #1a1a1a;
   border-left: 1px solid #2a2a2a;
   display: flex; flex-direction: column; flex-shrink: 0;
 }
 #selHeader {
-  padding: 8px 11px; border-bottom: 1px solid #252525;
+  padding: 10px 13px; border-bottom: 1px solid #252525;
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
-#selHeader h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+#selHeader h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
 
-#selList { flex: 1; overflow-y: auto; padding: 5px; }
-#selList::-webkit-scrollbar { width: 5px; }
+#selList { flex: 1; overflow-y: auto; padding: 6px; }
+#selList::-webkit-scrollbar { width: 6px; }
 #selList::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
 
 .sel-item {
-  display: flex; align-items: center; gap: 7px;
-  padding: 5px 6px; background: #212121;
-  border-radius: 5px; margin-bottom: 3px; border: 1px solid #2a2a2a;
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 8px; background: #212121;
+  border-radius: 5px; margin-bottom: 4px; border: 1px solid #2a2a2a;
 }
 .sel-item:hover { background: #272727; }
-.drag-handle { color: #3a3a3a; font-size: 14px; cursor: grab; flex-shrink: 0; padding: 1px 2px; }
+.drag-handle { color: #3a3a3a; font-size: 16px; cursor: grab; flex-shrink: 0; padding: 1px 3px; }
 .drag-handle:active { cursor: grabbing; }
-.sel-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: block; }
+.sel-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: block; }
 .sel-thumb:hover { opacity: 0.75; }
 .sel-info { flex: 1; min-width: 0; }
-.sel-num  { font-size: 9px; color: #555; margin-bottom: 1px; }
-.sel-name { font-size: 10px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rm-btn { color: #3a3a3a; background: transparent; border: none; font-size: 13px; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; }
+.sel-num  { font-size: 10px; color: #555; margin-bottom: 2px; }
+.sel-name { font-size: 12px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rm-btn { color: #3a3a3a; background: transparent; border: none; font-size: 15px; padding: 3px 6px; border-radius: 3px; flex-shrink: 0; }
 .rm-btn:hover { color: #e55; background: rgba(220,80,80,0.1); }
 
 #selFooter {
-  padding: 9px 11px; border-top: 1px solid #252525;
-  display: flex; flex-direction: column; gap: 7px; flex-shrink: 0;
+  padding: 11px 13px; border-top: 1px solid #252525;
+  display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
 }
-#selCount { font-size: 11px; color: #555; }
+#selCount { font-size: 12px; color: #555; }
 
 /* ── Sortable ── */
 .sortable-ghost  { opacity: 0.2; background: #006D7822 !important; }
 .sortable-chosen { background: #2b2b2b !important; }
 
 /* ── Empty states ── */
-.empty { text-align: center; padding: 48px 20px; }
-.empty-icon { font-size: 38px; margin-bottom: 11px; }
-.empty p { font-size: 12px; color: #555; line-height: 1.7; }
+.empty { text-align: center; padding: 56px 24px; }
+.empty-icon { font-size: 46px; margin-bottom: 13px; }
+.empty p { font-size: 13px; color: #555; line-height: 1.7; }
 
 /* ── Lightbox ── */
 #lightbox {
@@ -264,31 +264,31 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 #lightbox.open { display: flex; }
 #lbImg { max-width: calc(100vw - 120px); max-height: calc(100vh - 110px); object-fit: contain; border-radius: 3px; display: block; user-select: none; }
 #lbClose {
-  position: fixed; top: 15px; right: 18px; font-size: 18px; color: #888;
-  background: rgba(0,0,0,0.55); border: none; border-radius: 5px; padding: 6px 11px;
+  position: fixed; top: 16px; right: 20px; font-size: 20px; color: #888;
+  background: rgba(0,0,0,0.55); border: none; border-radius: 5px; padding: 8px 13px;
 }
 #lbClose:hover { color: #fff; background: rgba(0,0,0,0.8); }
 #lbInfo {
-  position: fixed; top: 17px; left: 18px; font-size: 11px; color: #888;
-  background: rgba(0,0,0,0.55); padding: 5px 10px; border-radius: 5px;
+  position: fixed; top: 18px; left: 20px; font-size: 13px; color: #888;
+  background: rgba(0,0,0,0.55); padding: 6px 12px; border-radius: 5px;
   max-width: 55vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .lb-arrow {
   position: fixed; top: 50%; transform: translateY(-50%);
-  font-size: 26px; color: #888;
+  font-size: 30px; color: #888;
   background: rgba(0,0,0,0.4); border: none; border-radius: 5px;
-  padding: 14px 10px; transition: background 0.15s, color 0.15s;
+  padding: 18px 12px; transition: background 0.15s, color 0.15s;
 }
 .lb-arrow:hover { color: #fff; background: rgba(0,0,0,0.75); }
-#lbPrev { left: 12px; }
-#lbNext { right: 12px; }
-#lbBottom { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
-#lbAddBtn { font-size: 13px; padding: 8px 18px; }
+#lbPrev { left: 14px; }
+#lbNext { right: 14px; }
+#lbBottom { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
+#lbAddBtn { font-size: 14px; padding: 10px 22px; }
 #lbSelBadge {
-  display: none; position: fixed; top: 15px; right: 68px;
+  display: none; position: fixed; top: 16px; right: 76px;
   background: #006D78; color: #fff; border: 1px solid #00919f;
-  border-radius: 20px; font-size: 13px; font-weight: 700;
-  padding: 5px 13px; line-height: 1.4; z-index: 2002;
+  border-radius: 20px; font-size: 14px; font-weight: 700;
+  padding: 6px 15px; line-height: 1.4; z-index: 2002;
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 #lbSelBadge.visible { display: block; }
@@ -302,45 +302,171 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 #modal.open { display: flex; }
 .modal-box {
   background: #1e1e1e; border: 1px solid #333; border-radius: 8px;
-  width: 520px; max-width: 95vw; max-height: 80vh;
+  width: 560px; max-width: 95vw; max-height: 80vh;
   display: flex; flex-direction: column; overflow: hidden;
 }
 .modal-head {
-  padding: 13px 16px; border-bottom: 1px solid #2a2a2a;
+  padding: 15px 18px; border-bottom: 1px solid #2a2a2a;
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
-.modal-head h3 { font-size: 14px; color: #ddd; }
+.modal-head h3 { font-size: 15px; color: #ddd; }
 .modal-crumb {
-  padding: 8px 14px; border-bottom: 1px solid #252525;
-  font-size: 11px; color: #666; flex-shrink: 0;
+  padding: 10px 16px; border-bottom: 1px solid #252525;
+  font-size: 12px; color: #666; flex-shrink: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .modal-crumb span { cursor: pointer; color: #888; }
 .modal-crumb span:hover { color: #006D78; text-decoration: underline; }
-.modal-list { flex: 1; overflow-y: auto; padding: 6px; }
+.modal-list { flex: 1; overflow-y: auto; padding: 7px; }
 .modal-list::-webkit-scrollbar { width: 6px; }
 .modal-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
 .dir-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 5px; cursor: pointer;
-  font-size: 13px; color: #ccc;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 5px; cursor: pointer;
+  font-size: 14px; color: #ccc;
 }
 .dir-item:hover { background: #2a2a2a; color: #fff; }
 .modal-foot {
-  padding: 11px 14px; border-top: 1px solid #252525;
-  display: flex; justify-content: flex-end; gap: 9px; flex-shrink: 0;
+  padding: 13px 16px; border-top: 1px solid #252525;
+  display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
 }
 
 /* ── Welcome ── */
 #welcome {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 14px; text-align: center; padding: 40px;
+  gap: 18px; text-align: center; padding: 40px;
 }
-#welcome .wi { font-size: 52px; margin-bottom: 4px; }
-#welcome h2 { font-size: 18px; color: #888; font-weight: 500; }
-#welcome p  { font-size: 13px; color: #555; line-height: 1.7; max-width: 360px; }
+#welcome .wi { font-size: 60px; margin-bottom: 4px; }
+#welcome h2 { font-size: 22px; color: #888; font-weight: 500; }
+#welcome p  { font-size: 14px; color: #555; line-height: 1.7; max-width: 380px; }
 #appMain { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+
+/* ── Contact Sheet modal ── */
+.btn-teal { background: #006D78; color: #fff; padding: 10px 16px; width: 100%; border-radius: 5px; }
+.btn-teal:hover:not(:disabled) { background: #005560; }
+.btn-teal:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── Watermark modal ── */
+#wmModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82); z-index: 3200;
+  align-items: center; justify-content: center;
+}
+#wmModal.open { display: flex; }
+.wm-box {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+  width: 780px; max-width: 96vw; height: 480px; max-height: 92vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.wm-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.wm-settings {
+  width: 215px; flex-shrink: 0; padding: 14px;
+  border-right: 1px solid #252525;
+  display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+}
+.wm-preview-area {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #0a0a0a; padding: 14px; overflow: hidden;
+}
+#wmCanvas { max-width: 100%; max-height: 100%; display: block; border-radius: 3px; }
+.wm-foot {
+  padding: 10px 14px; border-top: 1px solid #252525;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  font-size: 11px; color: #555;
+}
+.wm-field { display: flex; flex-direction: column; gap: 3px; }
+.wm-field label { font-size: 10px; color: #4a4a4a; }
+.wm-field input[type=text], .wm-field select {
+  background: #212121; border: 1px solid #2e2e2e; border-radius: 4px;
+  color: #bbb; font-size: 11px; padding: 5px 7px; font-family: inherit; width: 100%;
+}
+.wm-field input[type=text]:focus, .wm-field select:focus { outline: none; border-color: #006D78; }
+.wm-field input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px; border-radius: 2px;
+  background: #333; cursor: pointer; outline: none; margin-top: 4px;
+}
+.wm-field input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 10px;
+  border-radius: 50%; background: #006D78; cursor: pointer;
+}
+.wm-field input[type=range]::-moz-range-thumb {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #006D78; border: none; cursor: pointer;
+}
+.wm-row { display: flex; gap: 8px; }
+.wm-row .wm-field { flex: 1; }
+
+/* CS modal watermark checkbox */
+.cs-wm-toggle { flex-direction: row !important; align-items: center; gap: 8px; }
+.cs-wm-toggle input[type=checkbox] { accent-color: #006D78; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+.cs-wm-toggle label { text-transform: none !important; letter-spacing: 0 !important; color: #999; font-size: 12px; cursor: pointer; }
+
+#csModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82); z-index: 3100;
+  align-items: center; justify-content: center;
+}
+#csModal.open { display: flex; }
+.cs-box {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+  width: 940px; max-width: 96vw; height: 640px; max-height: 92vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.cs-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.cs-settings {
+  width: 220px; flex-shrink: 0; overflow-y: auto;
+  padding: 14px; border-right: 1px solid #252525;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.cs-settings::-webkit-scrollbar { width: 4px; }
+.cs-settings::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+.cs-field { display: flex; flex-direction: column; gap: 5px; }
+.cs-field label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: #555; }
+.cs-field input[type=text], .cs-field input[type=number], .cs-field select {
+  background: #252525; border: 1px solid #333; border-radius: 4px;
+  color: #ccc; font-size: 12px; padding: 6px 8px;
+  font-family: inherit; width: 100%;
+}
+.cs-field input:focus, .cs-field select:focus { outline: none; border-color: #006D78; }
+.cs-field input[type=color] {
+  width: 100%; height: 30px; padding: 2px 3px;
+  border: 1px solid #333; border-radius: 4px; background: #252525; cursor: pointer;
+}
+.cs-row { display: flex; gap: 6px; }
+.cs-row .cs-field { flex: 1; }
+hr.cs-sep { border: none; border-top: 1px solid #222; }
+.cs-preview-area {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #0a0a0a; padding: 14px; position: relative; overflow: hidden; min-width: 0;
+}
+#csCanvas { max-width: 100%; max-height: 100%; display: block; border-radius: 2px; }
+.cs-progress-wrap {
+  position: absolute; bottom: 10px; left: 14px; right: 14px;
+  height: 3px; background: #222; border-radius: 2px; overflow: hidden; display: none;
+}
+#csProgressFill { height: 100%; background: #006D78; border-radius: 2px; transition: width 0.15s; width: 0%; }
+.cs-foot {
+  padding: 10px 14px; border-top: 1px solid #252525;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.cs-spacer { flex: 1; }
+.cs-field input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px; border-radius: 2px;
+  background: #333; cursor: pointer; outline: none;
+}
+.cs-field input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #006D78; cursor: pointer;
+}
+.cs-field input[type=range]::-moz-range-thumb {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #006D78; border: none; cursor: pointer;
+}
+#csStatus { font-size: 11px; color: #555; }
 </style>
 </head>
 <body>
@@ -389,6 +515,8 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
       <div id="selFooter">
         <span id="selCount">0 images</span>
         <button class="btn-success" id="exportBtn" disabled>📄 Export PDF</button>
+        <button class="btn-teal" id="csBtn" disabled>⊞ Contact Sheet</button>
+        <button class="btn-secondary" id="wmBtn" style="font-size:11px">🔏 Watermark…</button>
       </div>
     </div>
 
@@ -407,6 +535,135 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
   </div>
   <div id="lbSelBadge"></div>
   <div id="lbFlash"></div>
+</div>
+
+<!-- Watermark modal -->
+<div id="wmModal">
+  <div class="wm-box">
+    <div class="modal-head">
+      <h3>Watermark</h3>
+      <button class="btn-ghost" id="wmClose">✕</button>
+    </div>
+    <div class="wm-body">
+      <div class="wm-settings">
+        <div class="wm-field">
+          <label>Text</label>
+          <input type="text" id="csWmText" placeholder="Confidential…">
+        </div>
+        <div class="wm-field">
+          <label>Font</label>
+          <select id="csWmFont">
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Impact, sans-serif">Impact</option>
+          </select>
+        </div>
+        <div class="wm-field">
+          <label>Opacity — <span id="csWmOpacityVal">20</span>%</label>
+          <input type="range" id="csWmOpacity" min="1" max="80" value="20">
+        </div>
+        <div class="wm-field">
+          <label>Size — <span id="csWmSizeVal">5</span>%</label>
+          <input type="range" id="csWmSize" min="1" max="20" value="5">
+        </div>
+        <div class="wm-field">
+          <label>Angle — <span id="csWmAngleVal">-30</span>°</label>
+          <input type="range" id="csWmAngle" min="-90" max="90" value="-30">
+        </div>
+      </div>
+      <div class="wm-preview-area">
+        <canvas id="wmCanvas"></canvas>
+      </div>
+    </div>
+    <div class="wm-foot">
+      Applied to all PDF exports when text is set.
+      <div style="flex:1"></div>
+      <button class="btn-primary" id="wmDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Sheet modal -->
+<div id="csModal">
+  <div class="cs-box">
+    <div class="modal-head">
+      <h3>Contact Sheet — <span id="csSelName"></span></h3>
+      <button class="btn-ghost" id="csClose">✕</button>
+    </div>
+    <div class="cs-body">
+      <div class="cs-settings">
+        <div class="cs-field">
+          <label>Title</label>
+          <input type="text" id="csTitle" placeholder="Optional…">
+        </div>
+        <div class="cs-field">
+          <label>Background</label>
+          <input type="color" id="csBg" value="#0f0f0f">
+        </div>
+        <hr class="cs-sep">
+        <div class="cs-field">
+          <label>Aspect ratio</label>
+          <select id="csRatio">
+            <option value="16:9">16 : 9</option>
+            <option value="2:1">2 : 1</option>
+            <option value="4:3">4 : 3</option>
+            <option value="1:1">1 : 1</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+        <div class="cs-row" id="csCustomRatioRow" style="display:none">
+          <div class="cs-field"><label>W</label><input type="number" id="csRatioW" value="16" min="1"></div>
+          <div class="cs-field"><label>H</label><input type="number" id="csRatioH" value="9" min="1"></div>
+        </div>
+        <div class="cs-field">
+          <label>Columns</label>
+          <select id="csCols">
+            <option value="0">Auto</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+        <div class="cs-field">
+          <label>Gap (px)</label>
+          <input type="number" id="csMargin" value="6" min="0" max="80">
+        </div>
+        <hr class="cs-sep">
+        <div class="cs-field">
+          <label>Export width</label>
+          <select id="csExportW">
+            <option value="1280">HD — 1280 px</option>
+            <option value="1920" selected>Full HD — 1920 px</option>
+            <option value="3840">4K — 3840 px</option>
+          </select>
+        </div>
+        <hr class="cs-sep">
+        <div class="cs-field cs-wm-toggle">
+          <input type="checkbox" id="csWmEnabled">
+          <label for="csWmEnabled">Apply watermark</label>
+        </div>
+      </div>
+      <div class="cs-preview-area">
+        <canvas id="csCanvas"></canvas>
+        <div class="cs-progress-wrap" id="csProgressWrap">
+          <div id="csProgressFill"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cs-foot">
+      <span id="csStatus"></span>
+      <div class="cs-spacer"></div>
+      <button class="btn-secondary" id="csJpgBtn">↓ JPG</button>
+      <button class="btn-secondary" id="csPngBtn">↓ PNG</button>
+      <button class="btn-secondary" id="csPdfBtn">↓ PDF</button>
+    </div>
+  </div>
 </div>
 
 <!-- Folder browser modal -->
@@ -543,7 +800,9 @@ async function browseTo(path) {
   if (data.parent) {
     const up = document.createElement('div');
     up.className = 'dir-item';
-    up.innerHTML = '📁 <span style="color:#888">.. (up)</span>';
+    const folderLabel = data.path.split('/').filter(Boolean).pop() || data.path;
+    const imgLabel = data.image_count === 1 ? '1 image' : `${data.image_count} images`;
+    up.innerHTML = `↑ <span style="color:#ccc">${folderLabel}</span><span style="color:#555;font-size:12px;margin-left:8px">${imgLabel}</span>`;
     up.onclick = () => browseTo(data.parent);
     list.appendChild(up);
   }
@@ -753,6 +1012,7 @@ function renderSelection() {
 
   $('selCount').textContent   = sel.length === 1 ? '1 image' : `${sel.length} images`;
   $('exportBtn').disabled     = sel.length === 0;
+  $('csBtn').disabled         = sel.length === 0;
   $('clearSelBtn').disabled   = sel.length === 0;
 
   if (sortable) { sortable.destroy(); sortable = null; }
@@ -860,7 +1120,9 @@ async function exportPDF() {
       const el = await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`);
       const canvas = document.createElement('canvas');
       canvas.width = el.naturalWidth; canvas.height = el.naturalHeight;
-      canvas.getContext('2d').drawImage(el, 0, 0);
+      const ctx2d = canvas.getContext('2d');
+      ctx2d.drawImage(el, 0, 0);
+      csDrawWatermark(ctx2d, canvas.width, canvas.height);
       const data  = canvas.toDataURL('image/jpeg', 0.92);
       const scale = Math.min(PW / el.naturalWidth, PH / el.naturalHeight);
       const w = el.naturalWidth * scale, h = el.naturalHeight * scale;
@@ -884,6 +1146,228 @@ function loadImgEl(url) {
   });
 }
 
+// ─── Watermark modal ───────────────────────────────────────────────────────
+let wmPreviewTimer = null;
+
+function openWm()  { $('wmModal').classList.add('open');    renderWmPreview(); }
+function closeWm() { $('wmModal').classList.remove('open'); }
+
+function wmQueuePreview() {
+  clearTimeout(wmPreviewTimer);
+  wmPreviewTimer = setTimeout(renderWmPreview, 80);
+}
+
+function drawDummyBg(ctx, W, H) {
+  // Sky
+  let g = ctx.createLinearGradient(0, 0, 0, H * 0.62);
+  g.addColorStop(0, '#1b2b3a'); g.addColorStop(1, '#2a3b4c');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * 0.62);
+  // Ground
+  g = ctx.createLinearGradient(0, H * 0.62, 0, H);
+  g.addColorStop(0, '#181818'); g.addColorStop(1, '#0c0c0c');
+  ctx.fillStyle = g; ctx.fillRect(0, H * 0.62, W, H * 0.38);
+  // Horizon glow
+  g = ctx.createRadialGradient(W/2, H*0.62, 0, W/2, H*0.62, W*0.45);
+  g.addColorStop(0, 'rgba(255,170,80,0.18)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // Bokeh
+  [[0.15,0.28,W*0.04],[0.78,0.38,W*0.03],[0.5,0.18,W*0.025],[0.33,0.45,W*0.035],[0.62,0.25,W*0.02]].forEach(([x,y,r]) => {
+    const cg = ctx.createRadialGradient(W*x, H*y, 0, W*x, H*y, r);
+    cg.addColorStop(0, 'rgba(255,255,255,0.14)'); cg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(W*x, H*y, r, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function renderWmPreview() {
+  const canvas = $('wmCanvas');
+  const area   = canvas.parentElement;
+  const W = Math.floor(area.clientWidth - 28) || 460;
+  const H = Math.round(W * 9 / 16);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  drawDummyBg(ctx, W, H);
+  csDrawWatermark(ctx, W, H);
+}
+
+// ─── Contact Sheet ─────────────────────────────────────────────────────────
+let csPreviewTimer  = null;
+let csRendering     = false;
+let csPendingPreview = false;
+
+function openCS() {
+  $('csSelName').textContent = activeSel;
+  $('csModal').classList.add('open');
+  generateCSPreview();
+}
+function closeCS() { $('csModal').classList.remove('open'); }
+
+function csQueuePreview() {
+  clearTimeout(csPreviewTimer);
+  csPreviewTimer = setTimeout(generateCSPreview, 450);
+}
+
+async function generateCSPreview() {
+  if (!$('csModal').classList.contains('open')) return;
+  if (csRendering) { csPendingPreview = true; return; }
+  csRendering = true; csPendingPreview = false;
+  $('csStatus').textContent = 'Rendering…';
+  try { await csRender($('csCanvas'), 580); }
+  finally {
+    csRendering = false;
+    $('csStatus').textContent = '';
+    if (csPendingPreview) generateCSPreview();
+  }
+}
+
+function csGetRatio() {
+  const v = $('csRatio').value;
+  if (v === '16:9') return 16/9;
+  if (v === '2:1')  return 2;
+  if (v === '4:3')  return 4/3;
+  if (v === '1:1')  return 1;
+  return (parseFloat($('csRatioW').value)||16) / (parseFloat($('csRatioH').value)||9);
+}
+
+function csCalcGrid(n, availW, availH, ars, margin) {
+  let best = { cols: 1, rows: n, cellW: 0, cellH: 0, score: -1 };
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    const cellW = (availW - (cols-1)*margin) / cols;
+    const cellH = (availH - (rows-1)*margin) / rows;
+    if (cellW <= 0 || cellH <= 0) continue;
+    let score = Infinity;
+    for (let i = 0; i < n; i++) {
+      const ar = ars[i]; let w = cellW, h = cellH;
+      if (w/h > ar) w = h*ar; else h = w/ar;
+      score = Math.min(score, w*h);
+    }
+    if (score > best.score) best = { cols, rows, cellW, cellH, score };
+  }
+  return best;
+}
+
+async function csRender(canvas, W) {
+  const sel = curSel(); if (!sel.length) return;
+  const margin     = parseInt($('csMargin').value)  || 0;
+  const bgColor    = $('csBg').value;
+  const title      = $('csTitle').value.trim();
+  const ratio      = csGetRatio();
+  const forceCols  = parseInt($('csCols').value)    || 0;
+
+  const H = Math.round(W / ratio);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = bgColor; ctx.fillRect(0, 0, W, H);
+
+  let titleH = 0;
+  if (title) {
+    const fs = Math.max(14, Math.round(W * 0.022));
+    titleH = fs + margin * 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `600 ${fs}px -apple-system, BlinkMacSystemFont, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(title, W/2, margin);
+  }
+
+  const availW = W - 2*margin;
+  const availH = H - titleH - 2*margin;
+
+  const pw = $('csProgressWrap'), pf = $('csProgressFill');
+  pw.style.display = 'block'; pf.style.width = '0%';
+
+  const loaded = [];
+  for (let i = 0; i < sel.length; i++) {
+    loaded.push(await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`));
+    pf.style.width = `${(i+1)/sel.length*50}%`;
+  }
+  const ars = loaded.map(img => img.naturalWidth / img.naturalHeight);
+
+  let cols, rows, cellW, cellH;
+  if (forceCols > 0) {
+    cols  = Math.min(forceCols, sel.length);
+    rows  = Math.ceil(sel.length / cols);
+    cellW = (availW - (cols-1)*margin) / cols;
+    cellH = (availH - (rows-1)*margin) / rows;
+  } else {
+    ({ cols, rows, cellW, cellH } = csCalcGrid(sel.length, availW, availH, ars, margin));
+  }
+
+  for (let i = 0; i < loaded.length; i++) {
+    const img = loaded[i];
+    const col = i % cols, row = Math.floor(i / cols);
+    const cellX = margin + col*(cellW+margin);
+    const cellY = margin + titleH + row*(cellH+margin);
+    const ar = ars[i]; let w = cellW, h = cellH;
+    if (w/h > ar) w = h*ar; else h = w/ar;
+    ctx.drawImage(img, cellX+(cellW-w)/2, cellY+(cellH-h)/2, w, h);
+    pf.style.width = `${50 + (i+1)/loaded.length*50}%`;
+  }
+
+  if ($('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
+  setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+}
+
+function csDrawWatermark(ctx, W, H) {
+  const text = $('csWmText').value.trim();
+  if (!text) return;
+  const opacity   = parseFloat($('csWmOpacity').value) / 100;
+  const fontFace  = $('csWmFont').value;
+  const fontSize  = Math.round(W * parseFloat($('csWmSize').value) / 100);
+  const angleDeg  = parseFloat($('csWmAngle').value) || 0;
+  const angle     = angleDeg * Math.PI / 180;
+
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle   = '#ffffff';
+  ctx.font        = `bold ${fontSize}px ${fontFace}`;
+  ctx.textAlign   = 'center';
+  ctx.textBaseline = 'middle';
+
+  const textW   = ctx.measureText(text).width + fontSize;
+  const spacingX = textW;
+  const spacingY = fontSize * 3;
+  const diag    = Math.sqrt(W * W + H * H);
+  const cols    = Math.ceil(diag / spacingX) + 2;
+  const rows    = Math.ceil(diag / spacingY) + 2;
+
+  ctx.translate(W / 2, H / 2);
+  ctx.rotate(angle);
+  for (let r = -rows; r <= rows; r++) {
+    for (let c = -cols; c <= cols; c++) {
+      ctx.fillText(text, c * spacingX, r * spacingY);
+    }
+  }
+  ctx.restore();
+}
+
+
+
+async function exportCS(fmt) {
+  const ids = { jpg:'csJpgBtn', png:'csPngBtn', pdf:'csPdfBtn' };
+  const btn = $(ids[fmt]); const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const W = parseInt($('csExportW').value) || 1920;
+    const canvas = document.createElement('canvas');
+    await csRender(canvas, W);
+    const name = (activeSel||'contact-sheet').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'contact-sheet';
+    if (fmt === 'jpg' || fmt === 'png') {
+      const a = document.createElement('a');
+      a.download = `${name}.${fmt}`;
+      a.href = canvas.toDataURL(fmt === 'jpg' ? 'image/jpeg' : 'image/png', fmt === 'jpg' ? 0.92 : 1);
+      a.click();
+    } else {
+      const { jsPDF } = window.jspdf;
+      const ratio = csGetRatio();
+      const PW = 297, PH = Math.round(PW/ratio*1000)/1000;
+      const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: ratio>=1?'landscape':'portrait' });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+      pdf.save(`${name}.pdf`);
+    }
+  } catch(e) { alert('Export error: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+}
+
 // ─── Util ──────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
 
@@ -893,6 +1377,34 @@ $('welcomeOpenBtn').onclick = openBrowser;
 $('addTabBtn').onclick      = addNewSel;
 $('clearSelBtn').onclick    = clearSel;
 $('exportBtn').onclick      = exportPDF;
+$('csBtn').onclick   = openCS;
+$('csClose').onclick = closeCS;
+$('csModal').onclick = e => { if (e.target === $('csModal')) closeCS(); };
+$('csJpgBtn').onclick = () => exportCS('jpg');
+$('csPngBtn').onclick = () => exportCS('png');
+$('csPdfBtn').onclick = () => exportCS('pdf');
+
+// Live preview — CS modal settings
+['csTitle','csRatioW','csRatioH','csMargin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
+$('csBg').addEventListener('input', csQueuePreview);
+['csCols','csExportW'].forEach(id => $(id).addEventListener('change', csQueuePreview));
+$('csRatio').addEventListener('change', () => {
+  $('csCustomRatioRow').style.display = $('csRatio').value === 'custom' ? 'flex' : 'none';
+  csQueuePreview();
+});
+$('csWmEnabled').addEventListener('change', csQueuePreview);
+
+// Watermark modal
+$('wmBtn').onclick   = openWm;
+$('wmClose').onclick = closeWm;
+$('wmDone').onclick  = closeWm;
+$('wmModal').onclick = e => { if (e.target === $('wmModal')) closeWm(); };
+function wmChanged() { wmQueuePreview(); csQueuePreview(); }
+$('csWmText').addEventListener('input',  wmChanged);
+$('csWmFont').addEventListener('change', wmChanged);
+[['csWmOpacity','csWmOpacityVal'], ['csWmSize','csWmSizeVal'], ['csWmAngle','csWmAngleVal']].forEach(([id, lblId]) => {
+  $(id).addEventListener('input', () => { $(lblId).textContent = $(id).value; wmChanged(); });
+});
 
 $('modalClose').onclick  = closeModal;
 $('modalCancel').onclick = closeModal;
@@ -905,12 +1417,16 @@ $('lbNext').onclick   = () => { if (lbIdx < lbImages.length - 1) { lbIdx++; upda
 $('lbAddBtn').onclick = () => { const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } };
 $('lightbox').onclick = e => { if (e.target === $('lightbox')) closeLb(); };
 
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', async e => {
   if ($('lightbox').classList.contains('open')) {
     if (e.key === 'Escape')     closeLb();
     if (e.key === 'ArrowLeft')  { if (lbIdx > 0) { lbIdx--; updateLb(); } }
     if (e.key === 'ArrowRight') { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
     if (e.key === ' ') { e.preventDefault(); const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } }
+  } else if ($('wmModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeWm();
+  } else if ($('csModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeCS();
   } else if ($('modal').classList.contains('open')) {
     if (e.key === 'Escape') closeModal();
   }
