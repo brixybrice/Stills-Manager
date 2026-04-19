@@ -9,7 +9,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #141414;
+  background: #242424;
   color: #e0e0e0;
   height: 100vh;
   display: flex;
@@ -20,6 +20,7 @@ body {
 /* ── Buttons ── */
 button { cursor: pointer; border: none; font-family: inherit; font-size: 13px; border-radius: 5px; transition: background 0.15s; }
 button:disabled { opacity: 0.35; cursor: not-allowed; }
+a, label, select, input[type="checkbox"], input[type="radio"] { cursor: pointer; }
 .btn-primary   { background: #006D78; color: #fff; padding: 8px 16px; }
 .btn-primary:hover:not(:disabled)   { background: #005560; }
 .btn-secondary { background: #2e2e2e; color: #ccc; padding: 8px 16px; border: 1px solid #3e3e3e; }
@@ -199,14 +200,30 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 }
 @keyframes lbSelectFlash {
   0%   { opacity: 0.55; background: rgba(0,109,120,0.45); }
+  35%  { opacity: 0.5;  background: rgba(0,109,120,0.42); }
   100% { opacity: 0;    background: rgba(0,109,120,0); }
 }
 @keyframes lbDeselectFlash {
-  0%   { opacity: 0.4; background: rgba(200,60,60,0.38); }
-  100% { opacity: 0;   background: rgba(200,60,60,0); }
+  0%   { opacity: 0.4;  background: rgba(200,60,60,0.38); }
+  35%  { opacity: 0.38; background: rgba(200,60,60,0.34); }
+  100% { opacity: 0;    background: rgba(200,60,60,0); }
 }
-#lbFlash.flash-add    { animation: lbSelectFlash   0.45s ease-out forwards; }
-#lbFlash.flash-remove { animation: lbDeselectFlash 0.45s ease-out forwards; }
+#lbFlash.flash-add    { animation: lbSelectFlash   0.9s ease-out forwards; }
+#lbFlash.flash-remove { animation: lbDeselectFlash 0.9s ease-out forwards; }
+
+/* Gallery thumbnail flash on toggle */
+@keyframes galSelectFlash {
+  0%   { box-shadow: inset 0 0 0 1000px rgba(0,109,120,0.42); }
+  35%  { box-shadow: inset 0 0 0 1000px rgba(0,109,120,0.38); }
+  100% { box-shadow: inset 0 0 0 1000px rgba(0,109,120,0); }
+}
+@keyframes galDeselectFlash {
+  0%   { box-shadow: inset 0 0 0 1000px rgba(200,60,60,0.38); }
+  35%  { box-shadow: inset 0 0 0 1000px rgba(200,60,60,0.32); }
+  100% { box-shadow: inset 0 0 0 1000px rgba(200,60,60,0); }
+}
+.thumb-wrap.gal-flash-add    { animation: galSelectFlash   0.9s ease-out forwards; }
+.thumb-wrap.gal-flash-remove { animation: galDeselectFlash 0.9s ease-out forwards; }
 
 /* ── Selection panel ── */
 #selPanel {
@@ -258,11 +275,30 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 /* ── Lightbox ── */
 #lightbox {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.93); z-index: 2000;
+  background: #111; z-index: 2000;
   align-items: center; justify-content: center;
+  padding-left: 206px;
 }
 #lightbox.open { display: flex; }
-#lbImg { max-width: calc(100vw - 120px); max-height: calc(100vh - 110px); object-fit: contain; border-radius: 3px; display: block; user-select: none; }
+#lbImg { max-width: calc(100vw - 336px); max-height: calc(100vh - 110px); object-fit: contain; border-radius: 3px; display: block; user-select: none; }
+
+/* ── Vertical carousel ── */
+#lbCarousel {
+  position: fixed; left: 12px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 7px; z-index: 2001;
+}
+.lb-car-slot {
+  width: 180px; height: 101px; flex-shrink: 0;
+  border: 2px solid #252525; border-radius: 4px;
+  overflow: hidden; background: #080808;
+  opacity: 0.35; cursor: pointer;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.lb-car-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lb-car-slot.lb-car-active { border-color: #006D78; opacity: 1; cursor: default; box-shadow: 0 0 0 1px #006D78; }
+.lb-car-slot.lb-car-near   { opacity: 1; }
+.lb-car-slot:not(.lb-car-active):hover { opacity: 0.85; border-color: #555; }
+.lb-car-slot.lb-car-empty { opacity: 0; pointer-events: none; }
 #lbClose {
   position: fixed; top: 16px; right: 20px; font-size: 20px; color: #888;
   background: rgba(0,0,0,0.55); border: none; border-radius: 5px; padding: 8px 13px;
@@ -280,15 +316,26 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
   padding: 18px 12px; transition: background 0.15s, color 0.15s;
 }
 .lb-arrow:hover { color: #fff; background: rgba(0,0,0,0.75); }
-#lbPrev { left: 14px; }
+#lbPrev { left: 206px; }
 #lbNext { right: 14px; }
 #lbBottom { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
 #lbAddBtn { font-size: 14px; padding: 10px 22px; }
+#lbTopRight {
+  position: fixed; top: 16px; right: 76px; z-index: 2002;
+  display: flex; align-items: center; gap: 8px;
+}
+#lbContext {
+  background: rgba(0,0,0,0.6); color: #888; border: 1px solid #333;
+  border-radius: 20px; font-size: 14px; font-weight: 700;
+  padding: 6px 15px; line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5); white-space: nowrap;
+}
+#lbContext.in-sel { color: #00b8c8; border-color: rgba(0,109,120,0.55); }
 #lbSelBadge {
-  display: none; position: fixed; top: 16px; right: 76px;
+  display: none;
   background: #006D78; color: #fff; border: 1px solid #00919f;
   border-radius: 20px; font-size: 14px; font-weight: 700;
-  padding: 6px 15px; line-height: 1.4; z-index: 2002;
+  padding: 6px 15px; line-height: 1.4;
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 #lbSelBadge.visible { display: block; }
@@ -331,6 +378,43 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
   display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
 }
 
+/* ── Help modal ── */
+#helpModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3100;
+  align-items: center; justify-content: center;
+}
+#helpModal.open { display: flex; }
+.help-box {
+  background: #1e1e1e; border: 1px solid #333; border-radius: 8px;
+  width: 680px; max-width: 95vw; max-height: 85vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.help-body {
+  flex: 1; overflow-y: auto; padding: 24px 28px;
+  font-size: 13.5px; line-height: 1.7; color: #bbb;
+}
+.help-body::-webkit-scrollbar { width: 6px; }
+.help-body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+.help-section { margin-bottom: 28px; }
+.help-section:last-child { margin-bottom: 0; }
+.help-section h4 {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.9px;
+  text-transform: uppercase; color: #006D78;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.help-section p { margin-bottom: 6px; color: #999; }
+.help-section p strong { color: #ddd; font-weight: 600; }
+.help-kbds { display: grid; grid-template-columns: auto 1fr; gap: 5px 18px; align-items: center; }
+kbd {
+  display: inline-block; background: #2a2a2a; border: 1px solid #3e3e3e;
+  border-bottom-width: 2px; border-radius: 4px;
+  padding: 2px 8px; font-size: 12px; font-family: inherit;
+  color: #ccc; white-space: nowrap;
+}
+.help-kbds .kb-desc { color: #888; font-size: 13px; }
+
 /* ── Welcome ── */
 #welcome {
   flex: 1; display: flex; flex-direction: column;
@@ -356,30 +440,30 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 #wmModal.open { display: flex; }
 .wm-box {
   background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-  width: 780px; max-width: 96vw; height: 480px; max-height: 92vh;
+  width: 920px; max-width: 96vw; height: 560px; max-height: 92vh;
   display: flex; flex-direction: column; overflow: hidden;
 }
 .wm-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .wm-settings {
-  width: 215px; flex-shrink: 0; padding: 14px;
+  width: 280px; flex-shrink: 0; padding: 20px;
   border-right: 1px solid #252525;
-  display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
 }
 .wm-preview-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  background: #0a0a0a; padding: 14px; overflow: hidden;
+  background: #0a0a0a; padding: 18px; overflow: hidden;
 }
 #wmCanvas { max-width: 100%; max-height: 100%; display: block; border-radius: 3px; }
 .wm-foot {
-  padding: 10px 14px; border-top: 1px solid #252525;
+  padding: 13px 18px; border-top: 1px solid #252525;
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-  font-size: 11px; color: #555;
+  font-size: 12px; color: #555;
 }
-.wm-field { display: flex; flex-direction: column; gap: 3px; }
-.wm-field label { font-size: 10px; color: #4a4a4a; }
+.wm-field { display: flex; flex-direction: column; gap: 5px; }
+.wm-field label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; }
 .wm-field input[type=text], .wm-field select {
   background: #212121; border: 1px solid #2e2e2e; border-radius: 4px;
-  color: #bbb; font-size: 11px; padding: 5px 7px; font-family: inherit; width: 100%;
+  color: #bbb; font-size: 13px; padding: 7px 10px; font-family: inherit; width: 100%;
 }
 .wm-field input[type=text]:focus, .wm-field select:focus { outline: none; border-color: #006D78; }
 .wm-field input[type=range] {
@@ -388,14 +472,14 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
   background: #333; cursor: pointer; outline: none; margin-top: 4px;
 }
 .wm-field input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 10px; height: 10px;
+  -webkit-appearance: none; width: 12px; height: 12px;
   border-radius: 50%; background: #006D78; cursor: pointer;
 }
 .wm-field input[type=range]::-moz-range-thumb {
-  width: 10px; height: 10px; border-radius: 50%;
+  width: 12px; height: 12px; border-radius: 50%;
   background: #006D78; border: none; cursor: pointer;
 }
-.wm-row { display: flex; gap: 8px; }
+.wm-row { display: flex; gap: 10px; }
 .wm-row .wm-field { flex: 1; }
 
 /* CS modal watermark checkbox */
@@ -475,8 +559,9 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 <div id="header">
   <h1>Stills Manager</h1>
   <span id="folderName">No folder open</span>
-  <span id="saveStatus">✓ Saved</span>
-  <button class="btn-primary" id="openBtn">📁 Open Folder</button>
+  <span id="saveStatus">Saved</span>
+  <button class="btn-primary" id="openBtn">Open Folder</button>
+  <button class="btn-ghost" id="helpBtn" title="Help">?</button>
 </div>
 
 <!-- Tabs (hidden until folder open) -->
@@ -486,10 +571,10 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 
 <!-- Welcome -->
 <div id="welcome">
-  <div class="wi">🎞️</div>
+  <div class="wi"></div>
   <h2>Stills Manager</h2>
   <p>Select a folder containing your images (JPG, PNG, TIF).<br>Selections are saved automatically as JSON in the folder.</p>
-  <button class="btn-primary" style="font-size:14px;padding:10px 22px" id="welcomeOpenBtn">📁 Open Folder</button>
+  <button class="btn-primary" style="font-size:14px;padding:10px 22px" id="welcomeOpenBtn">Open Folder</button>
 </div>
 
 <!-- App main -->
@@ -509,14 +594,14 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
     <div id="selPanel">
       <div id="selHeader">
         <h2>Selection</h2>
-        <button class="btn-ghost" id="clearSelBtn" disabled>✕ Clear</button>
+        <button class="btn-ghost" id="clearSelBtn" disabled>Clear</button>
       </div>
       <div id="selList"></div>
       <div id="selFooter">
         <span id="selCount">0 images</span>
-        <button class="btn-success" id="exportBtn" disabled>📄 Export PDF</button>
-        <button class="btn-teal" id="csBtn" disabled>⊞ Contact Sheet</button>
-        <button class="btn-secondary" id="wmBtn" style="font-size:11px">🔏 Watermark…</button>
+        <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
+        <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
+        <button class="btn-secondary" id="wmBtn" style="font-size:11px">Watermark</button>
       </div>
     </div>
 
@@ -527,13 +612,19 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 <div id="lightbox">
   <button id="lbClose">✕</button>
   <div id="lbInfo"></div>
+  <div id="lbTopRight">
+    <div id="lbContext"></div>
+    <div id="lbSelBadge"></div>
+  </div>
+  <div id="lbCarousel"></div>
   <button class="lb-arrow" id="lbPrev">‹</button>
   <img id="lbImg" src="" alt="">
   <button class="lb-arrow" id="lbNext">›</button>
   <div id="lbBottom">
-    <button id="lbAddBtn" class="btn-primary">＋ Add to selection</button>
+    <button id="lbUpBtn"  class="btn-secondary">↑</button>
+    <button id="lbAddBtn" class="btn-primary">Add to selection</button>
+    <button id="lbDownBtn" class="btn-secondary">↓</button>
   </div>
-  <div id="lbSelBadge"></div>
   <div id="lbFlash"></div>
 </div>
 
@@ -682,6 +773,82 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   </div>
 </div>
 
+<!-- Help modal -->
+<div id="helpModal">
+  <div class="help-box">
+    <div class="modal-head">
+      <h3>Help — Stills Manager</h3>
+      <button class="btn-ghost" id="helpClose">✕</button>
+    </div>
+    <div class="help-body">
+
+      <div class="help-section">
+        <h4>Opening a folder</h4>
+        <p>Click <strong>Open Folder</strong> to browse your filesystem and open any folder containing images (JPG, PNG, TIF).</p>
+        <p>The open folder is stored in the URL — reloading the page automatically reopens the same folder.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Gallery</h4>
+        <p><strong>Click</strong> a thumbnail to add or remove the image from the active selection.</p>
+        <p><strong>Cmd+click</strong> or the expand button on a thumbnail to open the image fullscreen.</p>
+        <p>Selected images show a teal border and a numbered badge indicating their position in the current selection.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Selections</h4>
+        <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images.</p>
+        <p><strong>+</strong> creates a new tab · <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
+        <p>Images within a selection can be reordered by <strong>drag and drop</strong>.</p>
+        <p>Selections are saved automatically to <strong>stills-selections.json</strong> in the open folder (debounced at 350 ms).</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Fullscreen (Lightbox)</h4>
+        <p>A <strong>vertical carousel</strong> on the left shows surrounding images — click any thumbnail to jump to it.</p>
+        <p>The <strong>context badge</strong> (top right) shows whether you are browsing the Gallery or a named selection. The <strong>#N</strong> badge shows the image's position in the active selection.</p>
+        <p>The <strong>Up</strong> and <strong>Down</strong> buttons (and their keyboard shortcuts) move the image within the selection order.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>PDF export</h4>
+        <p>The <strong>PDF</strong> button in the selection panel exports one image per page in 16:9 landscape format.</p>
+        <p>If a <strong>watermark</strong> is configured, it is composited over every page.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Contact sheet</h4>
+        <p>The <strong>Contact Sheet</strong> button opens a settings panel with a live canvas preview. Export is available as JPG, PNG or PDF.</p>
+        <p>The grid layout is computed automatically to maximise image area given the chosen aspect ratio and column count.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Watermark</h4>
+        <p>The <strong>Watermark</strong> button opens a dedicated panel with a live preview on a synthetic image. Configure text, font, size, opacity and angle.</p>
+        <p>The watermark is applied to the main PDF export and can be enabled on the contact sheet via its checkbox.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Keyboard shortcuts</h4>
+        <div class="help-kbds">
+          <span><kbd>←</kbd> <kbd>↑</kbd></span>                              <span class="kb-desc">Previous image (fullscreen)</span>
+          <span><kbd>→</kbd> <kbd>↓</kbd></span>                              <span class="kb-desc">Next image (fullscreen)</span>
+          <span><kbd>Space</kbd></span>                                        <span class="kb-desc">Add / remove from selection (fullscreen)</span>
+          <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image up in selection (fullscreen)</span>
+          <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image down in selection (fullscreen)</span>
+          <span><kbd>Esc</kbd></span>                                          <span class="kb-desc">Close fullscreen or modal</span>
+          <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>          <span class="kb-desc">Redo</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary" id="helpDone">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -695,10 +862,58 @@ let activeSel   = '';
 
 let lbImages    = [];
 let lbIdx       = 0;
+let lbContext   = 'gallery'; // 'gallery' | selection name
 let sortable    = null;
 let saveTimer   = null;
+let lastToggled = null;
 let browserPath = '';
 let folderName  = '';
+
+// ─── Undo / Redo ──────────────────────────────────────────────────────────
+const HISTORY_LIMIT = 60;
+let undoStack = [];
+let redoStack = [];
+
+function snapshotState() {
+  return {
+    selections: JSON.parse(JSON.stringify(selections)),
+    selOrder:   [...selOrder],
+    activeSel
+  };
+}
+function pushHistory() {
+  undoStack.push(snapshotState());
+  if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+  redoStack = [];
+}
+function restoreSnapshot(snap) {
+  selections = snap.selections;
+  selOrder   = snap.selOrder;
+  activeSel  = snap.activeSel;
+  syncLightboxToSel();
+  queueSave(); renderAll();
+}
+
+function syncLightboxToSel() {
+  if (!$('lightbox').classList.contains('open') || lbContext === 'gallery') return;
+  const newSel = (selections[lbContext] || []);
+  if (newSel.length === 0) { closeLb(); return; }
+  const currentName = lbImages[lbIdx];
+  lbImages = [...newSel];
+  const newIdx = lbImages.indexOf(currentName);
+  lbIdx = newIdx !== -1 ? newIdx : Math.min(lbIdx, lbImages.length - 1);
+  updateLb();
+}
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push(snapshotState());
+  restoreSnapshot(undoStack.pop());
+}
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push(snapshotState());
+  restoreSnapshot(redoStack.pop());
+}
 
 // ─── API helpers ───────────────────────────────────────────────────────────
 async function api(url, opts = {}) {
@@ -740,11 +955,12 @@ async function loadFolder(path) {
   // If no JSON existed yet, save an empty one immediately
   await apiPost('/api/selections', { selections, selOrder, activeSel });
 
-  $('folderName').textContent = '📂 ' + res.name;
+  $('folderName').textContent = res.name;
   $('welcome').style.display  = 'none';
   $('appMain').style.display  = 'flex';
   $('tabBar').style.display   = 'flex';
 
+  history.replaceState(null, '', '?path=' + encodeURIComponent(res.path));
   renderAll();
   showSaved();
 }
@@ -812,7 +1028,7 @@ async function browseTo(path) {
   data.dirs.forEach(d => {
     const item = document.createElement('div');
     item.className = 'dir-item';
-    item.textContent = '📁 ' + d.name;
+    item.textContent = d.name;
     item.onclick = () => browseTo(d.path);
     list.appendChild(item);
   });
@@ -826,16 +1042,20 @@ function isInSel(n)  { return curSel().includes(n); }
 function toggleInSel(name) {
   const s = curSel(), i = s.indexOf(name);
   const adding = i === -1;
+  pushHistory();
   if (adding) s.push(name); else s.splice(i, 1);
   selections[activeSel] = s;
+  lastToggled = { name, adding };
   queueSave(); renderGallery(); renderSelection();
+  lastToggled = null;
 }
 function removeFromSel(name) {
   const s = curSel(), i = s.indexOf(name);
-  if (i !== -1) { s.splice(i, 1); selections[activeSel] = s; }
+  if (i !== -1) { pushHistory(); s.splice(i, 1); selections[activeSel] = s; }
   queueSave(); renderGallery(); renderSelection();
 }
 function clearSel() {
+  pushHistory();
   selections[activeSel] = [];
   queueSave(); renderGallery(); renderSelection();
 }
@@ -913,10 +1133,12 @@ function switchSel(name) {
 function addNewSel() {
   let n = selOrder.length + 1, name;
   do { name = `Selection ${n++}`; } while (selections[name] !== undefined);
+  pushHistory();
   selections[name] = []; selOrder.push(name); activeSel = name;
   queueSave(); renderAll();
 }
 function renameSel(oldName, newName) {
+  pushHistory();
   const data = selections[oldName];
   delete selections[oldName];
   selections[newName] = data;
@@ -928,6 +1150,7 @@ function deleteSel(name) {
   if (selOrder.length <= 1) { alert('Cannot delete the last selection.'); return; }
   const c = selections[name].length;
   if (c > 0 && !confirm(`Delete "${name}" with its ${c} image(s)?`)) return;
+  pushHistory();
   const idx = selOrder.indexOf(name);
   selOrder.splice(idx, 1); delete selections[name];
   if (activeSel === name) activeSel = selOrder[Math.max(0, idx - 1)];
@@ -941,7 +1164,7 @@ function renderGallery() {
   grid.innerHTML = '';
 
   if (!allImages.length) {
-    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><p>No images found<br>(jpg, png, tif)</p></div>';
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No images found<br>(jpg, png, tif)</p></div>';
     return;
   }
 
@@ -951,7 +1174,10 @@ function renderGallery() {
     const isTif = /\.tiff?$/i.test(name);
 
     const wrap = document.createElement('div');
-    wrap.className = 'thumb-wrap' + (inSel ? ' in-sel' : '');
+    let wrapCls = 'thumb-wrap' + (inSel ? ' in-sel' : '');
+    if (lastToggled && lastToggled.name === name)
+      wrapCls += lastToggled.adding ? ' gal-flash-add' : ' gal-flash-remove';
+    wrap.className = wrapCls;
     wrap.onclick = e => {
       if (e.metaKey || e.ctrlKey) openLightbox(allImages, i);
       else toggleInSel(name);
@@ -960,7 +1186,7 @@ function renderGallery() {
     if (isTif) {
       const ph = document.createElement('div');
       ph.className = 'tif-ph';
-      ph.innerHTML = '<span style="font-size:26px">🖼️</span><span>TIF</span>';
+      ph.innerHTML = '<span>TIF</span>';
       wrap.appendChild(ph);
     } else {
       const img = document.createElement('img');
@@ -984,7 +1210,7 @@ function renderGallery() {
 
     // Zoom button (Shift+click shortcut reminder)
     const zb = document.createElement('button');
-    zb.className = 'thumb-zoom'; zb.innerHTML = '⤢'; zb.title = 'View large (or Cmd+click)';
+    zb.className = 'thumb-zoom'; zb.textContent = 'View'; zb.title = 'View large (Cmd+click)';
     zb.onclick = e => { e.stopPropagation(); openLightbox(allImages, i); };
     wrap.appendChild(zb);
 
@@ -1036,8 +1262,7 @@ function renderSelection() {
     thumb.alt = name; thumb.draggable = false;
     // Click on selection thumb also opens lightbox (in selection context)
     thumb.onclick = () => {
-      const imgs = sel.map(n => n); // names
-      openLightbox(sel, i);
+      openLightbox(sel, i, activeSel);
     };
 
     const info = document.createElement('div');
@@ -1061,6 +1286,7 @@ function renderSelection() {
     handle: '.drag-handle', animation: 150,
     ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
     onEnd: evt => {
+      pushHistory();
       const s = curSel();
       const [m] = s.splice(evt.oldIndex, 1);
       s.splice(evt.newIndex, 0, m);
@@ -1073,8 +1299,8 @@ function renderSelection() {
 function renderAll() { renderTabs(); renderGallery(); renderSelection(); }
 
 // ─── Lightbox ──────────────────────────────────────────────────────────────
-function openLightbox(images, idx) {
-  lbImages = images; lbIdx = idx;
+function openLightbox(images, idx, context = 'gallery') {
+  lbImages = images; lbIdx = idx; lbContext = context;
   updateLb();
   $('lightbox').classList.add('open');
 }
@@ -1085,16 +1311,58 @@ function flashLb(adding) {
   void el.offsetWidth; // reflow to restart animation
   el.classList.add(adding ? 'flash-add' : 'flash-remove');
 }
+function renderCarousel() {
+  const el = $('lbCarousel');
+  el.innerHTML = '';
+  const spread = 3;
+  for (let offset = -spread; offset <= spread; offset++) {
+    const i = lbIdx + offset;
+    const slot = document.createElement('div');
+    if (i < 0 || i >= lbImages.length) {
+      slot.className = 'lb-car-slot lb-car-empty';
+    } else {
+      let cls = 'lb-car-slot';
+      if (offset === 0)          cls += ' lb-car-active';
+      else if (Math.abs(offset) === 1) cls += ' lb-car-near';
+      slot.className = cls;
+      const img = document.createElement('img');
+      img.src = `/api/image/${encodeURIComponent(lbImages[i])}`;
+      img.draggable = false;
+      if (offset !== 0) {
+        const captured = i;
+        slot.onclick = () => { lbIdx = captured; updateLb(); };
+      }
+      slot.appendChild(img);
+    }
+    el.appendChild(slot);
+  }
+}
+
 function updateLb() {
   const name = lbImages[lbIdx]; if (!name) return;
   $('lbImg').src = `/api/image/${encodeURIComponent(name)}`;
   $('lbInfo').textContent = `${name}   ${lbIdx + 1} / ${lbImages.length}`;
-  $('lbPrev').style.visibility = lbIdx > 0 ? 'visible' : 'hidden';
-  $('lbNext').style.visibility = lbIdx < lbImages.length - 1 ? 'visible' : 'hidden';
+  renderCarousel();
+  const ctxEl = $('lbContext');
+  if (lbContext === 'gallery') {
+    ctxEl.textContent = 'Galerie';
+    ctxEl.className = '';
+  } else {
+    ctxEl.textContent = lbContext;
+    ctxEl.className = 'in-sel';
+  }
+  $('lbPrev').style.visibility    = lbIdx > 0                   ? 'visible' : 'hidden';
+  $('lbNext').style.visibility    = lbIdx < lbImages.length - 1 ? 'visible' : 'hidden';
   const inSel = isInSel(name);
-  $('lbAddBtn').textContent = inSel ? '✓ In selection' : '＋ Add to selection';
+  $('lbAddBtn').textContent = inSel ? 'In selection' : 'Add to selection';
   $('lbAddBtn').className   = inSel ? 'btn-secondary' : 'btn-primary';
   const pos = curSel().indexOf(name);
+  // Reorder buttons — only meaningful in selection context
+  const inSelCtx = lbContext !== 'gallery';
+  $('lbUpBtn').style.visibility   = inSelCtx ? 'visible' : 'hidden';
+  $('lbDownBtn').style.visibility = inSelCtx ? 'visible' : 'hidden';
+  $('lbUpBtn').disabled           = !inSelCtx || pos <= 0;
+  $('lbDownBtn').disabled         = !inSelCtx || pos === -1 || pos >= curSel().length - 1;
   const badge = $('lbSelBadge');
   if (pos !== -1) {
     badge.textContent = `# ${pos + 1}`;
@@ -1406,23 +1674,94 @@ $('csWmFont').addEventListener('change', wmChanged);
   $(id).addEventListener('input', () => { $(lblId).textContent = $(id).value; wmChanged(); });
 });
 
+$('helpBtn').onclick   = () => $('helpModal').classList.add('open');
+$('helpClose').onclick = () => $('helpModal').classList.remove('open');
+$('helpDone').onclick  = () => $('helpModal').classList.remove('open');
+$('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open'); };
+
 $('modalClose').onclick  = closeModal;
 $('modalCancel').onclick = closeModal;
 $('modal').onclick       = e => { if (e.target === $('modal')) closeModal(); };
 $('modalOpen').onclick   = async () => { closeModal(); await loadFolder(browserPath); };
 
-$('lbClose').onclick  = closeLb;
-$('lbPrev').onclick   = () => { if (lbIdx > 0) { lbIdx--; updateLb(); } };
-$('lbNext').onclick   = () => { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } };
-$('lbAddBtn').onclick = () => { const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } };
-$('lightbox').onclick = e => { if (e.target === $('lightbox')) closeLb(); };
+$('lbClose').onclick   = closeLb;
+$('lbCarousel').addEventListener('wheel', e => {
+  e.preventDefault();
+  if (e.deltaY > 0) { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
+  else              { if (lbIdx > 0)                    { lbIdx--; updateLb(); } }
+}, { passive: false });
+$('lbPrev').onclick    = () => { if (lbIdx > 0)                      { lbIdx--; updateLb(); } };
+$('lbNext').onclick    = () => { if (lbIdx < lbImages.length - 1)    { lbIdx++; updateLb(); } };
+$('lbUpBtn').onclick   = () => {
+  if (lbContext === 'gallery') return;
+  const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
+  if (pos <= 0) return;
+  pushHistory();
+  [s[pos - 1], s[pos]] = [s[pos], s[pos - 1]];
+  selections[activeSel] = s; lbImages = [...s]; lbIdx = pos - 1;
+  queueSave(); renderGallery(); renderSelection(); updateLb();
+};
+$('lbDownBtn').onclick = () => {
+  if (lbContext === 'gallery') return;
+  const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
+  if (pos === -1 || pos >= s.length - 1) return;
+  pushHistory();
+  [s[pos], s[pos + 1]] = [s[pos + 1], s[pos]];
+  selections[activeSel] = s; lbImages = [...s]; lbIdx = pos + 1;
+  queueSave(); renderGallery(); renderSelection(); updateLb();
+};
+function lbToggleSel() {
+  const n = lbImages[lbIdx]; if (!n) return;
+  const adding = !isInSel(n);
+  toggleInSel(n);
+  flashLb(adding);
+  if (!adding) syncLightboxToSel(); else updateLb();
+}
+$('lbAddBtn').onclick  = lbToggleSel;
+$('lightbox').onclick  = e => { if (e.target === $('lightbox')) closeLb(); };
+
+// Two-finger horizontal swipe (trackpad) on the lightbox image
+let _swipeAccum = 0, _swipeLocked = false;
+$('lbImg').addEventListener('wheel', e => {
+  if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return; // ignore vertical scroll
+  e.preventDefault();
+  if (_swipeLocked) return;
+  _swipeAccum += e.deltaX;
+  if (Math.abs(_swipeAccum) > 60) {
+    _swipeLocked = true;
+    if (_swipeAccum > 0) { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
+    else                 { if (lbIdx > 0)                    { lbIdx--; updateLb(); } }
+    _swipeAccum = 0;
+    setTimeout(() => { _swipeLocked = false; }, 400);
+  }
+}, { passive: false });
 
 document.addEventListener('keydown', async e => {
+  // Undo / Redo — global, works from any view
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+    e.preventDefault();
+    if (e.shiftKey) redo(); else undo();
+    return;
+  }
   if ($('lightbox').classList.contains('open')) {
-    if (e.key === 'Escape')     closeLb();
-    if (e.key === 'ArrowLeft')  { if (lbIdx > 0) { lbIdx--; updateLb(); } }
-    if (e.key === 'ArrowRight') { if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
-    if (e.key === ' ') { e.preventDefault(); const n = lbImages[lbIdx]; if (n) { const adding = !isInSel(n); toggleInSel(n); updateLb(); flashLb(adding); } }
+    if (e.key === 'Escape') closeLb();
+    // Navigate prev/next — left/right arrows and up/down arrows
+    if (e.key === 'ArrowLeft'  || (e.key === 'ArrowUp'   && !(e.metaKey || e.ctrlKey))) { e.preventDefault(); if (lbIdx > 0) { lbIdx--; updateLb(); } }
+    if (e.key === 'ArrowRight' || (e.key === 'ArrowDown'  && !(e.metaKey || e.ctrlKey))) { e.preventDefault(); if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
+    // Reorder in selection — Cmd/Ctrl + up/down
+    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowUp' && lbContext !== 'gallery') {
+      e.preventDefault();
+      const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
+      if (pos > 0) { pushHistory(); [s[pos-1],s[pos]]=[s[pos],s[pos-1]]; selections[activeSel]=s; lbImages=[...s]; lbIdx=pos-1; queueSave(); renderGallery(); renderSelection(); updateLb(); }
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowDown' && lbContext !== 'gallery') {
+      e.preventDefault();
+      const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
+      if (pos !== -1 && pos < s.length-1) { pushHistory(); [s[pos],s[pos+1]]=[s[pos+1],s[pos]]; selections[activeSel]=s; lbImages=[...s]; lbIdx=pos+1; queueSave(); renderGallery(); renderSelection(); updateLb(); }
+    }
+    if (e.key === ' ') { e.preventDefault(); lbToggleSel(); }
+  } else if ($('helpModal').classList.contains('open')) {
+    if (e.key === 'Escape') $('helpModal').classList.remove('open');
   } else if ($('wmModal').classList.contains('open')) {
     if (e.key === 'Escape') closeWm();
   } else if ($('csModal').classList.contains('open')) {
@@ -1431,6 +1770,12 @@ document.addEventListener('keydown', async e => {
     if (e.key === 'Escape') closeModal();
   }
 });
+
+// ─── Auto-restore folder from URL on load ─────────────────────────────────
+(async () => {
+  const urlPath = new URLSearchParams(location.search).get('path');
+  if (urlPath) await loadFolder(urlPath);
+})();
 </script>
 </body>
 </html>
