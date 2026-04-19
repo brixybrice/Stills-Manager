@@ -440,9 +440,18 @@ kbd {
 #wmModal.open { display: flex; }
 .wm-box {
   background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-  width: 920px; max-width: 96vw; height: 560px; max-height: 92vh;
+  width: 940px; max-width: 96vw; height: 640px; max-height: 92vh;
   display: flex; flex-direction: column; overflow: hidden;
 }
+.set-tabs { display: flex; gap: 2px; flex: 1; margin: 0 12px; }
+.set-tab {
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  color: #555; padding: 0 16px; font-size: 13px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.set-tab:hover { color: #999; }
+.set-tab.active { color: #ddd; border-bottom-color: #006D78; }
+.set-pane { display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0; }
 .wm-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .wm-settings {
   width: 280px; flex-shrink: 0; padding: 20px;
@@ -487,17 +496,6 @@ kbd {
 .cs-wm-toggle input[type=checkbox] { accent-color: #006D78; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
 .cs-wm-toggle label { text-transform: none !important; letter-spacing: 0 !important; color: #999; font-size: 12px; cursor: pointer; }
 
-#csModal {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.82); z-index: 3100;
-  align-items: center; justify-content: center;
-}
-#csModal.open { display: flex; }
-.cs-box {
-  background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-  width: 940px; max-width: 96vw; height: 640px; max-height: 92vh;
-  display: flex; flex-direction: column; overflow: hidden;
-}
 .cs-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .cs-settings {
   width: 220px; flex-shrink: 0; overflow-y: auto;
@@ -601,7 +599,7 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
         <span id="selCount">0 images</span>
         <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
         <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
-        <button class="btn-secondary" id="wmBtn" style="font-size:11px">Watermark</button>
+        <button class="btn-secondary" id="wmBtn" style="font-size:11px">settings</button>
       </div>
     </div>
 
@@ -628,132 +626,139 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   <div id="lbFlash"></div>
 </div>
 
-<!-- Watermark modal -->
+<!-- Paramètres modal (Watermark + Contact Sheet) -->
 <div id="wmModal">
   <div class="wm-box">
     <div class="modal-head">
-      <h3>Watermark</h3>
+      <h3>Paramètres</h3>
+      <div class="set-tabs">
+        <button class="set-tab active" id="setTabWm">Watermark</button>
+        <button class="set-tab" id="setTabCS">Contact Sheet</button>
+      </div>
       <button class="btn-ghost" id="wmClose">✕</button>
     </div>
-    <div class="wm-body">
-      <div class="wm-settings">
-        <div class="wm-field">
-          <label>Text</label>
-          <input type="text" id="csWmText" placeholder="Confidential…">
-        </div>
-        <div class="wm-field">
-          <label>Font</label>
-          <select id="csWmFont">
-            <option value="Arial, sans-serif">Arial</option>
-            <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="Georgia, serif">Georgia</option>
-            <option value="'Courier New', monospace">Courier New</option>
-            <option value="Impact, sans-serif">Impact</option>
-          </select>
-        </div>
-        <div class="wm-field">
-          <label>Opacity — <span id="csWmOpacityVal">20</span>%</label>
-          <input type="range" id="csWmOpacity" min="1" max="80" value="20">
-        </div>
-        <div class="wm-field">
-          <label>Size — <span id="csWmSizeVal">5</span>%</label>
-          <input type="range" id="csWmSize" min="1" max="20" value="5">
-        </div>
-        <div class="wm-field">
-          <label>Angle — <span id="csWmAngleVal">-30</span>°</label>
-          <input type="range" id="csWmAngle" min="-90" max="90" value="-30">
-        </div>
-      </div>
-      <div class="wm-preview-area">
-        <canvas id="wmCanvas"></canvas>
-      </div>
-    </div>
-    <div class="wm-foot">
-      Applied to all PDF exports when text is set.
-      <div style="flex:1"></div>
-      <button class="btn-primary" id="wmDone">Done</button>
-    </div>
-  </div>
-</div>
 
-<!-- Contact Sheet modal -->
-<div id="csModal">
-  <div class="cs-box">
-    <div class="modal-head">
-      <h3>Contact Sheet — <span id="csSelName"></span></h3>
-      <button class="btn-ghost" id="csClose">✕</button>
-    </div>
-    <div class="cs-body">
-      <div class="cs-settings">
-        <div class="cs-field">
-          <label>Title</label>
-          <input type="text" id="csTitle" placeholder="Optional…">
+    <!-- Watermark pane -->
+    <div class="set-pane" id="setPaneWm">
+      <div class="wm-body">
+        <div class="wm-settings">
+          <div class="wm-field">
+            <label>Text</label>
+            <input type="text" id="csWmText" placeholder="Confidential…">
+          </div>
+          <div class="wm-field">
+            <label>Font</label>
+            <select id="csWmFont">
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="'Times New Roman', serif">Times New Roman</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="Impact, sans-serif">Impact</option>
+            </select>
+          </div>
+          <div class="wm-field">
+            <label>Opacity — <span id="csWmOpacityVal">20</span>%</label>
+            <input type="range" id="csWmOpacity" min="1" max="80" value="20">
+          </div>
+          <div class="wm-field">
+            <label>Size — <span id="csWmSizeVal">5</span>%</label>
+            <input type="range" id="csWmSize" min="1" max="20" value="5">
+          </div>
+          <div class="wm-field">
+            <label>Angle — <span id="csWmAngleVal">-30</span>°</label>
+            <input type="range" id="csWmAngle" min="-90" max="90" value="-30">
+          </div>
         </div>
-        <div class="cs-field">
-          <label>Background</label>
-          <input type="color" id="csBg" value="#0f0f0f">
-        </div>
-        <hr class="cs-sep">
-        <div class="cs-field">
-          <label>Aspect ratio</label>
-          <select id="csRatio">
-            <option value="16:9">16 : 9</option>
-            <option value="2:1">2 : 1</option>
-            <option value="4:3">4 : 3</option>
-            <option value="1:1">1 : 1</option>
-            <option value="custom">Custom…</option>
-          </select>
-        </div>
-        <div class="cs-row" id="csCustomRatioRow" style="display:none">
-          <div class="cs-field"><label>W</label><input type="number" id="csRatioW" value="16" min="1"></div>
-          <div class="cs-field"><label>H</label><input type="number" id="csRatioH" value="9" min="1"></div>
-        </div>
-        <div class="cs-field">
-          <label>Columns</label>
-          <select id="csCols">
-            <option value="0">Auto</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-          </select>
-        </div>
-        <div class="cs-field">
-          <label>Gap (px)</label>
-          <input type="number" id="csMargin" value="6" min="0" max="80">
-        </div>
-        <hr class="cs-sep">
-        <div class="cs-field">
-          <label>Export width</label>
-          <select id="csExportW">
-            <option value="1280">HD — 1280 px</option>
-            <option value="1920" selected>Full HD — 1920 px</option>
-            <option value="3840">4K — 3840 px</option>
-          </select>
-        </div>
-        <hr class="cs-sep">
-        <div class="cs-field cs-wm-toggle">
-          <input type="checkbox" id="csWmEnabled">
-          <label for="csWmEnabled">Apply watermark</label>
+        <div class="wm-preview-area">
+          <canvas id="wmCanvas"></canvas>
         </div>
       </div>
-      <div class="cs-preview-area">
-        <canvas id="csCanvas"></canvas>
-        <div class="cs-progress-wrap" id="csProgressWrap">
-          <div id="csProgressFill"></div>
-        </div>
+      <div class="wm-foot">
+        Applied to all PDF exports when text is set.
+        <div style="flex:1"></div>
+        <button class="btn-primary" id="wmDone">Done</button>
       </div>
     </div>
-    <div class="cs-foot">
-      <span id="csStatus"></span>
-      <div class="cs-spacer"></div>
-      <button class="btn-secondary" id="csJpgBtn">↓ JPG</button>
-      <button class="btn-secondary" id="csPngBtn">↓ PNG</button>
-      <button class="btn-secondary" id="csPdfBtn">↓ PDF</button>
+
+    <!-- Contact Sheet pane -->
+    <div class="set-pane" id="setPaneCS" style="display:none">
+      <div class="cs-body">
+        <div class="cs-settings">
+          <div class="cs-field">
+            <label>Title</label>
+            <input type="text" id="csTitle" placeholder="Optional…">
+          </div>
+          <div class="cs-field">
+            <label>Background</label>
+            <input type="color" id="csBg" value="#0f0f0f">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Aspect ratio</label>
+            <select id="csRatio">
+              <option value="16:9">16 : 9</option>
+              <option value="2:1">2 : 1</option>
+              <option value="4:3">4 : 3</option>
+              <option value="1:1">1 : 1</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div class="cs-row" id="csCustomRatioRow" style="display:none">
+            <div class="cs-field"><label>W</label><input type="number" id="csRatioW" value="16" min="1"></div>
+            <div class="cs-field"><label>H</label><input type="number" id="csRatioH" value="9" min="1"></div>
+          </div>
+          <div class="cs-field">
+            <label>Columns</label>
+            <select id="csCols">
+              <option value="0">Auto</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Gap (px)</label>
+            <input type="number" id="csMargin" value="6" min="0" max="80">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Export width</label>
+            <select id="csExportW">
+              <option value="1280">HD — 1280 px</option>
+              <option value="1920" selected>Full HD — 1920 px</option>
+              <option value="3840">4K — 3840 px</option>
+            </select>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csWmEnabled">
+            <label for="csWmEnabled">Apply watermark</label>
+          </div>
+        </div>
+        <div class="cs-preview-area">
+          <canvas id="csCanvas"></canvas>
+          <div class="cs-progress-wrap" id="csProgressWrap">
+            <div id="csProgressFill"></div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-foot">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;color:#777;font-size:12px">
+          <input type="checkbox" id="pdfAppendCS" style="accent-color:#006D78">
+          Append to PDF export
+        </label>
+        <span id="csStatus" style="margin-left:12px"></span>
+        <div class="cs-spacer"></div>
+        <button class="btn-secondary" id="csJpgBtn">↓ JPG</button>
+        <button class="btn-secondary" id="csPngBtn">↓ PNG</button>
+        <button class="btn-secondary" id="csPdfBtn">↓ PDF</button>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -817,15 +822,10 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
       </div>
 
       <div class="help-section">
-        <h4>Contact sheet</h4>
-        <p>The <strong>Contact Sheet</strong> button opens a settings panel with a live canvas preview. Export is available as JPG, PNG or PDF.</p>
-        <p>The grid layout is computed automatically to maximise image area given the chosen aspect ratio and column count.</p>
-      </div>
-
-      <div class="help-section">
-        <h4>Watermark</h4>
-        <p>The <strong>Watermark</strong> button opens a dedicated panel with a live preview on a synthetic image. Configure text, font, size, opacity and angle.</p>
-        <p>The watermark is applied to the main PDF export and can be enabled on the contact sheet via its checkbox.</p>
+        <h4>Paramètres</h4>
+        <p>The <strong>Paramètres</strong> button opens a two-tab settings panel.</p>
+        <p><strong>Watermark</strong> — configure text, font, size, opacity and angle, with a live preview on a synthetic image. The watermark is applied to all PDF exports when text is set.</p>
+        <p><strong>Contact Sheet</strong> — configure grid layout, aspect ratio, gap, export resolution and watermark. Live canvas preview. Export as JPG, PNG or PDF. The <em>Append to PDF export</em> checkbox adds the contact sheet as a final page to the main PDF.</p>
       </div>
 
       <div class="help-section">
@@ -839,6 +839,8 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
           <span><kbd>Esc</kbd></span>                                          <span class="kb-desc">Close fullscreen or modal</span>
           <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>          <span class="kb-desc">Redo</span>
+          <span><kbd>Cmd</kbd>+<kbd>O</kbd></span>                            <span class="kb-desc">Open folder</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>                            <span class="kb-desc">New selection</span>
         </div>
       </div>
 
@@ -1210,7 +1212,7 @@ function renderGallery() {
 
     // Zoom button (Shift+click shortcut reminder)
     const zb = document.createElement('button');
-    zb.className = 'thumb-zoom'; zb.textContent = 'View'; zb.title = 'View large (Cmd+click)';
+    zb.className = 'thumb-zoom'; zb.innerHTML = '⤢'; zb.title = 'View large (Cmd+click)';
     zb.onclick = e => { e.stopPropagation(); openLightbox(allImages, i); };
     wrap.appendChild(zb);
 
@@ -1397,12 +1399,22 @@ async function exportPDF() {
       pdf.addImage(data, 'JPEG', (PW - w) / 2, (PH - h) / 2, w, h);
     }
 
+    if ($('pdfAppendCS').checked) {
+      const csCanvas = document.createElement('canvas');
+      await csRender(csCanvas, 2400);
+      const ratio = csGetRatio();
+      const CSW = 297, CSH = Math.round(CSW / ratio * 1000) / 1000;
+      const orient = ratio >= 1 ? 'landscape' : 'portrait';
+      pdf.addPage([CSW, CSH], orient);
+      pdf.addImage(csCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, CSW, CSH);
+    }
+
     const fname = activeSel.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'selection';
     pdf.save(`${fname}.pdf`);
   } catch (e) {
     alert('PDF export error: ' + e.message);
   } finally {
-    btn.textContent = '📄 Export PDF';
+    btn.textContent = 'Export PDF';
     btn.disabled = curSel().length === 0;
   }
 }
@@ -1417,8 +1429,18 @@ function loadImgEl(url) {
 // ─── Watermark modal ───────────────────────────────────────────────────────
 let wmPreviewTimer = null;
 
-function openWm()  { $('wmModal').classList.add('open');    renderWmPreview(); }
+function openWm()  { switchSettingsTab('wm'); $('wmModal').classList.add('open'); renderWmPreview(); }
 function closeWm() { $('wmModal').classList.remove('open'); }
+function openCS()  { switchSettingsTab('cs'); $('wmModal').classList.add('open'); generateCSPreview(); }
+function closeCS() { $('wmModal').classList.remove('open'); }
+
+function switchSettingsTab(tab) {
+  const isCS = tab === 'cs';
+  $('setPaneWm').style.display = isCS ? 'none' : 'flex';
+  $('setPaneCS').style.display = isCS ? 'flex' : 'none';
+  $('setTabWm').classList.toggle('active', !isCS);
+  $('setTabCS').classList.toggle('active',  isCS);
+}
 
 function wmQueuePreview() {
   clearTimeout(wmPreviewTimer);
@@ -1462,12 +1484,6 @@ let csPreviewTimer  = null;
 let csRendering     = false;
 let csPendingPreview = false;
 
-function openCS() {
-  $('csSelName').textContent = activeSel;
-  $('csModal').classList.add('open');
-  generateCSPreview();
-}
-function closeCS() { $('csModal').classList.remove('open'); }
 
 function csQueuePreview() {
   clearTimeout(csPreviewTimer);
@@ -1475,7 +1491,7 @@ function csQueuePreview() {
 }
 
 async function generateCSPreview() {
-  if (!$('csModal').classList.contains('open')) return;
+  if (!$('wmModal').classList.contains('open') || $('setPaneCS').style.display === 'none') return;
   if (csRendering) { csPendingPreview = true; return; }
   csRendering = true; csPendingPreview = false;
   $('csStatus').textContent = 'Rendering…';
@@ -1646,8 +1662,8 @@ $('addTabBtn').onclick      = addNewSel;
 $('clearSelBtn').onclick    = clearSel;
 $('exportBtn').onclick      = exportPDF;
 $('csBtn').onclick   = openCS;
-$('csClose').onclick = closeCS;
-$('csModal').onclick = e => { if (e.target === $('csModal')) closeCS(); };
+$('setTabWm').onclick = () => { switchSettingsTab('wm'); renderWmPreview(); };
+$('setTabCS').onclick = () => { switchSettingsTab('cs'); generateCSPreview(); };
 $('csJpgBtn').onclick = () => exportCS('jpg');
 $('csPngBtn').onclick = () => exportCS('png');
 $('csPdfBtn').onclick = () => exportCS('pdf');
@@ -1737,11 +1753,17 @@ $('lbImg').addEventListener('wheel', e => {
 }, { passive: false });
 
 document.addEventListener('keydown', async e => {
-  // Undo / Redo — global, works from any view
+  // Global shortcuts
   if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
     e.preventDefault();
     if (e.shiftKey) redo(); else undo();
     return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'o') {
+    e.preventDefault(); openBrowser(); return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'N') {
+    e.preventDefault(); addNewSel(); return;
   }
   if ($('lightbox').classList.contains('open')) {
     if (e.key === 'Escape') closeLb();
@@ -1764,8 +1786,6 @@ document.addEventListener('keydown', async e => {
     if (e.key === 'Escape') $('helpModal').classList.remove('open');
   } else if ($('wmModal').classList.contains('open')) {
     if (e.key === 'Escape') closeWm();
-  } else if ($('csModal').classList.contains('open')) {
-    if (e.key === 'Escape') closeCS();
   } else if ($('modal').classList.contains('open')) {
     if (e.key === 'Escape') closeModal();
   }
