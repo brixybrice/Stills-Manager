@@ -10,14 +10,15 @@ A local web app for browsing and curating image stills from a shoot. Runs entire
 
 - **Browse** any local folder containing JPG, PNG or TIF images
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
-- **Fullscreen lightbox** — Cmd+click to view full size; vertical carousel shows surrounding images
+- **Fullscreen lightbox** — Cmd+click to view full size; vertical carousel with scroll navigation; two-finger swipe to navigate
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
 - **Multiple selections** via tabs — add, rename (double-click), reorder and delete
 - **Drag & drop** reordering of images within a selection
-- **Reorder from fullscreen** — move the current image up or down in the selection without leaving fullscreen
-- **Contact sheet** — configurable grid export (JPG, PNG or PDF) with live preview
-- **Watermark** — tiled text overlay with font, size, opacity and angle controls; applied to PDF and contact sheet exports
-- **Export to PDF** — one image per page, 16:9 landscape
+- **Reorder from fullscreen** — Cmd+↑/↓ moves the current image up or down in the selection order
+- **Paramètres panel** — two-tab settings modal:
+  - *Watermark* — tiled text overlay with font, size, opacity and angle; live preview; applied to all PDF exports
+  - *Contact Sheet* — grid layout, aspect ratio, gap, export resolution; live preview; export as JPG, PNG or PDF; optional append to main PDF export
+- **Export to PDF** — one image per page, 16:9 landscape, with optional contact sheet appended
 - **Undo / Redo** — full history for all selection edits (Cmd+Z / Cmd+Shift+Z)
 - **Auto-save** — selections written as `stills-selections.json` in the open folder, debounced at 350 ms
 - **URL persistence** — the open folder is encoded in the URL; reloading the page reopens it automatically
@@ -62,10 +63,12 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `Space` | Add / remove from selection (fullscreen) |
 | `Cmd+↑` | Move image up in selection (fullscreen) |
 | `Cmd+↓` | Move image down in selection (fullscreen) |
-| `Escape` | Close fullscreen or modal |
+| `Esc` | Close fullscreen or modal |
 | `Cmd+Z` | Undo |
 | `Cmd+Shift+Z` | Redo |
-| `Cmd+click` | Open image in fullscreen (gallery) |
+| `Cmd+O` | Open folder |
+| `Cmd+Shift+N` | New selection |
+| `Cmd+click` | Open image fullscreen (gallery) |
 
 ---
 
