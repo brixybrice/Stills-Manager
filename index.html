@@ -973,23 +973,23 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
           </div>
           <hr class="cs-sep">
           <div class="cs-field">
-            <label>Aspect ratio</label>
-            <select id="csRatio">
-              <option value="16:9">16 : 9</option>
-              <option value="2:1">2 : 1</option>
-              <option value="4:3">4 : 3</option>
-              <option value="1:1">1 : 1</option>
-              <option value="custom">Custom…</option>
-            </select>
-          </div>
-          <div class="cs-row" id="csCustomRatioRow" style="display:none">
-            <div class="cs-field"><label>W</label><input type="number" id="csRatioW" value="16" min="1"></div>
-            <div class="cs-field"><label>H</label><input type="number" id="csRatioH" value="9" min="1"></div>
-          </div>
-          <div class="cs-field">
             <label>Columns</label>
             <select id="csCols">
               <option value="0">Auto</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Rows / page</label>
+            <select id="csRows">
+              <option value="0">Auto</option>
+              <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4">4</option>
@@ -1005,14 +1005,20 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
           </div>
           <hr class="cs-sep">
           <div class="cs-field">
-            <label>Export width</label>
+            <label>Export format</label>
             <select id="csExportW">
               <option value="1280">HD — 1280 px</option>
               <option value="1920" selected>Full HD — 1920 px</option>
               <option value="3840">4K — 3840 px</option>
+              <option value="a4p">A4 Portrait — 300 dpi</option>
+              <option value="a4l">A4 Landscape — 300 dpi</option>
             </select>
           </div>
           <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csProdInfo">
+            <label for="csProdInfo">Production info</label>
+          </div>
           <div class="cs-field cs-wm-toggle">
             <input type="checkbox" id="csWmEnabled">
             <label for="csWmEnabled">Apply watermark</label>
@@ -2112,11 +2118,12 @@ async function exportPDF() {
     }
 
     if ($('pdfAppendCS').checked) {
+      const csDims = csGetExportDims();
       const csCanvas = document.createElement('canvas');
-      await csRender(csCanvas, 2400);
-      const ratio = csGetRatio();
-      const CSW = 297, CSH = Math.round(CSW / ratio * 1000) / 1000;
-      const orient = ratio >= 1 ? 'landscape' : 'portrait';
+      await csRender(csCanvas, csDims.W, null, 0, csDims.H);
+      const CSW = csDims.a4 ? csDims.a4.PW : 297;
+      const CSH = csDims.a4 ? csDims.a4.PH : Math.round(297 * csDims.H / csDims.W * 1000) / 1000;
+      const orient = CSW >= CSH ? 'landscape' : 'portrait';
       pdf.addPage([CSW, CSH], orient);
       pdf.addImage(csCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, CSW, CSH);
     }
@@ -2248,21 +2255,28 @@ async function generateCSPreview() {
   if (csRendering) { csPendingPreview = true; return; }
   csRendering = true; csPendingPreview = false;
   $('csStatus').textContent = 'Rendering…';
-  try { await csRender($('csCanvas'), 580); }
-  finally {
+  try {
+    const d = csGetExportDims();
+    const prevW = 580, prevH = Math.round(prevW * d.H / d.W);
+    const result = await csRender($('csCanvas'), prevW, null, 0, prevH);
+    $('csStatus').textContent = (result && result.totalPages > 1) ? `Page 1 / ${result.totalPages}` : '';
+  } finally {
     csRendering = false;
-    $('csStatus').textContent = '';
     if (csPendingPreview) generateCSPreview();
   }
 }
 
+function csGetExportDims() {
+  const v = $('csExportW').value;
+  if (v === 'a4p') return { W: 2480, H: 3508, a4: { PW: 210, PH: 297 } };
+  if (v === 'a4l') return { W: 3508, H: 2480, a4: { PW: 297, PH: 210 } };
+  const W = parseInt(v) || 1920;
+  return { W, H: Math.round(W * 9/16), a4: null };
+}
+
 function csGetRatio() {
-  const v = $('csRatio').value;
-  if (v === '16:9') return 16/9;
-  if (v === '2:1')  return 2;
-  if (v === '4:3')  return 4/3;
-  if (v === '1:1')  return 1;
-  return (parseFloat($('csRatioW').value)||16) / (parseFloat($('csRatioH').value)||9);
+  const d = csGetExportDims();
+  return d.W / d.H;
 }
 
 function csCalcGrid(n, availW, availH, ars, margin) {
@@ -2283,65 +2297,145 @@ function csCalcGrid(n, availW, availH, ars, margin) {
   return best;
 }
 
-async function csRender(canvas, W) {
-  const sel = curSel(); if (!sel.length) return;
-  const margin     = parseInt($('csMargin').value)  || 0;
-  const bgColor    = $('csBg').value;
-  const title      = $('csTitle').value.trim();
-  const ratio      = csGetRatio();
-  const forceCols  = parseInt($('csCols').value)    || 0;
+async function csDrawProdInfo(ctx, W, topY, margin) {
+  const prod = loadProdData();
+  const fs = Math.max(10, Math.round(W * 0.013));
+  const lh = Math.round(fs * 1.55);
+  const crew = [
+    prod.director && `Dir. ${prod.director}`,
+    prod.dop      && `DOP ${prod.dop}`,
+    prod.ac1      && `AC ${prod.ac1}`,
+    prod.dit      && `DIT ${prod.dit}`,
+  ].filter(Boolean).join('  ·  ');
+  const hasProd = prod.production || prod.project;
+  if (!hasProd && !crew) return 0;
 
-  const H = Math.round(W / ratio);
+  const pad = Math.round(margin * 1.4) || Math.round(W * 0.012);
+  const blockH = pad + (hasProd ? lh : 0) + (crew ? lh : 0) + pad;
+
+  // Background strip + bottom separator
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillRect(0, topY, W, blockH);
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = Math.max(1, Math.round(W * 0.0005));
+  ctx.beginPath(); ctx.moveTo(0, topY + blockH); ctx.lineTo(W, topY + blockH); ctx.stroke();
+
+  // Logo (right side)
+  let rightX = W - pad;
+  if (prod.logo) {
+    try {
+      const img = await loadImgEl(prod.logo);
+      const logoH = blockH * 0.65;
+      const logoW = Math.round(logoH * img.naturalWidth / img.naturalHeight);
+      ctx.drawImage(img, W - pad - logoW, topY + (blockH - logoH) / 2, logoW, logoH);
+      rightX = W - pad - logoW - pad;
+    } catch(e) {}
+  }
+
+  const font = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+  let ty = topY + pad;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+
+  if (hasProd) {
+    const parts = [prod.production && prod.production.toUpperCase(), prod.project].filter(Boolean);
+    ctx.font = `700 ${fs}px ${font}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(parts.join('  —  '), pad, ty);
+    ty += lh;
+  }
+  if (crew) {
+    ctx.font = `${Math.round(fs * 0.85)}px ${font}`;
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText(crew, pad, ty);
+  }
+  return blockH;
+}
+
+async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0) {
+  const sel = curSel(); if (!sel.length) return null;
+  const margin    = parseInt($('csMargin').value) || 0;
+  const bgColor   = $('csBg').value;
+  const title     = $('csTitle').value.trim();
+  const forceCols = parseInt($('csCols').value) || 0;
+  const forceRows = parseInt($('csRows').value) || 0;
+
+  const H = overrideH || Math.round(W / csGetRatio());
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = bgColor; ctx.fillRect(0, 0, W, H);
 
-  let titleH = 0;
+  let headerH = 0;
+  if ($('csProdInfo').checked) {
+    headerH = await csDrawProdInfo(ctx, W, 0, margin);
+  }
+
+  let titleH = headerH;
   if (title) {
     const fs = Math.max(14, Math.round(W * 0.022));
-    titleH = fs + margin * 2;
+    const tPad = Math.round(margin * 0.8) || Math.round(W * 0.008);
+    titleH = headerH + fs + tPad * 2;
     ctx.fillStyle = '#ffffff';
     ctx.font = `600 ${fs}px -apple-system, BlinkMacSystemFont, sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText(title, W/2, margin);
+    ctx.fillText(title, W/2, headerH + tPad);
   }
 
   const availW = W - 2*margin;
   const availH = H - titleH - 2*margin;
 
   const pw = $('csProgressWrap'), pf = $('csProgressFill');
-  pw.style.display = 'block'; pf.style.width = '0%';
-
-  const loaded = [];
-  for (let i = 0; i < sel.length; i++) {
-    loaded.push(await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`));
-    pf.style.width = `${(i+1)/sel.length*50}%`;
+  const isFirstLoad = !preloadedImgs;
+  if (isFirstLoad) {
+    pw.style.display = 'block'; pf.style.width = '0%';
+    preloadedImgs = [];
+    for (let i = 0; i < sel.length; i++) {
+      preloadedImgs.push(await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`));
+      pf.style.width = `${(i+1)/sel.length*50}%`;
+    }
   }
-  const ars = loaded.map(img => img.naturalWidth / img.naturalHeight);
+  const loaded = preloadedImgs;
+  const allArs = loaded.map(img => img.naturalWidth / img.naturalHeight);
 
+  // Compute grid dimensions
   let cols, rows, cellW, cellH;
-  if (forceCols > 0) {
-    cols  = Math.min(forceCols, sel.length);
-    rows  = Math.ceil(sel.length / cols);
+  if (forceCols > 0 && forceRows > 0) {
+    cols = forceCols; rows = forceRows;
+    cellW = (availW - (cols-1)*margin) / cols;
+    cellH = (availH - (rows-1)*margin) / rows;
+  } else if (forceCols > 0) {
+    cols = Math.min(forceCols, loaded.length);
+    rows = forceRows > 0 ? forceRows : Math.ceil(loaded.length / cols);
+    cellW = (availW - (cols-1)*margin) / cols;
+    cellH = (availH - (rows-1)*margin) / rows;
+  } else if (forceRows > 0) {
+    const auto = csCalcGrid(loaded.length, availW, availH, allArs, margin);
+    cols = auto.cols; rows = forceRows;
     cellW = (availW - (cols-1)*margin) / cols;
     cellH = (availH - (rows-1)*margin) / rows;
   } else {
-    ({ cols, rows, cellW, cellH } = csCalcGrid(sel.length, availW, availH, ars, margin));
+    ({ cols, rows, cellW, cellH } = csCalcGrid(loaded.length, availW, availH, allArs, margin));
   }
 
-  for (let i = 0; i < loaded.length; i++) {
-    const img = loaded[i];
+  const itemsPerPage = cols * rows;
+  const totalPages = forceRows > 0 ? Math.ceil(loaded.length / itemsPerPage) : 1;
+  const start = pageIndex * itemsPerPage;
+  const pageImgs = loaded.slice(start, start + itemsPerPage);
+  const pageArs = allArs.slice(start, start + itemsPerPage);
+
+  for (let i = 0; i < pageImgs.length; i++) {
+    const img = pageImgs[i];
     const col = i % cols, row = Math.floor(i / cols);
     const cellX = margin + col*(cellW+margin);
     const cellY = margin + titleH + row*(cellH+margin);
-    const ar = ars[i]; let w = cellW, h = cellH;
+    const ar = pageArs[i]; let w = cellW, h = cellH;
     if (w/h > ar) w = h*ar; else h = w/ar;
     ctx.drawImage(img, cellX+(cellW-w)/2, cellY+(cellH-h)/2, w, h);
-    pf.style.width = `${50 + (i+1)/loaded.length*50}%`;
+    if (isFirstLoad) pf.style.width = `${50 + (i+1)/pageImgs.length*50}%`;
   }
 
   if ($('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
-  setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+  if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+  return { loaded, cols, rows, itemsPerPage, totalPages };
 }
 
 function csDrawWatermark(ctx, W, H) {
@@ -2384,22 +2478,45 @@ async function exportCS(fmt) {
   const btn = $(ids[fmt]); const orig = btn.textContent;
   btn.disabled = true; btn.textContent = '⏳';
   try {
-    const W = parseInt($('csExportW').value) || 1920;
+    const dims = csGetExportDims();
+    const baseName = (activeSel||'contact-sheet').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'contact-sheet';
+    const suffix = `${baseName}_contact_sheet`;
+
+    // Render page 0 (loads images, returns metadata)
     const canvas = document.createElement('canvas');
-    await csRender(canvas, W);
-    const name = (activeSel||'contact-sheet').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'contact-sheet';
-    if (fmt === 'jpg' || fmt === 'png') {
-      const a = document.createElement('a');
-      a.download = `${name}.${fmt}`;
-      a.href = canvas.toDataURL(fmt === 'jpg' ? 'image/jpeg' : 'image/png', fmt === 'jpg' ? 0.92 : 1);
-      a.click();
-    } else {
+    const result = await csRender(canvas, dims.W, null, 0, dims.H);
+    const { loaded, totalPages } = result;
+
+    if (fmt === 'pdf') {
       const { jsPDF } = window.jspdf;
-      const ratio = csGetRatio();
-      const PW = 297, PH = Math.round(PW/ratio*1000)/1000;
-      const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: ratio>=1?'landscape':'portrait' });
+      const PW = dims.a4 ? dims.a4.PW : 297;
+      const PH = dims.a4 ? dims.a4.PH : Math.round(297 * dims.H / dims.W * 1000) / 1000;
+      const pdf = new jsPDF({ unit:'mm', format: dims.a4 ? 'a4' : [PW,PH], orientation: PW>=PH?'landscape':'portrait' });
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
-      pdf.save(`${name}.pdf`);
+      for (let p = 1; p < totalPages; p++) {
+        const c = document.createElement('canvas');
+        await csRender(c, dims.W, loaded, p, dims.H);
+        pdf.addPage();
+        pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+      }
+      pdf.save(`${suffix}.pdf`);
+    } else {
+      const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+      const q = fmt === 'jpg' ? 0.92 : 1;
+      const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
+      const a0 = document.createElement('a');
+      a0.download = `${suffix}${pageLabel(0)}.${fmt}`;
+      a0.href = canvas.toDataURL(mime, q);
+      a0.click();
+      for (let p = 1; p < totalPages; p++) {
+        await new Promise(r => setTimeout(r, 300));
+        const c = document.createElement('canvas');
+        await csRender(c, dims.W, loaded, p, dims.H);
+        const a = document.createElement('a');
+        a.download = `${suffix}${pageLabel(p)}.${fmt}`;
+        a.href = c.toDataURL(mime, q);
+        a.click();
+      }
     }
   } catch(e) { alert('Export error: ' + e.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
@@ -2443,13 +2560,10 @@ $('csPngBtn').onclick = () => exportCS('png');
 $('csPdfBtn').onclick = () => exportCS('pdf');
 
 // Live preview — CS modal settings
-['csTitle','csRatioW','csRatioH','csMargin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
+['csTitle','csMargin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
 $('csBg').addEventListener('input', csQueuePreview);
-['csCols','csExportW'].forEach(id => $(id).addEventListener('change', csQueuePreview));
-$('csRatio').addEventListener('change', () => {
-  $('csCustomRatioRow').style.display = $('csRatio').value === 'custom' ? 'flex' : 'none';
-  csQueuePreview();
-});
+['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csQueuePreview));
+$('csProdInfo').addEventListener('change', csQueuePreview);
 $('csWmEnabled').addEventListener('change', csQueuePreview);
 
 // Report search
