@@ -819,7 +819,7 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   <input id="reportSearchInput" type="search" placeholder="Search clips…" style="display:none">
   <span id="saveStatus">Saved</span>
   <button class="btn-ghost" id="settingsHeaderBtn" title="Settings" style="font-size:20px; padding:4px 10px;">⚙</button>
-  <button class="btn-secondary" id="exportHeaderBtn" title="Export (Cmd+E)">Export</button>
+  <button class="btn-secondary" id="exportHeaderBtn" title="Export (Cmd+E)" style="display:none">Export</button>
   <button class="btn-primary" id="openBtn">Open Folder</button>
   <button class="btn-ghost" id="helpBtn" title="Help">?</button>
 </div>
@@ -864,7 +864,6 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
         <span id="selCount">0 images</span>
         <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
         <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
-        <button class="btn-secondary" id="wmBtn" style="font-size:11px">settings</button>
       </div>
     </div>
 
@@ -1412,6 +1411,7 @@ function switchMainView(tab) {
   $('galleryView').style.display      = isReport ? 'none' : '';
   $('reportView').classList.toggle('active', isReport);
   $('selPanel').style.display         = isReport ? 'none' : '';
+  $('exportHeaderBtn').style.display  = isReport ? '' : 'none';
   if (isReport) renderReport();
   const p = new URLSearchParams(location.search);
   const base = isReport ? '/report' : '/stills';
@@ -2462,7 +2462,6 @@ $('cdPrev').onclick = e => { e.stopPropagation(); if (clipDetailIdx > 0) { clipD
 $('cdNext').onclick = e => { e.stopPropagation(); if (clipDetailIdx < clipDetailMarkers.length - 1) { clipDetailIdx++; updateClipDetailImage(); } };
 
 // Watermark modal
-$('wmBtn').onclick   = openWm;
 $('wmClose').onclick = closeWm;
 $('wmDone').onclick  = closeWm;
 $('wmModal').onclick = e => { if (e.target === $('wmModal')) closeWm(); };
