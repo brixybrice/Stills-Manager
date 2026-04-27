@@ -15,12 +15,15 @@ A local web app for browsing and curating image stills from a shoot. Runs entire
 - **Multiple selections** via tabs — add, rename (double-click), reorder and delete
 - **Drag & drop** reordering of images within a selection
 - **Reorder from fullscreen** — Cmd+↑/↓ moves the current image up or down in the selection order
-- **Paramètres panel** — two-tab settings modal:
+- **Clips Report** view — one card per clip with thumbnail, full metadata (Camera, Optics, Color, Timing), Comments and Reviewer Notes; searchable; persists thumbnail choice; half-page detail panel
+- **Paramètres panel** — three-tab settings modal:
   - *Watermark* — tiled text overlay with font, size, opacity and angle; live preview; applied to all PDF exports
   - *Contact Sheet* — grid layout, aspect ratio, gap, export resolution; live preview; export as JPG, PNG or PDF; optional append to main PDF export
+  - *Production* — project and crew fields (Director, DOP, DIT, ACs…) + logo drop zone; stored in `localStorage`; used in exports
+- **Export panel** (`Cmd+E`) — ALE and CSV export of clip metadata; Clips Report and Shoot Report PDF (coming soon)
 - **Export to PDF** — one image per page, 16:9 landscape, with optional contact sheet appended
 - **Undo / Redo** — full history for all selection edits (Cmd+Z / Cmd+Shift+Z)
-- **Auto-save** — selections written as `stills-selections.json` in the open folder, debounced at 350 ms
+- **Auto-save** — selections written as `.stills-selections.json` in the open folder, debounced at 350 ms
 - **URL persistence** — the open folder is encoded in the URL; reloading the page reopens it automatically
 
 ---
@@ -67,6 +70,8 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `Cmd+Z` | Undo |
 | `Cmd+Shift+Z` | Redo |
 | `Cmd+O` | Open folder |
+| `Cmd+;` | Open settings |
+| `Cmd+E` | Open export panel |
 | `Cmd+Shift+N` | New selection |
 | `Cmd+click` | Open image fullscreen (gallery) |
 
@@ -74,7 +79,7 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 
 ## Data
 
-Selections are saved as a JSON file (`stills-selections.json`) in the open folder:
+Selections are saved as a JSON file (`.stills-selections.json`) in the open folder:
 
 ```json
 {
@@ -87,7 +92,7 @@ Selections are saved as a JSON file (`stills-selections.json`) in the open folde
 }
 ```
 
-The file is created automatically when a folder is opened and updated on every change.
+The file is created automatically when a folder is opened and updated on every change. It is hidden by default on macOS and Linux (dot-prefixed); use `ls -a` or **Show Hidden Files** in Finder (`Cmd+Shift+.`) to reveal it.
 
 ---
 

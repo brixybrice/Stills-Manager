@@ -36,11 +36,14 @@ a, label, select, input[type="checkbox"], input[type="radio"] { cursor: pointer;
   padding: 12px 20px;
   display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid #2a2a2a;
-  flex-shrink: 0;
+  flex-shrink: 0; position: relative;
 }
 #header h1 { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
 #folderName { font-size: 13px; color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#saveStatus { font-size: 12px; color: #4a4; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
+#saveStatus {
+  font-size: 12px; color: #4a4; white-space: nowrap; opacity: 0; transition: opacity 0.4s;
+  position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none;
+}
 #saveStatus.show { opacity: 1; }
 
 /* ── Tabs ── */
@@ -106,13 +109,7 @@ a, label, select, input[type="checkbox"], input[type="radio"] { cursor: pointer;
 @media (max-width: 560px) {
   #imageGrid { --cols: 2; }
 }
-#galleryPanel,
-
-#imageGrid {
-
-  min-height: 0;
-
-}
+#galleryPanel, #galleryView, #imageGrid { min-height: 0; }
 
 #imageGrid {
   --cols: 6;
@@ -431,6 +428,33 @@ kbd {
 .btn-teal:hover:not(:disabled) { background: #005560; }
 .btn-teal:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* ── Export modal ── */
+#exportModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3100;
+  align-items: center; justify-content: center;
+}
+#exportModal.open { display: flex; }
+.export-box {
+  background: #1e1e1e; border: 1px solid #333; border-radius: 8px;
+  width: 460px; max-width: 95vw;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.export-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.export-desc { font-size: 12.5px; color: #555; }
+.export-options { display: flex; flex-direction: column; gap: 3px; }
+.export-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 14px; border-radius: 5px; cursor: pointer;
+  border: 1px solid transparent; transition: background 0.12s, border-color 0.12s;
+}
+.export-option:hover { background: #252525; border-color: #2e2e2e; }
+.export-option input[type=checkbox] { accent-color: #006D78; width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+.export-option-info { display: flex; flex-direction: column; gap: 2px; }
+.export-option-name { font-size: 13px; color: #ccc; font-weight: 600; }
+.export-option-desc { font-size: 11.5px; color: #555; }
+.export-sep { border: none; border-top: 1px solid #2a2a2a; margin: 4px 0; }
+
 /* ── Watermark modal ── */
 #wmModal {
   display: none; position: fixed; inset: 0;
@@ -491,6 +515,41 @@ kbd {
 .wm-row { display: flex; gap: 10px; }
 .wm-row .wm-field { flex: 1; }
 
+/* ── Production pane ── */
+.prod-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.prod-fields {
+  flex: 1; padding: 24px 28px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px;
+  align-content: start; overflow-y: auto;
+}
+.prod-field { display: flex; flex-direction: column; gap: 5px; }
+.prod-field label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; }
+.prod-field input {
+  background: #212121; border: 1px solid #2e2e2e; border-radius: 4px;
+  color: #bbb; font-size: 13px; padding: 7px 10px; font-family: inherit; width: 100%;
+}
+.prod-field input:focus { outline: none; border-color: #006D78; }
+.prod-logo-panel {
+  width: 240px; flex-shrink: 0; border-left: 1px solid #252525;
+  padding: 24px; display: flex; flex-direction: column; gap: 10px;
+}
+.prod-logo-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; }
+.prod-logo-drop {
+  flex: 1; border: 2px dashed #2e2e2e; border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; transition: border-color 0.15s; position: relative; overflow: hidden;
+  background: #141414;
+}
+.prod-logo-drop:hover, .prod-logo-drop.drag-over { border-color: #006D78; }
+.prod-logo-drop img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+.prod-logo-hint { font-size: 11px; color: #3a3a3a; text-align: center; pointer-events: none; line-height: 1.6; }
+.prod-logo-actions { display: flex; gap: 8px; align-items: center; }
+.prod-logo-clear {
+  font-size: 11px; color: #555; background: none; border: none;
+  cursor: pointer; text-decoration: underline; padding: 0;
+}
+.prod-logo-clear:hover { color: #ccc; }
+
 /* CS modal watermark checkbox */
 .cs-wm-toggle { flex-direction: row !important; align-items: center; gap: 8px; }
 .cs-wm-toggle input[type=checkbox] { accent-color: #006D78; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
@@ -549,6 +608,202 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   background: #006D78; border: none; cursor: pointer;
 }
 #csStatus { font-size: 11px; color: #555; }
+
+/* ── Header view toggle ── */
+#viewToggle {
+  display: none; align-items: center;
+  background: #2a2a2a; border-radius: 6px; padding: 3px; gap: 2px;
+}
+#viewToggle.visible { display: flex; }
+.vtab {
+  padding: 5px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  background: transparent; color: #666; border-radius: 4px;
+  border: none; transition: background 0.12s, color 0.12s;
+}
+.vtab.active { background: #006D78; color: #fff; }
+.vtab:hover:not(.active) { color: #ccc; }
+
+/* ── Gallery wrapper ── */
+#galleryView { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+/* ── Clips Report ── */
+#reportView {
+  flex: 1; overflow-y: auto; display: none;
+  padding: 10px; flex-direction: column; gap: 8px;
+}
+#reportView.detail-open { padding-bottom: calc(60vh + 20px); }
+#reportView.active { display: flex; align-items: center; }
+#reportView::-webkit-scrollbar { width: 6px; }
+#reportView::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+
+#reportSearchInput {
+  flex: 1; max-width: 320px; padding: 6px 11px;
+  background: #2a2a2a; border: 1px solid #383838;
+  border-radius: 6px; color: #ddd; font-size: 13px; font-family: inherit;
+  outline: none;
+}
+#reportSearchInput:focus { border-color: #006D78; }
+#reportSearchInput::placeholder { color: #444; }
+.clip-card.hidden { display: none; }
+
+/* Fixed-height row: thumbnail left, metadata right */
+.clip-card {
+  min-height: 160px;
+  width: 80%;
+  background: #1e1e1e; border-radius: 5px;
+  border: 2px solid #252525;
+  overflow: hidden; display: flex; flex-direction: row; flex-shrink: 0;
+  transition: border-color 0.12s;
+}
+.clip-card:hover { border-color: #444; }
+.clip-card.active { border-color: #006D78; }
+
+/* Thumbnail — explicit dimensions, image fills via position:absolute inset:0 */
+.clip-card-thumb {
+  flex-shrink: 0; width: 325px; align-self: stretch;
+  position: relative; overflow: hidden;
+  background: #141414; cursor: pointer;
+  border-right: 1px solid #252525;
+}
+.clip-card-thumb img {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%; object-fit: contain; display: block;
+}
+.clip-card-thumb .thumb-hover {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0; transition: opacity 0.15s; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+.clip-card-thumb:hover .thumb-hover { opacity: 1; }
+.clip-card-no-thumb {
+  display: flex; align-items: center; justify-content: center;
+  color: #2a2a2a; font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* Metadata — scrollable panel to the right */
+.clip-card-body {
+  flex: 1; min-width: 0; overflow-y: auto;
+  padding: 10px 16px; display: flex; flex-direction: column; gap: 5px;
+}
+.clip-card-body::-webkit-scrollbar { display: none; }
+.clip-card-name {
+  display: flex; align-items: baseline; gap: 10px;
+  padding-bottom: 6px; border-bottom: 1px solid #2a2a2a; flex-shrink: 0;
+  min-width: 0;
+}
+.clip-card-name-text {
+  font-size: 14px; font-weight: 700; color: #ccc;
+  font-family: 'Courier New', monospace;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1;
+}
+.clip-card-label {
+  font-size: 13px; color: #006D78; white-space: nowrap; flex-shrink: 0;
+  font-weight: 600; letter-spacing: 0.2px;
+}
+.clip-card-notes {
+  display: flex; gap: 10px; flex-shrink: 0; margin-top: 6px;
+}
+.clip-card-note {
+  flex: 1; min-width: 0;
+  background: #161616; border: 1px solid #2a2a2a; border-radius: 3px;
+  padding: 5px 8px;
+}
+.clip-card-note-label {
+  font-size: 9px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;
+}
+.clip-card-note-val {
+  font-size: 11.5px; color: #888; min-height: 14px;
+  white-space: pre-wrap; word-break: break-word; line-height: 1.4;
+}
+
+.clip-meta-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  align-content: flex-start;
+}
+.clip-meta-group {
+  flex: 0 0 calc(23% - 15px);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.clip-meta-group:first-child { flex: 0 0 calc(31% - 15px); }
+.clip-meta-row { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.clip-meta-key {
+  color: #464646; white-space: nowrap; flex-shrink: 0;
+  text-transform: uppercase; font-size: 10.5px;
+  letter-spacing: 0.5px; min-width: 82px;
+}
+.clip-meta-val {
+  color: #888; font-size: 12px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.clip-meta-sep { column-span: all; height: 1px; background: #2a2a2a; margin: 3px 0; break-inside: avoid; }
+
+/* ── Clip detail panel ── */
+#clipDetail {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: 55vh; min-height: 320px;
+  background: #1a1a1a; border-top: 2px solid #333;
+  display: none; z-index: 500;
+}
+#clipDetail.open { display: flex; }
+#clipDetailClose {
+  position: absolute; top: 10px; right: 12px;
+  background: transparent; color: #555; font-size: 18px;
+  padding: 4px 8px; z-index: 1; line-height: 1;
+}
+#clipDetailClose:hover { color: #ccc; }
+#clipDetailImg {
+  flex-shrink: 0; width: 50%;
+  background: #111; border-right: 1px solid #2a2a2a;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+#clipDetailImg img {
+  max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+}
+#clipDetailImg .clip-card-no-thumb {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: #2a2a2a; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+}
+.cd-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.55); color: #bbb; font-size: 22px;
+  padding: 10px 13px; border-radius: 4px; z-index: 2;
+  opacity: 0; transition: opacity 0.15s;
+}
+#clipDetailImg:hover .cd-arrow:not(:disabled) { opacity: 1; }
+.cd-arrow:hover { background: rgba(0,0,0,0.85); color: #fff; }
+.cd-arrow:disabled { opacity: 0 !important; pointer-events: none; }
+#cdPrev { left: 8px; }
+#cdNext { right: 8px; }
+#cdCounter {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.6); color: #888; font-size: 11px;
+  padding: 2px 8px; border-radius: 10px; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+}
+#clipDetailImg:hover #cdCounter { opacity: 1; }
+#clipDetailMeta {
+  flex: 1; overflow-y: auto; padding: 16px 20px 16px 24px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+#clipDetailMeta::-webkit-scrollbar { width: 5px; }
+#clipDetailMeta::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+#clipDetailTitle {
+  font-size: 13px; font-weight: 700; color: #ddd;
+  font-family: 'Courier New', monospace;
+  padding-bottom: 10px; border-bottom: 1px solid #252525; flex-shrink: 0;
+}
+#clipDetailFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 24px; align-content: start;
+}
 </style>
 </head>
 <body>
@@ -556,8 +811,15 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 <!-- Header -->
 <div id="header">
   <h1>Stills Manager</h1>
+  <div id="viewToggle">
+    <button class="vtab active" id="viewTabGallery" onclick="switchMainView('gallery')">Stills Manager</button>
+    <button class="vtab"        id="viewTabReport"  onclick="switchMainView('report')">Clips Report</button>
+  </div>
   <span id="folderName">No folder open</span>
+  <input id="reportSearchInput" type="search" placeholder="Search clips…" style="display:none">
   <span id="saveStatus">Saved</span>
+  <button class="btn-ghost" id="settingsHeaderBtn" title="Settings" style="font-size:20px; padding:4px 10px;">⚙</button>
+  <button class="btn-secondary" id="exportHeaderBtn" title="Export (Cmd+E)">Export</button>
   <button class="btn-primary" id="openBtn">Open Folder</button>
   <button class="btn-ghost" id="helpBtn" title="Help">?</button>
 </div>
@@ -581,11 +843,14 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 
     <!-- Gallery -->
     <div id="galleryPanel">
-      <div id="galleryHeader">
-        <h2 id="galleryTitle">Images</h2>
-        <span id="galleryHint">Click to select · Cmd+click to view large</span>
+      <div id="galleryView">
+        <div id="galleryHeader">
+          <h2 id="galleryTitle">Images</h2>
+          <span id="galleryHint">Click to select · Cmd+click to view large</span>
+        </div>
+        <div id="imageGrid"></div>
       </div>
-      <div id="imageGrid"></div>
+      <div id="reportView"></div>
     </div>
 
     <!-- Selection -->
@@ -603,6 +868,20 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Clip detail panel -->
+<div id="clipDetail">
+  <button id="clipDetailClose">✕</button>
+  <div id="clipDetailImg">
+    <button class="cd-arrow" id="cdPrev">‹</button>
+    <button class="cd-arrow" id="cdNext">›</button>
+    <span id="cdCounter"></span>
+  </div>
+  <div id="clipDetailMeta">
+    <div id="clipDetailTitle"></div>
+    <div id="clipDetailFields"></div>
   </div>
 </div>
 
@@ -630,10 +909,11 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 <div id="wmModal">
   <div class="wm-box">
     <div class="modal-head">
-      <h3>Paramètres</h3>
+      <h3>Settings</h3>
       <div class="set-tabs">
         <button class="set-tab active" id="setTabWm">Watermark</button>
         <button class="set-tab" id="setTabCS">Contact Sheet</button>
+        <button class="set-tab" id="setTabProd">Production</button>
       </div>
       <button class="btn-ghost" id="wmClose">✕</button>
     </div>
@@ -759,6 +1039,39 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
       </div>
     </div>
 
+
+    <!-- Production pane -->
+    <div class="set-pane" id="setPaneProd" style="display:none">
+      <div class="prod-body">
+        <div class="prod-fields">
+          <div class="prod-field"><label>Project</label><input type="text" id="prod_project" placeholder="Project name…"></div>
+          <div class="prod-field"><label>Production</label><input type="text" id="prod_production" placeholder="Production company…"></div>
+          <div class="prod-field"><label>Director</label><input type="text" id="prod_director" placeholder="Name…"></div>
+          <div class="prod-field"><label>Director of Photography</label><input type="text" id="prod_dop" placeholder="Name…"></div>
+          <div class="prod-field"><label>DIT</label><input type="text" id="prod_dit" placeholder="Name…"></div>
+          <div class="prod-field"><label>Data Manager</label><input type="text" id="prod_dataManager" placeholder="Name…"></div>
+          <div class="prod-field"><label>1st AC</label><input type="text" id="prod_ac1" placeholder="Name…"></div>
+          <div class="prod-field"><label>2nd AC</label><input type="text" id="prod_ac2" placeholder="Name…"></div>
+        </div>
+        <div class="prod-logo-panel">
+          <span class="prod-logo-label">Logo (PNG)</span>
+          <div class="prod-logo-drop" id="prodLogoDrop">
+            <img id="prodLogoImg" alt="logo">
+            <span class="prod-logo-hint" id="prodLogoHint">Drop a PNG here<br>or click to browse</span>
+          </div>
+          <div class="prod-logo-actions">
+            <button class="prod-logo-clear" id="prodLogoClear">Remove logo</button>
+          </div>
+          <input type="file" id="prodLogoInput" accept="image/png" style="display:none">
+        </div>
+      </div>
+      <div class="wm-foot">
+        Production info is saved automatically and used in exports.
+        <div style="flex:1"></div>
+        <button class="btn-primary" id="prodDone">Done</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -805,7 +1118,7 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
         <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images.</p>
         <p><strong>+</strong> creates a new tab · <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
         <p>Images within a selection can be reordered by <strong>drag and drop</strong>.</p>
-        <p>Selections are saved automatically to <strong>stills-selections.json</strong> in the open folder (debounced at 350 ms).</p>
+        <p>Selections are saved automatically to <strong>.stills-selections.json</strong> in the open folder (debounced at 350 ms).</p>
       </div>
 
       <div class="help-section">
@@ -840,13 +1153,70 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
           <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>          <span class="kb-desc">Redo</span>
           <span><kbd>Cmd</kbd>+<kbd>O</kbd></span>                            <span class="kb-desc">Open folder</span>
-          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>                            <span class="kb-desc">New selection</span>
+          <span><kbd>Cmd</kbd>+<kbd>;</kbd></span>                            <span class="kb-desc">Open settings</span>
+          <span><kbd>Cmd</kbd>+<kbd>E</kbd></span>                            <span class="kb-desc">Open export panel</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>          <span class="kb-desc">New selection</span>
         </div>
       </div>
 
     </div>
     <div class="modal-foot">
       <button class="btn-primary" id="helpDone">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export modal -->
+<div id="exportModal">
+  <div class="export-box">
+    <div class="modal-head">
+      <h3>Export</h3>
+      <button class="btn-ghost" id="exportModalClose">✕</button>
+    </div>
+    <div class="export-body">
+      <p class="export-desc">Select the formats to generate:</p>
+      <div class="export-options">
+        <label class="export-option">
+          <input type="checkbox" id="expOptShootReport">
+          <div class="export-option-info">
+            <span class="export-option-name">Shoot Report</span>
+            <span class="export-option-desc">Daily production report with crew and camera info</span>
+          </div>
+        </label>
+        <label class="export-option">
+          <input type="checkbox" id="expOptClipsReport">
+          <div class="export-option-info">
+            <span class="export-option-name">Clips Report</span>
+            <span class="export-option-desc">PDF document of the clips report view</span>
+          </div>
+        </label>
+        <label class="export-option">
+          <input type="checkbox" id="expOptQCReport">
+          <div class="export-option-info">
+            <span class="export-option-name">QC Report</span>
+            <span class="export-option-desc">Quality control report with selected takes and notes</span>
+          </div>
+        </label>
+        <hr class="export-sep">
+        <label class="export-option">
+          <input type="checkbox" id="expOptALE">
+          <div class="export-option-info">
+            <span class="export-option-name">ALE</span>
+            <span class="export-option-desc">Avid Log Exchange — import into Avid Media Composer</span>
+          </div>
+        </label>
+        <label class="export-option">
+          <input type="checkbox" id="expOptCSV">
+          <div class="export-option-info">
+            <span class="export-option-name">CSV</span>
+            <span class="export-option-desc">Spreadsheet with all clip metadata</span>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" id="exportModalCancel">Cancel</button>
+      <button class="btn-primary" id="exportModalRun">Export</button>
     </div>
   </div>
 </div>
@@ -870,6 +1240,21 @@ let saveTimer   = null;
 let lastToggled = null;
 let browserPath = '';
 let folderName  = '';
+let clipsMetadata = null;
+let mainView    = 'gallery'; // 'gallery' | 'report'
+let clipDetailMarkers  = [];
+let clipDetailIdx      = 0;
+let clipDetailCardIdx  = -1;
+let clipDetailClipName = '';
+
+function thumbPrefs() {
+  try { return JSON.parse(localStorage.getItem('stills-thumb-prefs') || '{}'); } catch { return {}; }
+}
+function saveThumbPref(clipName, idx) {
+  const p = thumbPrefs(); p[clipName] = idx;
+  localStorage.setItem('stills-thumb-prefs', JSON.stringify(p));
+}
+function getThumbPref(clipName) { return thumbPrefs()[clipName] || 0; }
 
 // ─── Undo / Redo ──────────────────────────────────────────────────────────
 const HISTORY_LIMIT = 60;
@@ -962,9 +1347,12 @@ async function loadFolder(path) {
   $('appMain').style.display  = 'flex';
   $('tabBar').style.display   = 'flex';
 
-  history.replaceState(null, '', '?path=' + encodeURIComponent(res.path));
+  const _base = location.pathname === '/report' ? '/report' : '/stills';
+  history.replaceState(null, '', _base + '?path=' + encodeURIComponent(res.path));
+  resetMainView();
   renderAll();
   showSaved();
+  await loadMetadata();
 }
 
 function applySelData(data) {
@@ -982,6 +1370,330 @@ function mkDefault() {
   selections = { [n]: [] };
   selOrder   = [n];
   activeSel  = n;
+}
+
+// ─── Clips Report ─────────────────────────────────────────────────────────
+function resetMainView() {
+  mainView = 'gallery';
+  clipsMetadata = null;
+  $('viewToggle').classList.remove('visible');
+  $('viewTabGallery').classList.add('active');
+  $('viewTabReport').classList.remove('active');
+  $('tabBar').style.display           = 'flex';
+  $('reportSearchInput').style.display = 'none';
+  $('galleryView').style.display      = '';
+  $('reportView').classList.remove('active');
+  $('selPanel').style.display         = '';
+}
+
+async function loadMetadata() {
+  try {
+    const res = await api('/api/metadata');
+    clipsMetadata = (res && (res.clips || res.markers_metadata)) ? res : null;
+  } catch (e) {
+    clipsMetadata = null;
+  }
+  if (clipsMetadata) {
+    $('viewToggle').classList.add('visible');
+    if (location.pathname === '/report') switchMainView('report');
+  } else {
+    $('viewToggle').classList.remove('visible');
+    if (mainView === 'report') switchMainView('gallery');
+  }
+}
+
+function switchMainView(tab) {
+  mainView = tab;
+  const isReport = tab === 'report';
+  $('viewTabGallery').classList.toggle('active', !isReport);
+  $('viewTabReport').classList.toggle('active',  isReport);
+  $('tabBar').style.display           = isReport ? 'none' : 'flex';
+  $('reportSearchInput').style.display = isReport ? '' : 'none';
+  $('galleryView').style.display      = isReport ? 'none' : '';
+  $('reportView').classList.toggle('active', isReport);
+  $('selPanel').style.display         = isReport ? 'none' : '';
+  if (isReport) renderReport();
+  const p = new URLSearchParams(location.search);
+  const base = isReport ? '/report' : '/stills';
+  history.replaceState(null, '', base + (p.toString() ? '?' + p.toString() : ''));
+}
+
+// Each entry: [label, fn(get) → string] or null (separator)
+const CLIP_FIELDS = [
+  ['Camera ID',    g => g('Camera #')],
+  ['Camera Model', g => { const m = g('Camera Manufacturer'), t = g('Camera Type'), s = g('Camera Serial #'); return [m, t, s && `(${s})`].filter(Boolean).join(' '); }],
+  ['Codec',        g => { const c = g('Video Codec'), f = g('Format'); return c + (f ? ` (${f})` : ''); }],
+  ['Reel Name',    g => g('Reel Name')],
+  ['Resolution',   g => g('Resolution')],
+  null,
+  ['Lens',         g => g('Lens Type')],
+  ['Focal',        g => { const v = g('Focal Point (mm)'); return v ? v + ' mm' : ''; }],
+  ['Iris',         g => g('Camera Aperture')],
+  ['ND Filter',    g => g('ND Filter')],
+  null,
+  ['Color Space',  g => g('Color Space Notes')],
+  ['ISO',          g => g('ISO')],
+  ['Shutter Angle',g => { const v = g('Shutter Angle'); return v ? v + '°' : ''; }],
+  ['Tint',         g => g('White Balance Tint')],
+  ['Color Temp',   g => { const v = g('White Point (Kelvin)'); return v ? v + ' K' : ''; }],
+  null,
+  ['Framerate',    g => { const fps = g('Camera FPS'), sfps = String(g('FPS') || ''); const base = fps || sfps; if (!base) return ''; return base + (sfps && sfps !== fps ? ` (/${sfps})` : '') + ' fps'; }],
+  ['Duration',     g => { const d = g('Duration'), f = g('Frames'); return d ? d + (f ? ` (${f})` : '') : ''; }],
+  ['Start TC',     g => g('Start TC')],
+  ['End TC',       g => g('End TC')],
+];
+
+function renderMetaFields(container, get) {
+  let group = document.createElement('div');
+  group.className = 'clip-meta-group';
+  container.appendChild(group);
+  CLIP_FIELDS.forEach(entry => {
+    if (!entry) {
+      group = document.createElement('div');
+      group.className = 'clip-meta-group';
+      container.appendChild(group);
+      return;
+    }
+    const [label, fn] = entry;
+    const val = fn(get);
+    if (!val && val !== '0') return;
+    const row = document.createElement('div'); row.className = 'clip-meta-row';
+    const k = document.createElement('span'); k.className = 'clip-meta-key'; k.textContent = label;
+    const v = document.createElement('span'); v.className = 'clip-meta-val'; v.textContent = val; v.title = val;
+    row.appendChild(k); row.appendChild(v);
+    group.appendChild(row);
+  });
+}
+
+function filterReport(q) {
+  const term = q.trim().toLowerCase();
+  $('reportView').querySelectorAll('.clip-card').forEach(c => {
+    c.classList.toggle('hidden', term !== '' && !c.dataset.search.includes(term));
+  });
+}
+
+function renderReport() {
+  const container = $('reportView');
+  const scrollTop = container.scrollTop;
+  container.innerHTML = '';
+  if (!clipsMetadata) return;
+
+  $('reportSearchInput').value = '';
+  filterReport('');
+
+  const clips   = clipsMetadata.clips || [];
+  const markers = clipsMetadata.markers_metadata || {};
+
+  // Build marker map: clip_name → markers sorted by timeline_frame
+  const markersByClip = {};
+  Object.values(markers).forEach(m => {
+    if (!markersByClip[m.clip_name]) markersByClip[m.clip_name] = [];
+    markersByClip[m.clip_name].push(m);
+  });
+  Object.values(markersByClip).forEach(arr =>
+    arr.sort((a, b) => (a.timeline_frame || 0) - (b.timeline_frame || 0))
+  );
+
+  if (clips.length) {
+    clips.slice()
+      .sort((a, b) => (a.start_frame || 0) - (b.start_frame || 0))
+      .forEach(clip => {
+        const clipMarkers = markersByClip[clip.clip_name] || [];
+        buildClipCard(container, clip.clip_name, clip.metadata || {}, clip.clip_properties || {}, clipMarkers, null);
+      });
+  } else {
+    // markers-only fallback (old format)
+    const groups = new Map();
+    Object.values(markers)
+      .sort((a, b) => (a.timeline_frame || 0) - (b.timeline_frame || 0))
+      .forEach(m => {
+        if (!groups.has(m.clip_name)) groups.set(m.clip_name, []);
+        groups.get(m.clip_name).push(m);
+      });
+    groups.forEach((stills, clipName) => {
+      buildClipCard(container, clipName, stills[0].metadata || {}, stills[0].clip_properties || {},
+                    stills, stills[0].source_resolution || '');
+    });
+  }
+
+  container.scrollTop = scrollTop;
+}
+
+function buildClipCard(container, clipName, meta, props, allMarkers, srcRes) {
+  const prefIdx     = Math.min(getThumbPref(clipName), allMarkers.length - 1);
+  const firstMarker = allMarkers[Math.max(0, prefIdx)] || null;
+  const card = document.createElement('div');
+  card.className = 'clip-card';
+
+  // ── Thumbnail (first marker only)
+  const thumbDiv = document.createElement('div');
+  thumbDiv.className = 'clip-card-thumb';
+  if (firstMarker && firstMarker.exported_filename) {
+    const img = document.createElement('img');
+    img.src = `/api/image/${encodeURIComponent(firstMarker.exported_filename)}`;
+    img.loading = 'lazy'; img.alt = clipName; img.draggable = false;
+    thumbDiv.appendChild(img);
+    const hov = document.createElement('div'); hov.className = 'thumb-hover';
+    thumbDiv.appendChild(hov);
+  } else {
+    thumbDiv.classList.add('clip-card-no-thumb');
+  }
+  card.appendChild(thumbDiv);
+
+  // ── Summary metadata (key fields only)
+  const body = document.createElement('div');
+  body.className = 'clip-card-body';
+  const get = k => {
+    const v = meta[k] !== undefined ? meta[k] : (props[k] !== undefined ? props[k] : '');
+    return v === null ? '' : String(v).trim();
+  };
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'clip-card-name';
+
+  const nameText = document.createElement('span');
+  nameText.className = 'clip-card-name-text';
+  nameText.textContent = clipName.replace(/\.[^.]+$/, '');
+  nameText.title = clipName;
+  nameEl.appendChild(nameText);
+
+  const scene = get('Scene'), shot = get('Shot'), take = get('Take'),
+        good  = get('Good Take'), cam = get('Camera #');
+  if (scene || shot || take || cam) {
+    const label = document.createElement('span');
+    label.className = 'clip-card-label';
+    let txt = '';
+    if (scene) txt += scene;
+    if (shot)  txt += (txt ? '/' : '') + shot;
+    if (take)  txt += (txt ? '-' : '') + take;
+    if (good === '1') txt += '\u2605';
+    if (cam)   txt += ' (' + cam + ')';
+    label.textContent = txt;
+    nameEl.appendChild(label);
+  }
+
+  body.appendChild(nameEl);
+  const grid = document.createElement('div');
+  grid.className = 'clip-meta-grid';
+  renderMetaFields(grid, get);
+  body.appendChild(grid);
+
+  const notes = document.createElement('div');
+  notes.className = 'clip-card-notes';
+  [['Comments', 'Comments'], ['Reviewer Notes', 'Reviewers Notes']].forEach(([label, key]) => {
+    const box = document.createElement('div'); box.className = 'clip-card-note';
+    const lbl = document.createElement('div'); lbl.className = 'clip-card-note-label'; lbl.textContent = label;
+    const val = document.createElement('div'); val.className = 'clip-card-note-val'; val.textContent = get(key);
+    box.appendChild(lbl); box.appendChild(val);
+    notes.appendChild(box);
+  });
+  body.appendChild(notes);
+  card.appendChild(body);
+
+  // ── Searchable text (clip name + key metadata fields)
+  const searchFields = ['Scene','Shot','Take','Camera #','Lens Type','Focal Point (mm)','Roll Card #','Shoot Day'];
+  const searchStr = [clipName, ...searchFields.map(k => get(k))].join(' ').toLowerCase();
+  card.dataset.search = searchStr;
+
+  // ── Click → detail panel
+  const cardIdx = container.querySelectorAll('.clip-card').length;
+  card.onclick = () => openClipDetail(clipName, meta, props, allMarkers, srcRes, 0, cardIdx);
+  card.style.cursor = 'pointer';
+
+  container.appendChild(card);
+}
+
+// ─── Clip detail panel ────────────────────────────────────────────────────
+function updateClipDetailImage() {
+  const imgWrap = $('clipDetailImg');
+  const existing = imgWrap.querySelector('img, .clip-card-no-thumb');
+  if (existing) existing.remove();
+
+  const m = clipDetailMarkers[clipDetailIdx] || null;
+  if (m && m.exported_filename) {
+    const img = document.createElement('img');
+    img.src = `/api/image/${encodeURIComponent(m.exported_filename)}`;
+    imgWrap.insertBefore(img, $('cdPrev'));
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'clip-card-no-thumb'; ph.textContent = 'no still';
+    imgWrap.insertBefore(ph, $('cdPrev'));
+  }
+
+  const total = clipDetailMarkers.length;
+  $('cdPrev').disabled = clipDetailIdx === 0;
+  $('cdNext').disabled = clipDetailIdx >= total - 1;
+  $('cdCounter').textContent = total > 1 ? `${clipDetailIdx + 1} / ${total}` : '';
+
+  if (clipDetailClipName) saveThumbPref(clipDetailClipName, clipDetailIdx);
+
+  // Update card thumbnail to match chosen still
+  const cards = Array.from($('reportView').querySelectorAll('.clip-card'));
+  const card  = cards[clipDetailCardIdx];
+  if (card) {
+    const m = clipDetailMarkers[clipDetailIdx];
+    const img = card.querySelector('.clip-card-thumb img');
+    if (img && m && m.exported_filename)
+      img.src = `/api/image/${encodeURIComponent(m.exported_filename)}`;
+  }
+}
+
+function openClipDetail(clipName, meta, props, allMarkers, srcRes, startIdx, cardIdx) {
+  clipDetailMarkers  = allMarkers;
+  clipDetailClipName = clipName;
+  clipDetailCardIdx  = cardIdx ?? clipDetailCardIdx;
+  clipDetailIdx      = (startIdx != null && startIdx > 0) ? startIdx : getThumbPref(clipName);
+
+  // Active card: highlight + scroll to top of reportView
+  const cards = Array.from($('reportView').querySelectorAll('.clip-card'));
+  cards.forEach(c => c.classList.remove('active'));
+  const activeCard = cards[clipDetailCardIdx];
+  if (activeCard) {
+    activeCard.classList.add('active');
+    const rv = $('reportView');
+    rv.scrollTo({ top: activeCard.offsetTop - rv.offsetTop - 10, behavior: 'smooth' });
+  }
+
+  updateClipDetailImage();
+
+  // Title
+  $('clipDetailTitle').textContent = clipName.replace(/\.[^.]+$/, '');
+
+  // All metadata fields
+  const fields = $('clipDetailFields');
+  fields.innerHTML = '';
+  const allMeta = Object.assign({}, props, meta);
+  const getD = k => { const v = allMeta[k] !== undefined ? allMeta[k] : ''; return v === null ? '' : String(v).trim(); };
+  renderMetaFields(fields, getD);
+  // All remaining raw fields
+  const coveredKeys = new Set(['Camera #','Camera Manufacturer','Camera Type','Camera Serial #','Video Codec','Format',
+    'Reel Name','Resolution','Lens Type','Focal Point (mm)','Camera Aperture','ND Filter','Color Space Notes','ISO',
+    'Shutter Angle','White Balance Tint','White Point (Kelvin)','Camera FPS','FPS','Duration','Frames','Start TC','End TC',
+    'Scene','Shot','Take','Good Take']);
+  const remaining = Object.entries(allMeta)
+    .filter(([k, v]) => !coveredKeys.has(k) && v !== null && String(v).trim() !== '')
+    .sort(([a],[b]) => a.localeCompare(b));
+  if (remaining.length) {
+    const sep = document.createElement('div'); sep.className = 'clip-meta-sep'; fields.appendChild(sep);
+    remaining.forEach(([key, raw]) => {
+      const val = String(raw).trim();
+      const row = document.createElement('div'); row.className = 'clip-meta-row';
+      const k = document.createElement('span'); k.className = 'clip-meta-key'; k.textContent = key;
+      const v = document.createElement('span'); v.className = 'clip-meta-val'; v.textContent = val; v.title = val;
+      row.appendChild(k); row.appendChild(v);
+      fields.appendChild(row);
+    });
+  }
+
+  $('clipDetail').classList.add('open');
+  $('reportView').classList.add('detail-open');
+}
+
+function closeClipDetail() {
+  $('clipDetail').classList.remove('open');
+  $('reportView').classList.remove('detail-open');
+  $('reportView').querySelectorAll('.clip-card.active').forEach(c => c.classList.remove('active'));
+  clipDetailCardIdx = -1;
 }
 
 // ─── Folder browser ────────────────────────────────────────────────────────
@@ -1429,17 +2141,58 @@ function loadImgEl(url) {
 // ─── Watermark modal ───────────────────────────────────────────────────────
 let wmPreviewTimer = null;
 
-function openWm()  { switchSettingsTab('wm'); $('wmModal').classList.add('open'); renderWmPreview(); }
-function closeWm() { $('wmModal').classList.remove('open'); }
-function openCS()  { switchSettingsTab('cs'); $('wmModal').classList.add('open'); generateCSPreview(); }
-function closeCS() { $('wmModal').classList.remove('open'); }
+function openWm()   { switchSettingsTab('wm');   $('wmModal').classList.add('open'); renderWmPreview(); }
+function closeWm()  { $('wmModal').classList.remove('open'); }
+function openCS()   { switchSettingsTab('cs');   $('wmModal').classList.add('open'); generateCSPreview(); }
+function closeCS()  { $('wmModal').classList.remove('open'); }
+function openProd() { switchSettingsTab('prod'); $('wmModal').classList.add('open'); }
+
+// ─── Production data ──────────────────────────────────────────────────────
+const PROD_FIELD_IDS = ['project','production','director','dop','dit','dataManager','ac1','ac2'];
+
+function loadProdData() {
+  try { return JSON.parse(localStorage.getItem('stills-production') || '{}'); } catch { return {}; }
+}
+function saveProdData() {
+  const data = {};
+  PROD_FIELD_IDS.forEach(id => { data[id] = $('prod_' + id).value.trim(); });
+  const img = $('prodLogoImg');
+  if (img.style.display !== 'none' && img.src) data.logo = img.src;
+  localStorage.setItem('stills-production', JSON.stringify(data));
+}
+function initProdForm() {
+  const data = loadProdData();
+  PROD_FIELD_IDS.forEach(id => { $('prod_' + id).value = data[id] || ''; });
+  if (data.logo) {
+    $('prodLogoImg').src = data.logo;
+    $('prodLogoImg').style.display = 'block';
+    $('prodLogoHint').style.display = 'none';
+  }
+}
+function setLogoFromFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    $('prodLogoImg').src = e.target.result;
+    $('prodLogoImg').style.display = 'block';
+    $('prodLogoHint').style.display = 'none';
+    saveProdData();
+  };
+  reader.readAsDataURL(file);
+}
+function clearLogo() {
+  $('prodLogoImg').src = '';
+  $('prodLogoImg').style.display = 'none';
+  $('prodLogoHint').style.display = '';
+  saveProdData();
+}
 
 function switchSettingsTab(tab) {
-  const isCS = tab === 'cs';
-  $('setPaneWm').style.display = isCS ? 'none' : 'flex';
-  $('setPaneCS').style.display = isCS ? 'flex' : 'none';
-  $('setTabWm').classList.toggle('active', !isCS);
-  $('setTabCS').classList.toggle('active',  isCS);
+  const map = { wm: ['setTabWm','setPaneWm'], cs: ['setTabCS','setPaneCS'], prod: ['setTabProd','setPaneProd'] };
+  Object.entries(map).forEach(([t, [tabId, paneId]]) => {
+    $(tabId).classList.toggle('active', t === tab);
+    $(paneId).style.display = t === tab ? 'flex' : 'none';
+  });
 }
 
 function wmQueuePreview() {
@@ -1662,8 +2415,29 @@ $('addTabBtn').onclick      = addNewSel;
 $('clearSelBtn').onclick    = clearSel;
 $('exportBtn').onclick      = exportPDF;
 $('csBtn').onclick   = openCS;
-$('setTabWm').onclick = () => { switchSettingsTab('wm'); renderWmPreview(); };
-$('setTabCS').onclick = () => { switchSettingsTab('cs'); generateCSPreview(); };
+$('setTabWm').onclick   = () => { switchSettingsTab('wm');   renderWmPreview(); };
+$('setTabCS').onclick   = () => { switchSettingsTab('cs');   generateCSPreview(); };
+$('setTabProd').onclick = () => switchSettingsTab('prod');
+$('prodDone').onclick   = closeWm;
+$('settingsHeaderBtn').onclick  = openProd;
+$('exportHeaderBtn').onclick    = openExportModal;
+
+// Production form — autosave on change
+PROD_FIELD_IDS.forEach(id => $('prod_' + id).addEventListener('input', saveProdData));
+
+// Logo drop zone
+const logoDrop = $('prodLogoDrop');
+logoDrop.addEventListener('click', () => $('prodLogoInput').click());
+logoDrop.addEventListener('dragover',  e => { e.preventDefault(); logoDrop.classList.add('drag-over'); });
+logoDrop.addEventListener('dragleave', () => logoDrop.classList.remove('drag-over'));
+logoDrop.addEventListener('drop', e => {
+  e.preventDefault(); logoDrop.classList.remove('drag-over');
+  setLogoFromFile(e.dataTransfer.files[0]);
+});
+$('prodLogoInput').addEventListener('change', e => setLogoFromFile(e.target.files[0]));
+$('prodLogoClear').addEventListener('click',  e => { e.stopPropagation(); clearLogo(); });
+
+initProdForm();
 $('csJpgBtn').onclick = () => exportCS('jpg');
 $('csPngBtn').onclick = () => exportCS('png');
 $('csPdfBtn').onclick = () => exportCS('pdf');
@@ -1677,6 +2451,15 @@ $('csRatio').addEventListener('change', () => {
   csQueuePreview();
 });
 $('csWmEnabled').addEventListener('change', csQueuePreview);
+
+// Report search
+$('reportSearchInput').addEventListener('input', e => filterReport(e.target.value));
+
+// Clip detail panel
+$('clipDetailClose').onclick = closeClipDetail;
+$('clipDetail').onclick = e => { if (e.target === $('clipDetail')) closeClipDetail(); };
+$('cdPrev').onclick = e => { e.stopPropagation(); if (clipDetailIdx > 0) { clipDetailIdx--; updateClipDetailImage(); } };
+$('cdNext').onclick = e => { e.stopPropagation(); if (clipDetailIdx < clipDetailMarkers.length - 1) { clipDetailIdx++; updateClipDetailImage(); } };
 
 // Watermark modal
 $('wmBtn').onclick   = openWm;
@@ -1752,6 +2535,599 @@ $('lbImg').addEventListener('wheel', e => {
   }
 }, { passive: false });
 
+// ─── Export modal ────────────────────────────────────────────────────────
+const EXPORT_OPT_IDS = ['expOptClipsReport','expOptShootReport','expOptALE','expOptCSV','expOptQCReport'];
+
+function loadExportOpts() { try { return JSON.parse(localStorage.getItem('stills-export-opts') || '{}'); } catch { return {}; } }
+function saveExportOpts() {
+  const opts = {};
+  EXPORT_OPT_IDS.forEach(id => { opts[id] = $(id).checked; });
+  localStorage.setItem('stills-export-opts', JSON.stringify(opts));
+}
+function openExportModal() {
+  const opts = loadExportOpts();
+  EXPORT_OPT_IDS.forEach(id => { $(id).checked = opts[id] ?? false; });
+  $('exportModal').classList.add('open');
+}
+function closeExportModal() { $('exportModal').classList.remove('open'); }
+
+function downloadText(content, filename, mime) {
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([content], { type: mime })),
+    download: filename
+  });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function exportALE() {
+  if (!clipsMetadata?.clips?.length) return;
+  const clips = clipsMetadata.clips;
+  const keySet = new Set();
+  clips.forEach(c => {
+    Object.keys(c.metadata || {}).forEach(k => keySet.add(k));
+    Object.keys(c.clip_properties || {}).forEach(k => keySet.add(k));
+  });
+  const keys = [...keySet].sort();
+  const T = '\t', NL = '\n';
+  let ale = `Heading${NL}FIELD_DELIM${T}TABS${NL}VIDEO_FORMAT${T}${clipsMetadata.timeline || ''}${NL}${NL}Column${NL}`;
+  ale += ['Name', ...keys].join(T) + NL + NL + 'Data' + NL;
+  clips.forEach(c => {
+    const m = Object.assign({}, c.clip_properties || {}, c.metadata || {});
+    ale += [c.clip_name || '', ...keys.map(k => String(m[k] ?? '').replace(/\t/g,' '))].join(T) + NL;
+  });
+  downloadText(ale, (clipsMetadata.timeline || 'export') + '.ale', 'text/plain');
+}
+
+function exportCSV() {
+  if (!clipsMetadata?.clips?.length) return;
+  const clips = clipsMetadata.clips;
+  const keySet = new Set();
+  clips.forEach(c => {
+    Object.keys(c.metadata || {}).forEach(k => keySet.add(k));
+    Object.keys(c.clip_properties || {}).forEach(k => keySet.add(k));
+  });
+  const keys = [...keySet].sort();
+  const esc = v => { const s = String(v ?? ''); return /[,"\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; };
+  let csv = ['clip_name', ...keys].map(esc).join(',') + '\n';
+  clips.forEach(c => {
+    const m = Object.assign({}, c.clip_properties || {}, c.metadata || {});
+    csv += [c.clip_name || '', ...keys.map(k => esc(m[k] ?? ''))].join(',') + '\n';
+  });
+  downloadText(csv, (clipsMetadata.timeline || 'export') + '.csv', 'text/csv');
+}
+
+function pdfParseCard(name){const m=String(name||'').match(/^([A-Z](?:_\d{4}|\d+))C\d+/);return m?m[1]:null;}
+function pdfParseCamLetter(name){const m=String(name||'').match(/^([A-Z])(?:_\d{4}|\d+)C\d+/);return m?m[1]:null;}
+function pdfTcToSec(tc,fps=24){
+  if(!tc)return 0;const p=String(tc).trim().split(':').map(Number);
+  if(p.length===4)return p[0]*3600+p[1]*60+p[2]+p[3]/fps;
+  if(p.length===3)return p[0]*3600+p[1]*60+p[2];
+  if(p.length===2)return p[0]*60+p[1];return parseFloat(tc)||0;
+}
+function pdfFmtDur(s){
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60);
+  if(h)return`${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')} h`;
+  if(m)return`${m}:${String(sec).padStart(2,'0')} min`;return`${sec} sec`;
+}
+async function imgToBase64(url){
+  return new Promise(resolve=>{
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);try{resolve({data:c.toDataURL('image/jpeg',0.8),w:img.naturalWidth,h:img.naturalHeight});}catch{resolve(null);}};
+    img.onerror=()=>resolve(null);img.src=url;
+  });
+}
+function addThumb(doc,th,x,y,maxW,maxH){
+  if(!th?.data)return;
+  const r=th.w/th.h,dh=Math.min(maxH,(maxW)/r),dw=dh*r;
+  try{doc.addImage(th.data,'JPEG',x+(maxW-dw)/2,y+(maxH-dh)/2,dw,dh,'','FAST');}catch(e){}
+}
+
+function exportShootReport() {
+  if (!clipsMetadata?.clips?.length) { alert('No clips data available.'); return; }
+  const { jsPDF } = window.jspdf;
+  const clips = clipsMetadata.clips;
+  const timeline = clipsMetadata.timeline || 'Report';
+  const prod = loadProdData();
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const W=210, H=297, ML=15, MR=15, MT=15, MB=12, CW=180;
+  let y = MT;
+
+  const gm=(c,k)=>{const v=c.metadata?.[k]??c.clip_properties?.[k]??'';return v===null?'':String(v).trim();};
+  const tcToSec=pdfTcToSec, fmtDur=pdfFmtDur;
+  const T=(s,x,yy,o)=>doc.text(String(s??''),x,yy,o);
+  function hline(x1,x2,yy,lw=0.2,g=180){doc.setDrawColor(g,g,g);doc.setLineWidth(lw);doc.line(x1,yy,x2,yy);}
+  function checkY(n){if(y+n>H-MB){doc.addPage();y=MT;}}
+
+  // ── Aggregate ──────────────────────────────────────────────────────
+  let totalDur=0,totalFrames=0,selClips=0,selFrames=0,selDur=0;
+  const camMap={},reelMap={},sceneMap={};
+  clips.forEach(clip=>{
+    const camRaw=gm(clip,'Camera #');
+    const cardFromName=pdfParseCard(clip.clip_name);
+    const cam=camRaw||(cardFromName?pdfParseCamLetter(clip.clip_name):null)||'?';
+    const reel=gm(clip,'Roll Card #')||gm(clip,'Reel Name')||gm(clip,'Magazine')||cardFromName||'?';
+    const scene=gm(clip,'Scene')||'?';
+    const shot=gm(clip,'Shot'), take=gm(clip,'Take'), good=gm(clip,'Good Take');
+    const fps=parseFloat(gm(clip,'Camera FPS'))||24;
+    const dur=tcToSec(gm(clip,'Duration'),fps);
+    const frames=Math.round(dur*fps);
+    const stc=gm(clip,'Start TC'), etc=gm(clip,'End TC');
+    totalDur+=dur;totalFrames+=frames;
+    if(good==='1'){selClips++;selFrames+=frames;selDur+=dur;}
+    if(!camMap[cam])camMap[cam]={clips:0,dur:0,frames:0};
+    camMap[cam].clips++;camMap[cam].dur+=dur;camMap[cam].frames+=frames;
+    const codec=gm(clip,'Video Codec');
+    if(!reelMap[reel])reelMap[reel]={cam,clips:0,dur:0,frames:0,codec,startTC:stc,endTC:etc};
+    reelMap[reel].clips++;reelMap[reel].dur+=dur;reelMap[reel].frames+=frames;if(etc)reelMap[reel].endTC=etc;
+    if(!sceneMap[scene])sceneMap[scene]={shots:{}};
+    if(!sceneMap[scene].shots[shot])sceneMap[scene].shots[shot]={takes:[],goodTakes:0,cams:new Set(),dur:0};
+    if(!sceneMap[scene].shots[shot].takes.includes(take))sceneMap[scene].shots[shot].takes.push(take);
+    sceneMap[scene].shots[shot].dur+=dur;
+    sceneMap[scene].shots[shot].cams.add(cam);
+    if(good==='1')sceneMap[scene].shots[shot].goodTakes++;
+  });
+
+  // ── Drawing helpers ────────────────────────────────────────────────
+  const RH=4.8;
+  function secTitle(title,yy){
+    doc.setFont('helvetica','italic');doc.setFontSize(7.5);doc.setTextColor(150,150,150);
+    T(title,ML+2,yy+3.5);hline(ML,ML+CW,yy+5,0.2,215);
+  }
+  const colX=(c,cx)=>c.r?cx+c.w-1:c.c?cx+c.w/2:cx+1;
+  const colA=(c)=>c.r?'right':c.c?'center':'left';
+  function tblHeader(cols,yy){
+    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(60,60,60);
+    let cx=ML;cols.forEach(c=>{T(c.v,colX(c,cx),yy+RH-1,{align:colA(c)});cx+=c.w;});
+    hline(ML,ML+CW,yy+RH,0.45,120);return RH;
+  }
+  function tblRow(cols,yy,sep=true){
+    let cx=ML;cols.forEach(c=>{
+      doc.setFont('helvetica',c.b?'bold':'normal');doc.setFontSize(7.5);
+      doc.setTextColor(c.b?25:60,c.b?25:60,c.b?25:60);
+      T(c.v,colX(c,cx),yy+RH-1,{align:colA(c)});cx+=c.w;
+    });if(sep)hline(ML,ML+CW,yy+RH,0.15,225);return RH;
+  }
+  function tblTotal(cols,yy){
+    hline(ML,ML+CW,yy,0.45,120);
+    let cx=ML;cols.forEach(c=>{
+      doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(20,20,20);
+      T(c.v,c.r?cx+c.w-1:cx+1,yy+RH-1,{align:c.r?'right':'left'});cx+=c.w;
+    });return RH;
+  }
+  function box(yy,h){doc.setDrawColor(200,200,200);doc.setLineWidth(0.3);doc.rect(ML,yy,CW,h);}
+
+  // ══════════════════════════════════════════════════════════════════
+  // 1. HEADER
+  // ══════════════════════════════════════════════════════════════════
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(20,20,20);T(timeline,ML,y+7);
+  if(prod.logo){try{doc.addImage(prod.logo,'PNG',W-MR-32,y,32,16,'','FAST');}catch(e){}}
+  y+=11;
+  if(prod.production){doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(130,130,130);T(prod.production.toUpperCase(),ML,y);y+=5;}
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  y+=10;
+
+  // ══════════════════════════════════════════════════════════════════
+  // 2. PRODUCTION INFO
+  // ══════════════════════════════════════════════════════════════════
+  const pL=[['Shooting Day',timeline],['Director',prod.director],['Cinematographer',prod.dop],
+    ['1st AC',prod.ac1],['2nd AC',prod.ac2],['DIT',prod.dit],['Data Manager',prod.dataManager]].filter(([,v])=>v);
+  const pR=[['Production',prod.production],['Project',prod.project]].filter(([,v])=>v);
+  const maxPR=Math.max(pL.length,pR.length,1);
+  const piH=7+maxPR*4.5+4;
+  checkY(piH+4);y+=4;
+  const c2x=ML+CW/2;
+  pL.forEach(([k,v],i)=>{const ry=y+i*4.5;doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T(k+':',ML+3,ry);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);T(v,ML+46,ry);});
+  pR.forEach(([k,v],i)=>{const ry=y+i*4.5;doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T(k+':',c2x+3,ry);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);T(v,c2x+26,ry);});
+  y+=maxPR*4.5+6;
+
+  // ══════════════════════════════════════════════════════════════════
+  // 3. CLIPS OVERVIEW
+  // ══════════════════════════════════════════════════════════════════
+  const camE=Object.entries(camMap).sort();
+  const ovH=7+(camE.length+3)*RH+3;
+  checkY(ovH+4);secTitle('Clips Overview',y);y+=7;
+  const oC=[{v:'',w:CW-68},{v:'Clips',w:22,r:true},{v:'Frames',w:23,r:true},{v:'Duration',w:23,r:true}];
+  y+=tblHeader(oC,y);
+  camE.forEach(([cam,d],i)=>{checkY(RH+2);y+=tblRow([{v:`Camera ${cam}`,w:CW-68},{v:String(d.clips),w:22,r:true},{v:String(d.frames),w:23,r:true},{v:fmtDur(d.dur),w:23,r:true}],y,i<camE.length-1);});
+  y+=tblTotal([{v:'Total',w:CW-68},{v:String(clips.length),w:22,r:true},{v:String(totalFrames),w:23,r:true},{v:fmtDur(totalDur),w:23,r:true}],y);
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(180,180,180);
+  y+=tblRow([{v:'Selected Takes',w:CW-68},{v:String(selClips),w:22,r:true},{v:String(selFrames),w:23,r:true},{v:fmtDur(selDur),w:23,r:true}],y,false)+4;
+
+  // ══════════════════════════════════════════════════════════════════
+  // 4. CARDS / REELS
+  // ══════════════════════════════════════════════════════════════════
+  const reelE=Object.entries(reelMap).sort();
+  const rlH=7+(reelE.length+1)*RH+3;
+  checkY(rlH+4);secTitle('Cards / Reels',y);y+=7;
+  const rC=[{v:'Card',w:40},{v:'Cam',w:16,c:true},{v:'Clips',w:18,c:true},{v:'Codec',w:42},{v:'Frames',w:24,r:true},{v:'Duration',w:CW-140,r:true}];
+  y+=tblHeader(rC,y);
+  reelE.forEach(([reel,d],i)=>{checkY(RH+2);y+=tblRow([{v:reel,w:40,b:true},{v:d.cam,w:16,c:true},{v:String(d.clips),w:18,c:true},{v:d.codec||'',w:42},{v:String(d.frames),w:24,r:true},{v:fmtDur(d.dur),w:CW-140,r:true}],y,i<reelE.length-1);});
+  y+=4;
+
+  // ══════════════════════════════════════════════════════════════════
+  // 5. DETAILS BY SCENE (one row per shot, aggregated takes)
+  // ══════════════════════════════════════════════════════════════════
+  const sortN=s=>isNaN(s)?s:Number(s);
+  const sceneE=Object.entries(sceneMap).sort((a,b)=>sortN(a[0])<sortN(b[0])?-1:1);
+  checkY(14);secTitle('Details by Scene',y);y+=7;
+  const sC=[{v:'Scene',w:16},{v:'Shot',w:16},{v:'Takes',w:CW-96,r:true},{v:'Good',w:18,r:true},{v:'Camera(s)',w:22,r:true},{v:'Duration',w:24,r:true}];
+  y+=tblHeader(sC,y);
+  sceneE.forEach(([scene,d])=>{
+    const shotE=Object.entries(d.shots).sort();
+    shotE.forEach(([shot,s],si)=>{
+      checkY(RH+2);
+      const takes=s.takes.slice().sort((a,b)=>sortN(a)-sortN(b)).join(', ');
+      const good=s.goodTakes?String(s.goodTakes):'';
+      const cams=[...s.cams].sort().join(', ');
+      y+=tblRow([{v:si===0?scene:'',w:16,b:si===0},{v:shot,w:16},{v:takes,w:CW-96,r:true},{v:good,w:18,r:true},{v:cams,w:22,r:true},{v:fmtDur(s.dur),w:24,r:true}],y,true);
+    });
+    hline(ML,ML+CW,y,0.3,190);
+  });
+
+  // ── Footer ────────────────────────────────────────────────────────
+  const np=doc.getNumberOfPages();
+  for(let i=1;i<=np;i++){
+    doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(190,190,190);
+    hline(ML,W-MR,H-MB+2,0.2,210);T('Be4Post - Shoot Report',ML,H-MB+5);T(`Generated ${today}`,ML+CW/2,H-MB+5,{align:'center'});T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
+  }
+  doc.save(`${timeline}_shoot_report.pdf`);
+}
+
+async function exportQCReport() {
+  if (!clipsMetadata?.clips?.length) { alert('No clips data available.'); return; }
+  const { jsPDF } = window.jspdf;
+  const clips = clipsMetadata.clips.slice().sort((a,b)=>(a.start_frame||0)-(b.start_frame||0));
+  const allMarkers = clipsMetadata.markers_metadata || {};
+  const timeline = clipsMetadata.timeline || 'QC Report';
+  const prod = loadProdData();
+
+  const gm=(c,k)=>{const v=c.metadata?.[k]??c.clip_properties?.[k]??'';return v===null?'':String(v).trim();};
+
+  // Marker map for thumbnails only
+  const markersByClip={};
+  Object.values(allMarkers).forEach(m=>{
+    if(!markersByClip[m.clip_name])markersByClip[m.clip_name]=[];
+    markersByClip[m.clip_name].push(m);
+  });
+  Object.values(markersByClip).forEach(arr=>arr.sort((a,b)=>(a.timeline_frame||0)-(b.timeline_frame||0)));
+
+  // Stats
+  let totalDur=0,circled=0,qcCount=0;
+  const camSet=new Set(),reelSet=new Set(),sceneSet=new Set();
+  clips.forEach(clip=>{
+    const fps=parseFloat(gm(clip,'Camera FPS'))||24;
+    totalDur+=pdfTcToSec(gm(clip,'Duration'),fps);
+    if(gm(clip,'Good Take')==='1')circled++;
+    if(gm(clip,'Reviewers Notes'))qcCount++;
+    camSet.add(gm(clip,'Camera #')||pdfParseCamLetter(clip.clip_name)||'?');
+    reelSet.add(gm(clip,'Roll Card #')||gm(clip,'Reel Name')||gm(clip,'Magazine')||pdfParseCard(clip.clip_name)||'?');
+    sceneSet.add(gm(clip,'Scene')||'?');
+  });
+
+  // Fetch thumbnails
+  const thumbCache={};
+  for(const clip of clips){
+    const ms=markersByClip[clip.clip_name]||[];
+    const idx=Math.min(getThumbPref(clip.clip_name),ms.length-1);
+    const m=ms[Math.max(0,idx)];
+    if(m?.exported_filename)
+      thumbCache[clip.clip_name]=await imgToBase64(`/api/image/${encodeURIComponent(m.exported_filename)}`);
+  }
+
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297,ML=15,MR=15,MT=15,MB=12,CW=180;
+  let y=MT;
+
+  const T=(s,x,yy,o)=>doc.text(String(s??''),x,yy,o);
+  const hline=(x1,x2,yy,lw=0.2,g=180)=>{doc.setDrawColor(g,g,g);doc.setLineWidth(lw);doc.line(x1,yy,x2,yy);};
+  const checkY=(n)=>{if(y+n>H-MB){doc.addPage();y=MT;}};
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // ── Header ───────────────────────────────────────────────────────────────
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(20,20,20);T(timeline,ML,y+7);
+  if(prod.logo){try{doc.addImage(prod.logo,'PNG',W-MR-32,y,32,16,'','FAST');}catch(e){}}
+  y+=12;
+  if(prod.production){doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(130,130,130);T(prod.production.toUpperCase(),ML,y);y+=5;}
+  y+=10;
+
+  // ── Production info (same layout as shoot report) ────────────────────────
+  const pL=[['Shooting Day',timeline],['Director',prod.director],['Cinematographer',prod.dop],
+    ['1st AC',prod.ac1],['2nd AC',prod.ac2],['DIT',prod.dit],['Data Manager',prod.dataManager]].filter(([,v])=>v);
+  const pR=[['Production',prod.production],['Project',prod.project]].filter(([,v])=>v);
+  const maxPR=Math.max(pL.length,pR.length,1);
+  const c2x=ML+CW/2;
+  pL.forEach(([k,v],i)=>{const ry=y+i*4.5;doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T(k+':',ML+3,ry);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);T(v,ML+46,ry);});
+  pR.forEach(([k,v],i)=>{const ry=y+i*4.5;doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T(k+':',c2x+3,ry);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);T(v,c2x+26,ry);});
+  y+=maxPR*4.5+8;
+
+  // ── Summary stats (style: gray label / bold value, same as prod info) ────
+  const scenes=[...sceneSet].filter(s=>s!=='?').sort().join(', ');
+  const cams=[...camSet].filter(c=>c!=='?').sort().join(', ');
+  const KL=ML+3, KW2=43, VX=ML+KW2;
+  const statRow=(k,v)=>{checkY(5);doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T(k+':',KL,y);doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(25,25,25);T(v,VX,y);y+=4.5;};
+  statRow('Cards',String(reelSet.size));
+  statRow('Clips',String(clips.length));
+  statRow('Good Takes',String(circled));
+  statRow('Duration',pdfFmtDur(totalDur));
+  statRow('Cameras',cams||'—');
+  if(scenes){checkY(5);doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T('Sequences:',KL,y);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);const sw=doc.splitTextToSize(scenes,CW-KW2-6);sw.forEach((l,i)=>{if(i>0){checkY(5);y+=4.5;}T(l,VX,y);});y+=4.5;}
+  if(qcCount){statRow('QC notes',String(qcCount)+' clips');}
+  y+=8;
+
+  // ── Clip table ───────────────────────────────────────────────────────────
+  // Columns: TW=thumb, IW=clip info, SW=slate, ComW=comments, QW=reviewer notes
+  const TW=36,IW=42,SW=26,ComW=34,QW=CW-TW-IW-SW-ComW; // 42mm
+
+  // Table header
+  doc.setFillColor(30,30,30);doc.rect(ML,y,CW,6,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(220,220,220);
+  T('Clip',ML+TW+2,y+4.2);
+  T('Slate',ML+TW+IW+2,y+4.2);
+  T('Comments',ML+TW+IW+SW+2,y+4.2);
+  T('QC Notes',ML+TW+IW+SW+ComW+2,y+4.2);
+  y+=6;
+
+  const LINE_H=4.2,THUMB_H=20,PAD=2;
+  clips.forEach(clip=>{
+    const fps=parseFloat(gm(clip,'Camera FPS'))||24;
+    const clipName=(clip.clip_name||'').replace(/\.[^.]+$/,'');
+    const scene=gm(clip,'Scene'),shot=gm(clip,'Shot'),take=gm(clip,'Take');
+    const good=gm(clip,'Good Take')==='1';
+    const slate=`${scene}/${shot} - ${take}`.replace(/^\/\s*-\s*/,'');
+    const inTC=gm(clip,'Start TC'),outTC=gm(clip,'End TC');
+    const dur=pdfFmtDur(pdfTcToSec(gm(clip,'Duration'),fps));
+    const comment=gm(clip,'Comments');
+    const qcNote=gm(clip,'Reviewers Notes');
+
+    const comLines=comment?doc.splitTextToSize(comment,ComW-3).length:0;
+    const qcLines=qcNote?doc.splitTextToSize(qcNote,QW-3).length:0;
+    const textLines=4;
+    const rowH=Math.max(THUMB_H,textLines*LINE_H,comLines*LINE_H,qcLines*LINE_H)+PAD*2;
+
+    checkY(rowH+1);
+    const rowY=y;
+    hline(ML,ML+CW,rowY,0.15,230);
+
+    // Thumbnail
+    const th=thumbCache[clip.clip_name];
+    if(th)addThumb(doc,th,ML+1,rowY+PAD,TW-2,THUMB_H);
+
+    // Clip info
+    const ix=ML+TW+2,iy=rowY+PAD+LINE_H;
+    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(20,20,20);
+    T(doc.splitTextToSize(clipName,IW-4)[0],ix,iy);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,100,100);
+    if(inTC) T(`TC in:    ${inTC}`,ix,iy+LINE_H);
+    if(outTC)T(`TC out:  ${outTC}`,ix,iy+LINE_H*2);
+    if(dur)  T(`Duration: ${dur}`,ix,iy+LINE_H*3);
+
+    // Slate + good take star
+    const sx=ML+TW+IW+2;
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(60,60,60);
+    T(slate+(good?' *':''),sx,rowY+PAD+LINE_H);
+
+    // Comments
+    if(comment){
+      const cx=ML+TW+IW+SW+2;
+      doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(80,80,80);
+      doc.splitTextToSize(comment,ComW-3).forEach((l,i)=>T(l,cx,rowY+PAD+LINE_H+i*LINE_H));
+    }
+
+    // QC Notes (Reviewer Notes)
+    if(qcNote){
+      const qx=ML+TW+IW+SW+ComW+2;
+      doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(60,80,140);
+      doc.splitTextToSize(qcNote,QW-3).forEach((l,i)=>T(l,qx,rowY+PAD+LINE_H+i*LINE_H));
+    }
+
+    y+=rowH;
+  });
+  hline(ML,ML+CW,y,0.3,180);
+
+  // Footer
+  const np=doc.getNumberOfPages();
+  for(let i=1;i<=np;i++){
+    doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(190,190,190);
+    hline(ML,W-MR,H-MB+2,0.2,210);
+    T('Be4Post - QC Report',ML,H-MB+5);
+    T(`Generated ${today}`,ML+CW/2,H-MB+5,{align:'center'});
+    T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
+  }
+  doc.save(`${timeline}_qc_report.pdf`);
+}
+
+async function exportClipsReport() {
+  if (!clipsMetadata?.clips?.length) { alert('No clips data available.'); return; }
+  const { jsPDF } = window.jspdf;
+  const clips = clipsMetadata.clips.slice().sort((a,b)=>(a.start_frame||0)-(b.start_frame||0));
+  const timeline = clipsMetadata.timeline || 'Clips Report';
+  const prod = loadProdData();
+  const allMarkers = clipsMetadata.markers_metadata || {};
+
+  const gm=(c,k)=>{const v=c.metadata?.[k]??c.clip_properties?.[k]??'';return v===null?'':String(v).trim();};
+
+  // Marker map for thumbnails
+  const markersByClip={};
+  Object.values(allMarkers).forEach(m=>{
+    if(!markersByClip[m.clip_name])markersByClip[m.clip_name]=[];
+    markersByClip[m.clip_name].push(m);
+  });
+  Object.values(markersByClip).forEach(arr=>arr.sort((a,b)=>(a.timeline_frame||0)-(b.timeline_frame||0)));
+
+  // Fetch thumbnails
+  const thumbCache={};
+  for(const clip of clips){
+    const ms=markersByClip[clip.clip_name]||[];
+    const idx=Math.min(getThumbPref(clip.clip_name),ms.length-1);
+    const m=ms[Math.max(0,idx)];
+    if(m?.exported_filename)
+      thumbCache[clip.clip_name]=await imgToBase64(`/api/image/${encodeURIComponent(m.exported_filename)}`);
+  }
+
+  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const W=297,H=210,ML=15,MR=15,MT=15,MB=12,CW=267;
+  let y=MT;
+
+  const T=(s,x,yy,o)=>doc.text(String(s??''),x,yy,o);
+  const hline=(x1,x2,yy,lw=0.2,g=180)=>{doc.setDrawColor(g,g,g);doc.setLineWidth(lw);doc.line(x1,yy,x2,yy);};
+  const checkPageY=(n)=>{if(y+n>H-MB){doc.addPage();y=MT;return true;}return false;};
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(20,20,20);T(timeline,ML,y+6);
+  if(prod.logo){try{doc.addImage(prod.logo,'PNG',W-MR-28,y,28,14,'','FAST');}catch(e){}}
+  y+=10;
+  if(prod.production){doc.setFont('helvetica','bold');doc.setFontSize(6.5);doc.setTextColor(130,130,130);T(prod.production.toUpperCase(),ML,y);y+=4;}
+  y+=4;
+
+  // Production info (compact, 3 columns)
+  const pFields=[['Director',prod.director],['Cinematographer',prod.dop],['DIT',prod.dit],
+    ['Data Manager',prod.dataManager],['1st AC',prod.ac1],['2nd AC',prod.ac2]].filter(([,v])=>v);
+  if(pFields.length){
+    doc.setFontSize(6);
+    let lx=ML;
+    pFields.forEach(([k,v],i)=>{
+      if(i>0){doc.setFont('helvetica','normal');doc.setTextColor(200,200,200);T('  |  ',lx,y);lx+=doc.getTextWidth('  |  ');}
+      doc.setFont('helvetica','normal');doc.setTextColor(140,140,140);T(k+': ',lx,y);lx+=doc.getTextWidth(k+': ');
+      doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);T(v,lx,y);lx+=doc.getTextWidth(v);
+    });
+    y+=3;
+  }
+  hline(ML,ML+CW,y,0.3,200);y+=3;
+
+  // ── Table layout ──────────────────────────────────────────────────────────
+  const TW=52; // thumbnail width
+  // Data columns: Camera | Card/Res | Optics | Color | Timing | [Comments encart zone]
+  const COLS=[
+    {w:42},  // Camera
+    {w:22},  // Card/Res
+    {w:30},  // Optics
+    {w:40},  // Color
+    {w:44},  // Timing
+    {w:CW-TW-42-22-30-40-44}, // Comments = 37
+  ];
+  const colXs=[];let cx2=ML+TW;COLS.forEach(c=>{colXs.push(cx2);cx2+=c.w;});
+
+  const LH=3.5,PAD=1.5,THUMB_H=24,FS=6.5;
+
+  clips.forEach((clip,ri)=>{
+    const g=k=>gm(clip,k);
+    const clipName=(clip.clip_name||'').replace(/\.[^.]+$/,'');
+    const fps=g('Camera FPS'),sfps=String(g('FPS')||'');
+    const fpsStr=fps?(fps+(sfps&&sfps!==fps?` (/${sfps})`:'')+' fps'):'';
+    const durStr=g('Duration')+(g('Frames')?` (${g('Frames')})`:'');
+    const codecStr=g('Video Codec')+(g('Format')?` (${g('Format')})`:'');
+    const good=g('Good Take')==='1';
+    // Slate: Scene/Shot-Take[*]
+    const sc=g('Scene'),sh=g('Shot'),tk=g('Take');
+    const slate=(sc||sh||tk)?[sc,sh?'/'+sh:'',tk?'-'+tk:''].join('')+(good?'*':''):'';
+    const comment=g('Comments');
+
+    const kv=(k,v)=>v?`${k}: ${v}`:null;
+    const dataCells=[
+      [kv('Model',[g('Camera Manufacturer'),g('Camera Type')].filter(Boolean).join(' ')),
+       kv('Codec',codecStr),kv('S/N',g('Camera Serial #'))].filter(Boolean),
+      [kv('Card',g('Roll Card #')||g('Reel Name')||g('Magazine')||pdfParseCard(clip.clip_name)),
+       kv('Res',g('Resolution'))].filter(Boolean),
+      [kv('Lens',g('Lens Type')),kv('Focal',g('Focal Point (mm)')?(g('Focal Point (mm)')+' mm'):null),
+       kv('Iris',g('Camera Aperture')),kv('ND',g('ND Filter'))].filter(Boolean),
+      [kv('Space',g('Color Space Notes')),kv('ISO',g('ISO')),
+       kv('Shutter',g('Shutter Angle')?(g('Shutter Angle')+'°'):null),
+       kv('Tint',g('White Balance Tint')),kv('Temp',g('White Point (Kelvin)')?(g('White Point (Kelvin)')+' K'):null)].filter(Boolean),
+      [kv('FPS',fpsStr),kv('Dur',durStr||null),kv('In',g('Start TC')),kv('Out',g('End TC'))].filter(Boolean),
+    ];
+
+    // Row height: clip name + slate on first line, then data fields
+    let maxLines=0;
+    dataCells.forEach((lines,ci)=>{
+      const avail=COLS[ci].w-4;
+      let total=0;lines.forEach(l=>{total+=doc.splitTextToSize(l,avail).length;});
+      if(total>maxLines)maxLines=total;
+    });
+    const contentH=Math.max(THUMB_H,(1+maxLines)*LH)+PAD*2;
+    if(checkPageY(contentH)){}
+    const rowY=y;
+
+    // Row bg alternating
+    if(ri%2===0){doc.setFillColor(249,249,249);doc.rect(ML,rowY,CW,contentH,'F');}
+    hline(ML,ML+CW,rowY,0.12,225);
+
+    // Thumbnail
+    const th=thumbCache[clip.clip_name];
+    if(th)addThumb(doc,th,ML+1,rowY+PAD,TW-2,THUMB_H);
+
+    // Clip name + slate — first line to the right of thumbnail
+    const nx=ML+TW+2,nameAvail=CW-TW-4;
+    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(20,20,20);
+    T(doc.splitTextToSize(clipName,nameAvail-40)[0],nx,rowY+PAD+LH);
+    if(slate){
+      doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(0,109,120);
+      T(slate,ML+CW-2,rowY+PAD+LH,{align:'right'});
+    }
+
+    // Data cells (starting one line below the name)
+    dataCells.forEach((lines,ci)=>{
+      const x=colXs[ci]+2,avail=COLS[ci].w-4;
+      let ty=rowY+PAD+LH*2;
+      doc.setFont('helvetica','normal');doc.setFontSize(FS-0.5);
+      lines.forEach(line=>{
+        doc.splitTextToSize(line,avail).forEach(l=>{
+          const sep=l.indexOf(': ');
+          if(sep>0){
+            doc.setTextColor(140,140,140);T(l.substring(0,sep+2),x,ty);
+            doc.setFont('helvetica','bold');doc.setTextColor(35,35,35);
+            T(l.substring(sep+2),x+doc.getTextWidth(l.substring(0,sep+2)),ty);
+            doc.setFont('helvetica','normal');
+          } else {doc.setTextColor(80,80,80);T(l,x,ty);}
+          ty+=LH;
+        });
+      });
+    });
+
+    // Comment encart — rounded box in the last column, below the slate line
+    if(comment){
+      const encartX=colXs[5]+1,encartW=COLS[5].w-2;
+      const comLines=doc.splitTextToSize(comment,encartW-5);
+      const encartH=comLines.length*LH+PAD*2;
+      const encartY=rowY+PAD+LH*2;
+      doc.setFillColor(235,235,235);doc.setDrawColor(200,200,200);doc.setLineWidth(0.2);
+      doc.roundedRect(encartX,encartY,encartW,encartH,1.2,1.2,'FD');
+      doc.setFont('helvetica','normal');doc.setFontSize(FS-1);doc.setTextColor(90,90,90);
+      comLines.forEach((l,i)=>T(l,encartX+2.5,encartY+PAD+LH-0.5+i*LH));
+    }
+
+    y+=contentH;
+  });
+  hline(ML,ML+CW,y,0.3,180);
+
+  // Footer
+  const np=doc.getNumberOfPages();
+  for(let i=1;i<=np;i++){
+    doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(6);doc.setTextColor(190,190,190);
+    hline(ML,W-MR,H-MB+2,0.2,210);
+    T('Be4Post - Clips Report',ML,H-MB+5);
+    T(`Generated ${today}`,ML+CW/2+ML/2,H-MB+5,{align:'center'});
+    T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
+  }
+  doc.save(`${timeline}_clips_report.pdf`);
+}
+
+function runExports() {
+  if ($('expOptALE').checked) { if (confirm('ALE export has not been tested — do your own test before relying on it.\n\nProceed?')) exportALE(); }
+  if ($('expOptCSV').checked) exportCSV();
+  if ($('expOptClipsReport').checked) exportClipsReport();
+  if ($('expOptQCReport').checked) exportQCReport();
+  if ($('expOptShootReport').checked) exportShootReport();
+  closeExportModal();
+}
+
+$('exportModalClose').onclick  = closeExportModal;
+$('exportModalCancel').onclick = closeExportModal;
+$('exportModalRun').onclick    = runExports;
+$('exportModal').onclick = e => { if (e.target === $('exportModal')) closeExportModal(); };
+EXPORT_OPT_IDS.forEach(id => $(id).addEventListener('change', saveExportOpts));
+
 document.addEventListener('keydown', async e => {
   // Global shortcuts
   if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
@@ -1761,6 +3137,12 @@ document.addEventListener('keydown', async e => {
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'o') {
     e.preventDefault(); openBrowser(); return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === ';') {
+    e.preventDefault(); openWm(); return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+    e.preventDefault(); openExportModal(); return;
   }
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'N') {
     e.preventDefault(); addNewSel(); return;
@@ -1782,10 +3164,24 @@ document.addEventListener('keydown', async e => {
       if (pos !== -1 && pos < s.length-1) { pushHistory(); [s[pos],s[pos+1]]=[s[pos+1],s[pos]]; selections[activeSel]=s; lbImages=[...s]; lbIdx=pos+1; queueSave(); renderGallery(); renderSelection(); updateLb(); }
     }
     if (e.key === ' ') { e.preventDefault(); lbToggleSel(); }
+  } else if ($('clipDetail').classList.contains('open')) {
+    if (e.key === 'Escape') { closeClipDetail(); }
+    else if (e.key === 'ArrowLeft'  && clipDetailIdx > 0) { clipDetailIdx--; updateClipDetailImage(); }
+    else if (e.key === 'ArrowRight' && clipDetailIdx < clipDetailMarkers.length - 1) { clipDetailIdx++; updateClipDetailImage(); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const cards = Array.from($('reportView').querySelectorAll('.clip-card:not(.hidden)'));
+      const cur = cards.findIndex(c => c.classList.contains('active'));
+      const next = cur + (e.key === 'ArrowDown' ? 1 : -1);
+      if (next >= 0 && next < cards.length) cards[next].click();
+    }
   } else if ($('helpModal').classList.contains('open')) {
     if (e.key === 'Escape') $('helpModal').classList.remove('open');
   } else if ($('wmModal').classList.contains('open')) {
     if (e.key === 'Escape') closeWm();
+  } else if ($('exportModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeExportModal();
+    if (e.key === 'Enter') { e.preventDefault(); runExports(); }
   } else if ($('modal').classList.contains('open')) {
     if (e.key === 'Escape') closeModal();
   }
@@ -1795,6 +3191,9 @@ document.addEventListener('keydown', async e => {
 (async () => {
   const urlPath = new URLSearchParams(location.search).get('path');
   if (urlPath) await loadFolder(urlPath);
+  else if (location.pathname === '/report' || location.pathname === '/stills') {
+    const base = location.pathname; history.replaceState(null, '', base);
+  }
 })();
 </script>
 </body>

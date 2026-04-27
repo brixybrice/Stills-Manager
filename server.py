@@ -4,13 +4,15 @@ import os, json, re, threading, webbrowser
 app = Flask(__name__, static_folder='.', static_url_path='')
 current_dir  = None
 IMAGE_EXTS   = {'.jpg', '.jpeg', '.png', '.tif', '.tiff'}
-JSON_FILE    = 'stills-selections.json'
+JSON_FILE    = '.stills-selections.json'
 
 def nat_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
 # ── Static ────────────────────────────────────────────────────────────────
 @app.route('/')
+@app.route('/stills')
+@app.route('/report')
 def index():
     return send_from_directory('.', 'index.html')
 
@@ -88,6 +90,33 @@ def save_selections():
         return jsonify({'ok': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# ── Stills metadata ──────────────────────────────────────────────────────
+@app.route('/api/metadata')
+def get_metadata():
+    if not current_dir:
+        return jsonify(None), 200
+    combined = {}
+    try:
+        for name in sorted(os.listdir(current_dir)):
+            if not name.startswith('.'):
+                continue
+            if not (name.endswith('_clips.json') or name.endswith('_stills_metadata.json')):
+                continue
+            p = os.path.join(current_dir, name)
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if 'clips' in data:
+                    combined['timeline'] = data.get('timeline', '')
+                    combined['clips'] = data['clips']
+                if 'markers_metadata' in data:
+                    combined['markers_metadata'] = data['markers_metadata']
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return jsonify(combined if combined else None), 200
 
 # ── Start ─────────────────────────────────────────────────────────────────
 def _open_browser():
