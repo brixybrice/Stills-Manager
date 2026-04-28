@@ -2400,13 +2400,39 @@ async function exportPDF() {
 
     if ($('pdfAppendCS').checked) {
       const csDims = csGetExportDims();
-      const csCanvas = document.createElement('canvas');
-      await csRender(csCanvas, csDims.W, null, 0, csDims.H);
       const CSW = csDims.a4 ? csDims.a4.PW : 297;
       const CSH = csDims.a4 ? csDims.a4.PH : Math.round(297 * csDims.H / csDims.W * 1000) / 1000;
       const orient = CSW >= CSH ? 'landscape' : 'portrait';
-      pdf.addPage([CSW, CSH], orient);
-      pdf.addImage(csCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, CSW, CSH);
+      const addCSPage = c => { pdf.addPage([CSW, CSH], orient); pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, CSW, CSH); };
+
+      if ($('csSortScene').checked && clipsMetadata?.clips?.length) {
+        const sel = curSel();
+        const groups = csGetSceneGroups(sel);
+        const imgMap = new Map();
+        for (const f of sel) imgMap.set(f, await loadImgEl(`/api/image/${encodeURIComponent(f)}`));
+        for (const group of groups) {
+          const sceneImgs = group.images.map(f => imgMap.get(f)).filter(Boolean);
+          if (!sceneImgs.length) continue;
+          const sceneTitle = group.scene ? `Scene ${group.scene}` : '';
+          const c0 = document.createElement('canvas');
+          const r0 = await csRender(c0, csDims.W, null, 0, csDims.H, sceneImgs, sceneTitle);
+          addCSPage(c0);
+          for (let p = 1; p < r0.totalPages; p++) {
+            const c = document.createElement('canvas');
+            await csRender(c, csDims.W, null, p, csDims.H, sceneImgs, sceneTitle);
+            addCSPage(c);
+          }
+        }
+      } else {
+        const c0 = document.createElement('canvas');
+        const r0 = await csRender(c0, csDims.W, null, 0, csDims.H);
+        addCSPage(c0);
+        for (let p = 1; p < r0.totalPages; p++) {
+          const c = document.createElement('canvas');
+          await csRender(c, csDims.W, r0.loaded, p, csDims.H);
+          addCSPage(c);
+        }
+      }
     }
 
     const fname = activeSel.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'selection';
