@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory
-import os, json, re, threading, webbrowser
+import os, json, re, threading, webbrowser, base64
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 current_dir  = None
@@ -117,6 +117,32 @@ def get_metadata():
     except Exception:
         pass
     return jsonify(combined if combined else None), 200
+
+# ── Save exported file ───────────────────────────────────────────────────
+@app.route('/api/save-file', methods=['POST'])
+def save_file():
+    data     = request.json or {}
+    dir_path = os.path.expanduser(data.get('path', ''))
+    filename = data.get('filename', '')
+    data_uri = data.get('data', '')
+    subfolder= data.get('subfolder', '').strip()
+
+    if not dir_path or not filename:
+        return jsonify({'error': 'Missing path or filename'}), 400
+
+    target = os.path.join(dir_path, subfolder) if subfolder else dir_path
+    try:
+        os.makedirs(target, exist_ok=True)
+        full_path = os.path.join(target, filename)
+        if ',' in data_uri:
+            raw = base64.b64decode(data_uri.split(',', 1)[1])
+        else:
+            raw = base64.b64decode(data_uri)
+        with open(full_path, 'wb') as f:
+            f.write(raw)
+        return jsonify({'ok': True, 'path': full_path})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ── Start ─────────────────────────────────────────────────────────────────
 def _open_browser():

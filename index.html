@@ -557,9 +557,9 @@ kbd {
 
 .cs-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .cs-settings {
-  width: 220px; flex-shrink: 0; overflow-y: auto;
+  width: 260px; flex-shrink: 0; overflow-y: auto;
   padding: 14px; border-right: 1px solid #252525;
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .cs-settings::-webkit-scrollbar { width: 4px; }
 .cs-settings::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
@@ -578,6 +578,33 @@ kbd {
 .cs-row { display: flex; gap: 6px; }
 .cs-row .cs-field { flex: 1; }
 hr.cs-sep { border: none; border-top: 1px solid #222; }
+
+/* ── Paths tab ── */
+.paths-body { display:flex; flex-direction:column; padding:16px 20px; gap:10px; overflow-y:auto; flex:1; min-height:0; }
+.paths-opt-row { display:flex; gap:24px; flex-wrap:wrap; }
+.paths-opt { display:flex; align-items:center; gap:7px; color:#aaa; font-size:12px; cursor:pointer; user-select:none; }
+.paths-opt input[type=checkbox] { accent-color:#006D78; }
+.paths-rows { display:flex; flex-direction:column; gap:5px; }
+.paths-entry { display:flex; align-items:center; gap:8px; }
+.paths-lbl { color:#555; font-size:11px; text-transform:uppercase; letter-spacing:.5px; width:108px; flex-shrink:0; text-align:right; }
+.paths-input { flex:1; background:#181818; border:1px solid #2a2a2a; color:#ccc; border-radius:5px; padding:5px 9px; font-size:12px; font-family:inherit; min-width:0; }
+.paths-input:focus { outline:none; border-color:#444; color:#eee; }
+.paths-input::placeholder { color:#383838; }
+.paths-browse { flex-shrink:0; padding:4px 9px; font-size:13px; line-height:1; }
+
+/* ── Path picker mini-modal ── */
+#pathPicker { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:4000; align-items:center; justify-content:center; }
+#pathPicker.open { display:flex; }
+.pp-box { background:#1c1c1c; border:1px solid #2e2e2e; border-radius:10px; width:500px; max-height:55vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.7); }
+.pp-head { display:flex; align-items:center; gap:8px; padding:11px 14px; border-bottom:1px solid #252525; }
+.pp-crumb { flex:1; color:#777; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pp-crumb span { cursor:pointer; } .pp-crumb span:hover { color:#ccc; }
+.pp-list { flex:1; overflow-y:auto; padding:4px 0; }
+.pp-item { padding:8px 16px; color:#bbb; font-size:12px; cursor:pointer; }
+.pp-item:hover { background:#232323; color:#fff; }
+.pp-item.pp-up { color:#555; }
+.pp-foot { display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:1px solid #252525; }
+.pp-cur { flex:1; color:#555; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; }
 .cs-preview-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
   background: #0a0a0a; padding: 14px; position: relative; overflow: hidden; min-width: 0;
@@ -588,6 +615,18 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   height: 3px; background: #222; border-radius: 2px; overflow: hidden; display: none;
 }
 #csProgressFill { height: 100%; background: #006D78; border-radius: 2px; transition: width 0.15s; width: 0%; }
+.cs-nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12);
+  color: #ddd; font-size: 22px; line-height: 1; padding: 6px 10px;
+  cursor: pointer; border-radius: 5px; display: none; z-index: 10;
+  transition: background 0.15s;
+}
+.cs-nav-btn:hover { background: rgba(0,0,0,0.8); }
+.cs-nav-prev { left: 18px; }
+.cs-nav-next { right: 18px; }
+body.light .cs-nav-btn { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.12); color: #333; }
+body.light .cs-nav-btn:hover { background: rgba(255,255,255,0.95); }
 .cs-foot {
   padding: 10px 14px; border-top: 1px solid #252525;
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
@@ -804,6 +843,178 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 4px 24px; align-content: start;
 }
+
+/* ══ Light mode ══════════════════════════════════════════════════════════════ */
+body.light { background: #f0f0f0; color: #111; }
+
+/* Buttons */
+body.light .btn-secondary { background: #efefef; color: #444; border-color: #d4d4d4; }
+body.light .btn-secondary:hover:not(:disabled) { background: #e4e4e4; }
+body.light .btn-ghost { color: #888; }
+body.light .btn-ghost:hover:not(:disabled) { color: #333; background: rgba(0,0,0,0.06); }
+
+/* Header */
+body.light #header { background: #ffffff; border-bottom-color: #e4e4e4; }
+body.light #header h1 { color: #111; }
+body.light #folderName { color: #aaa; }
+
+/* Tab bar */
+body.light #tabBar { background: #f4f4f4; border-bottom-color: #e4e4e4; }
+body.light .tab { background: #eaeaea; color: #aaa; border-color: #ddd; }
+body.light .tab.active { background: #ffffff; color: #111; border-color: #d0d0d0; }
+body.light .tab:hover:not(.active) { background: #e0e0e0; color: #666; }
+body.light .tab-x { color: #bbb; }
+body.light #addTabBtn { color: #bbb; border-color: #d0d0d0; }
+body.light #addTabBtn:hover { color: #888; border-color: #aaa; }
+
+/* Gallery */
+body.light #galleryHeader { border-bottom-color: #e8e8e8; }
+body.light #galleryHeader h2 { color: #bbb; }
+body.light #galleryHeader span { color: #ccc; }
+body.light .thumb-wrap { background: #e4e4e4; }
+body.light .thumb-wrap:hover { border-color: #bbb; }
+body.light .tif-ph { background: #e4e4e4; color: #bbb; }
+
+/* Selection panel */
+body.light #selPanel { background: #f7f7f7; border-left-color: #e4e4e4; }
+body.light #selHeader { border-bottom-color: #e8e8e8; }
+body.light #selHeader h2 { color: #bbb; }
+body.light #selList::-webkit-scrollbar-thumb { background: #d8d8d8; }
+body.light .sel-item { background: #f2f2f2; border-color: #e4e4e4; }
+body.light .sel-item:hover { background: #eaeaea; }
+body.light .drag-handle { color: #ccc; }
+body.light .sel-num { color: #bbb; }
+body.light .sel-name { color: #777; }
+body.light .rm-btn { color: #ccc; }
+body.light #selFooter { border-top-color: #e8e8e8; }
+body.light #selCount { color: #bbb; }
+body.light .sortable-chosen { background: #eaeaea !important; }
+
+/* Empty / Welcome */
+body.light .empty p { color: #bbb; }
+body.light #welcome h2 { color: #999; }
+body.light #welcome p { color: #bbb; }
+
+/* Lightbox — stays dark (it's an image viewer) */
+
+/* View toggle */
+body.light #viewToggle { background: #e4e4e4; }
+body.light .vtab { color: #aaa; }
+body.light .vtab:hover:not(.active) { color: #555; }
+
+/* Folder browser modal */
+body.light .modal-box { background: #fff; border-color: #d8d8d8; }
+body.light .modal-head { border-bottom-color: #e8e8e8; }
+body.light .modal-head h3 { color: #222; }
+body.light .modal-crumb { border-bottom-color: #e8e8e8; color: #bbb; }
+body.light .modal-crumb span { color: #999; }
+body.light .modal-crumb span:hover { color: #006D78; }
+body.light .modal-list::-webkit-scrollbar-thumb { background: #d8d8d8; }
+body.light .dir-item { color: #444; }
+body.light .dir-item:hover { background: #f2f2f2; color: #111; }
+body.light .modal-foot { border-top-color: #e8e8e8; }
+
+/* Help modal */
+body.light .help-box { background: #fff; border-color: #d8d8d8; }
+body.light .help-body { color: #666; }
+body.light .help-body::-webkit-scrollbar-thumb { background: #d8d8d8; }
+body.light .help-section h4 { color: #006D78; border-bottom-color: #e8e8e8; }
+body.light .help-section p { color: #888; }
+body.light .help-section p strong { color: #222; }
+body.light .help-kbds .kb-desc { color: #999; }
+body.light kbd { background: #f2f2f2; border-color: #d4d4d4; color: #444; }
+
+/* Export modal */
+body.light .export-box { background: #fff; border-color: #d8d8d8; }
+body.light .export-desc { color: #bbb; }
+body.light .export-option:hover { background: #f5f5f5; border-color: #e4e4e4; }
+body.light .export-option-name { color: #333; }
+body.light .export-option-desc { color: #bbb; }
+body.light .export-sep { border-top-color: #e8e8e8; }
+
+/* Settings modal */
+body.light .wm-box { background: #f7f7f7; border-color: #d8d8d8; }
+body.light .wm-box .modal-head { background: #fff; border-bottom-color: #e8e8e8; }
+body.light .wm-box .modal-head h3 { color: #222; }
+body.light .set-tab { color: #aaa; }
+body.light .set-tab:hover { color: #555; }
+body.light .set-tab.active { color: #111; border-bottom-color: #006D78; }
+body.light .wm-settings { border-right-color: #e8e8e8; }
+body.light .wm-preview-area { background: #e0e0e0; }
+body.light .wm-foot { border-top-color: #e8e8e8; color: #bbb; }
+body.light .wm-field label { color: #aaa; }
+body.light .wm-field input[type=text], body.light .wm-field select { background: #fff; border-color: #d4d4d4; color: #333; }
+body.light .wm-field input[type=range] { background: #d8d8d8; }
+
+/* Contact sheet pane */
+body.light .cs-settings { border-right-color: #e8e8e8; }
+body.light .cs-settings::-webkit-scrollbar-thumb { background: #d8d8d8; }
+body.light .cs-field label { color: #aaa; }
+body.light .cs-field input[type=text], body.light .cs-field input[type=number], body.light .cs-field select { background: #fff; border-color: #d4d4d4; color: #333; }
+body.light .cs-field input[type=color] { background: #fff; border-color: #d4d4d4; }
+body.light .cs-field input[type=range] { background: #d8d8d8; }
+body.light hr.cs-sep { border-top-color: #e8e8e8; }
+body.light .cs-wm-toggle label { color: #999; }
+body.light .cs-preview-area { background: #e0e0e0; }
+body.light .cs-progress-wrap { background: #d0d0d0; }
+body.light .cs-foot { border-top-color: #e8e8e8; }
+body.light #csStatus { color: #bbb; }
+
+/* Production pane */
+body.light .prod-field label { color: #aaa; }
+body.light .prod-field input { background: #fff; border-color: #d4d4d4; color: #333; }
+body.light .prod-logo-panel { border-left-color: #e8e8e8; }
+body.light .prod-logo-label { color: #aaa; }
+body.light .prod-logo-drop { background: #f0f0f0; border-color: #d4d4d4; }
+body.light .prod-logo-hint { color: #ccc; }
+body.light .prod-logo-clear { color: #bbb; }
+body.light .prod-logo-clear:hover { color: #444; }
+
+/* Paths pane */
+body.light .paths-opt { color: #999; }
+body.light .paths-lbl { color: #bbb; }
+body.light .paths-input { background: #fff; border-color: #d4d4d4; color: #333; }
+body.light .paths-input:focus { border-color: #aaa; color: #111; }
+body.light .paths-input::placeholder { color: #d0d0d0; }
+
+/* Path picker */
+body.light .pp-box { background: #fff; border-color: #d8d8d8; }
+body.light .pp-head { border-bottom-color: #e8e8e8; }
+body.light .pp-crumb { color: #bbb; }
+body.light .pp-crumb span:hover { color: #333; }
+body.light .pp-item { color: #444; }
+body.light .pp-item:hover { background: #f5f5f5; color: #111; }
+body.light .pp-item.pp-up { color: #ccc; }
+body.light .pp-foot { border-top-color: #e8e8e8; }
+body.light .pp-cur { color: #bbb; }
+
+/* Clips Report */
+body.light #reportView::-webkit-scrollbar-thumb { background: #d8d8d8; }
+body.light #reportSearchInput { background: #f2f2f2; border-color: #d8d8d8; color: #333; }
+body.light #reportSearchInput::placeholder { color: #ccc; }
+body.light .clip-card { background: #ffffff; border-color: #e8e8e8; }
+body.light .clip-card:hover { border-color: #c8c8c8; }
+body.light .clip-card-thumb { background: #f2f2f2; border-right-color: #e8e8e8; }
+body.light .clip-card-no-thumb { color: #ddd; }
+body.light .clip-card-name { border-bottom-color: #e8e8e8; }
+body.light .clip-card-name-text { color: #333; }
+body.light .clip-card-note { background: #f8f8f8; border-color: #e8e8e8; }
+body.light .clip-card-note-label { color: #ccc; }
+body.light .clip-card-note-val { color: #888; }
+body.light .clip-meta-key { color: #ccc; }
+body.light .clip-meta-val { color: #666; }
+body.light .clip-meta-sep { background: #e8e8e8; }
+
+/* Clip detail panel */
+body.light #clipDetail { background: #f8f8f8; border-top-color: #d0d0d0; }
+body.light #clipDetailClose { color: #bbb; }
+body.light #clipDetailClose:hover { color: #444; }
+body.light #clipDetailImg { background: #f2f2f2; border-right-color: #e8e8e8; }
+body.light #clipDetailTitle { color: #222; border-bottom-color: #e8e8e8; }
+body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
+
+/* Theme toggle button */
+#themeToggle { font-size: 17px; padding: 4px 9px; line-height: 1; }
 </style>
 </head>
 <body>
@@ -818,6 +1029,7 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
   <span id="folderName">No folder open</span>
   <input id="reportSearchInput" type="search" placeholder="Search clips…" style="display:none">
   <span id="saveStatus">Saved</span>
+  <button class="btn-ghost" id="themeToggle" title="Toggle light / dark mode">☀</button>
   <button class="btn-ghost" id="settingsHeaderBtn" title="Settings" style="font-size:20px; padding:4px 10px;">⚙</button>
   <button class="btn-secondary" id="exportHeaderBtn" title="Export (Cmd+E)" style="display:none">Export</button>
   <button class="btn-primary" id="openBtn">Open Folder</button>
@@ -910,9 +1122,10 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
     <div class="modal-head">
       <h3>Settings</h3>
       <div class="set-tabs">
-        <button class="set-tab active" id="setTabWm">Watermark</button>
+        <button class="set-tab active" id="setTabProd">Production</button>
         <button class="set-tab" id="setTabCS">Contact Sheet</button>
-        <button class="set-tab" id="setTabProd">Production</button>
+        <button class="set-tab" id="setTabWm">Watermark</button>
+        <button class="set-tab" id="setTabPaths">Paths</button>
       </div>
       <button class="btn-ghost" id="wmClose">✕</button>
     </div>
@@ -965,7 +1178,10 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
         <div class="cs-settings">
           <div class="cs-field">
             <label>Title</label>
-            <input type="text" id="csTitle" placeholder="Optional…">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="csTitle" placeholder="Optional…" style="flex:1;width:auto;">
+              <input type="color" id="csTitleColor" value="#ffffff" title="Title colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+            </div>
           </div>
           <div class="cs-field">
             <label>Background</label>
@@ -1003,6 +1219,10 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
             <label>Gap (px)</label>
             <input type="number" id="csMargin" value="6" min="0" max="80">
           </div>
+          <div class="cs-field">
+            <label>A4 margin (mm)</label>
+            <input type="number" id="csA4Margin" value="10" min="0" max="40">
+          </div>
           <hr class="cs-sep">
           <div class="cs-field">
             <label>Export format</label>
@@ -1016,8 +1236,20 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
           </div>
           <hr class="cs-sep">
           <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csSortScene">
+            <label for="csSortScene">Sort by scene</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csColorPalette">
+            <label for="csColorPalette">Color palette</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
             <input type="checkbox" id="csProdInfo">
             <label for="csProdInfo">Production info</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csInvertLogo">
+            <label for="csInvertLogo">Invert logo</label>
           </div>
           <div class="cs-field cs-wm-toggle">
             <input type="checkbox" id="csWmEnabled">
@@ -1026,6 +1258,8 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
         </div>
         <div class="cs-preview-area">
           <canvas id="csCanvas"></canvas>
+          <button class="cs-nav-btn cs-nav-prev" id="csPrevPage">&#8249;</button>
+          <button class="cs-nav-btn cs-nav-next" id="csNextPage">&#8250;</button>
           <div class="cs-progress-wrap" id="csProgressWrap">
             <div id="csProgressFill"></div>
           </div>
@@ -1077,6 +1311,53 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
       </div>
     </div>
 
+    <!-- Paths pane -->
+    <div class="set-pane" id="setPanePaths" style="display:none">
+      <div class="paths-body">
+        <div class="paths-opt-row">
+          <label class="paths-opt"><input type="checkbox" id="pathsGang"> Gang — same folder for all exports</label>
+          <label class="paths-opt"><input type="checkbox" id="pathsCreateFolder"> Create sub-folder with title name</label>
+        </div>
+        <hr class="cs-sep">
+        <div id="pathsGangSection" class="paths-rows" style="display:none">
+          <div class="paths-entry">
+            <span class="paths-lbl">All exports</span>
+            <input type="text" class="paths-input" id="path_gang" placeholder="/Users/you/Exports…">
+            <button class="btn-secondary paths-browse" data-for="path_gang">…</button>
+          </div>
+        </div>
+        <div id="pathsIndivSection" class="paths-rows">
+          <div class="paths-entry"><span class="paths-lbl">PDF Stills</span><input type="text" class="paths-input" id="path_pdfStills" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_pdfStills">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">Contact Sheet</span><input type="text" class="paths-input" id="path_contactSheet" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_contactSheet">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">Clips Report</span><input type="text" class="paths-input" id="path_clipsReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_clipsReport">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">Shoot Report</span><input type="text" class="paths-input" id="path_shootReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_shootReport">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">QC Report</span><input type="text" class="paths-input" id="path_qcReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_qcReport">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">ALE</span><input type="text" class="paths-input" id="path_ale" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_ale">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">CSV</span><input type="text" class="paths-input" id="path_csv" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_csv">…</button></div>
+        </div>
+      </div>
+      <div class="wm-foot">
+        Paths are saved automatically and applied at export time.
+        <div style="flex:1"></div>
+        <button class="btn-primary" id="pathsDone">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Path picker mini-modal -->
+<div id="pathPicker">
+  <div class="pp-box">
+    <div class="pp-head">
+      <span class="pp-crumb" id="ppCrumb"></span>
+      <button class="btn-ghost" id="ppCancel">✕</button>
+    </div>
+    <div class="pp-list" id="ppList"></div>
+    <div class="pp-foot">
+      <span class="pp-cur" id="ppCurPath"></span>
+      <button class="btn-primary" id="ppSelect">Select this folder</button>
+    </div>
   </div>
 </div>
 
@@ -2129,7 +2410,7 @@ async function exportPDF() {
     }
 
     const fname = activeSel.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'selection';
-    pdf.save(`${fname}.pdf`);
+    await pdfSave(pdf, `${fname}.pdf`, 'pdfStills');
   } catch (e) {
     alert('PDF export error: ' + e.message);
   } finally {
@@ -2152,7 +2433,8 @@ function openWm()   { switchSettingsTab('wm');   $('wmModal').classList.add('ope
 function closeWm()  { $('wmModal').classList.remove('open'); }
 function openCS()   { switchSettingsTab('cs');   $('wmModal').classList.add('open'); generateCSPreview(); }
 function closeCS()  { $('wmModal').classList.remove('open'); }
-function openProd() { switchSettingsTab('prod'); $('wmModal').classList.add('open'); }
+function openProd()  { switchSettingsTab('prod');  $('wmModal').classList.add('open'); }
+function openPaths() { switchSettingsTab('paths'); $('wmModal').classList.add('open'); }
 
 // ─── Production data ──────────────────────────────────────────────────────
 const PROD_FIELD_IDS = ['project','production','director','dop','dit','dataManager','ac1','ac2'];
@@ -2195,11 +2477,116 @@ function clearLogo() {
 }
 
 function switchSettingsTab(tab) {
-  const map = { wm: ['setTabWm','setPaneWm'], cs: ['setTabCS','setPaneCS'], prod: ['setTabProd','setPaneProd'] };
-  Object.entries(map).forEach(([t, [tabId, paneId]]) => {
+  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'] };
+  Object.entries(map).forEach(([t,[tabId,paneId]]) => {
     $(tabId).classList.toggle('active', t === tab);
     $(paneId).style.display = t === tab ? 'flex' : 'none';
   });
+  localStorage.setItem('stills-last-settings-tab', tab);
+}
+
+function openSettings() {
+  const tab = localStorage.getItem('stills-last-settings-tab') || 'prod';
+  switchSettingsTab(tab);
+  $('wmModal').classList.add('open');
+  if (tab === 'wm') renderWmPreview();
+  if (tab === 'cs') generateCSPreview();
+}
+
+// ─── Paths data ───────────────────────────────────────────────────────────────
+const PATH_IDS = ['gang','pdfStills','contactSheet','clipsReport','shootReport','qcReport','ale','csv'];
+
+function loadPathsData() {
+  try { return JSON.parse(localStorage.getItem('stills-paths') || '{}'); } catch { return {}; }
+}
+function savePathsData() {
+  const d = { gang: $('pathsGang').checked, createFolder: $('pathsCreateFolder').checked, paths: {} };
+  PATH_IDS.forEach(id => { const el = $('path_'+id); if (el) d.paths[id] = el.value.trim(); });
+  localStorage.setItem('stills-paths', JSON.stringify(d));
+}
+function initPathsForm() {
+  const d = loadPathsData();
+  $('pathsGang').checked = !!d.gang;
+  $('pathsCreateFolder').checked = !!d.createFolder;
+  PATH_IDS.forEach(id => { const el = $('path_'+id); if (el) el.value = d.paths?.[id] || ''; });
+  updatePathsVis();
+}
+function updatePathsVis() {
+  const gang = $('pathsGang').checked;
+  $('pathsGangSection').style.display = gang ? '' : 'none';
+  $('pathsIndivSection').style.display = gang ? 'none' : '';
+}
+function getExportPath(type) {
+  const d = loadPathsData();
+  return (d.gang ? d.paths?.gang : d.paths?.[type]) || '';
+}
+function getExportSubfolder() {
+  const d = loadPathsData();
+  if (!d.createFolder) return '';
+  return (clipsMetadata?.timeline || activeSel || '').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
+}
+async function saveFileToServer(filename, dataUri, type) {
+  const dir = getExportPath(type);
+  if (!dir) return false;
+  const sub = getExportSubfolder();
+  try {
+    const r = await fetch('/api/save-file', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ path:dir, filename, data:dataUri, subfolder:sub })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Save failed');
+    return true;
+  } catch(e) { alert(`Could not save to ${dir}: ${e.message}`); return false; }
+}
+async function pdfSave(doc, filename, type) {
+  const uri = doc.output('datauristring');
+  if (!await saveFileToServer(filename, uri, type)) doc.save(filename);
+}
+async function textSave(content, filename, mime, type) {
+  const uri = `data:${mime};charset=utf-8,` + encodeURIComponent(content);
+  if (!await saveFileToServer(filename, uri, type)) downloadText(content, filename, mime);
+}
+
+// ─── Path picker ─────────────────────────────────────────────────────────────
+let ppTargetId = null, ppCurrentPath = '';
+
+async function openPathPicker(targetId) {
+  ppTargetId = targetId;
+  const cur = $(targetId)?.value.trim();
+  let start = cur;
+  if (!start) { try { start = (await api('/api/browse')).path; } catch { start = '/'; } }
+  $('pathPicker').classList.add('open');
+  await ppBrowseTo(start);
+}
+async function ppBrowseTo(path) {
+  try {
+    const data = await api('/api/browse?path=' + encodeURIComponent(path));
+    ppCurrentPath = data.path;
+    const parts = data.path.split('/').filter(Boolean);
+    const crumb = $('ppCrumb'); crumb.innerHTML = '';
+    let built = '';
+    parts.forEach((p, i) => {
+      built += '/' + p;
+      const s = document.createElement('span');
+      s.textContent = p + (i < parts.length-1 ? ' › ' : '');
+      const cap = built; s.onclick = () => ppBrowseTo(cap);
+      crumb.appendChild(s);
+    });
+    $('ppCurPath').textContent = data.path;
+    const list = $('ppList'); list.innerHTML = '';
+    if (data.parent) {
+      const up = document.createElement('div');
+      up.className = 'pp-item pp-up'; up.textContent = '↑ ..';
+      up.onclick = () => ppBrowseTo(data.parent); list.appendChild(up);
+    }
+    data.dirs.forEach(d => {
+      const item = document.createElement('div');
+      item.className = 'pp-item'; item.textContent = d.name;
+      item.onclick = () => ppBrowseTo(d.path); list.appendChild(item);
+    });
+    if (!data.dirs.length && !data.parent) list.innerHTML = '<div class="pp-item" style="color:#444">No subfolders</div>';
+  } catch(e) { console.error(e); }
 }
 
 function wmQueuePreview() {
@@ -2250,18 +2637,70 @@ function csQueuePreview() {
   csPreviewTimer = setTimeout(generateCSPreview, 450);
 }
 
+let csPreviewPage  = 0;
+let csPreviewTotal = 1;
+let csPreviewLoaded = null;  // normal mode: preloaded image elements
+let csPreviewGroups = null;  // scene mode: groups array
+
+function updateCSNavBtns() {
+  $('csPrevPage').style.display = csPreviewPage > 0                    ? 'block' : 'none';
+  $('csNextPage').style.display = csPreviewPage < csPreviewTotal - 1   ? 'block' : 'none';
+}
+
+function csPageLabel() {
+  if (csPreviewTotal <= 1) return '';
+  if (csPreviewGroups) return `Scene ${csPreviewPage + 1} / ${csPreviewTotal}`;
+  return `Page ${csPreviewPage + 1} / ${csPreviewTotal}`;
+}
+
+async function navigateCSPreview(delta) {
+  const next = csPreviewPage + delta;
+  if (next < 0 || next >= csPreviewTotal || csRendering) return;
+  csRendering = true;
+  csPreviewPage = next;
+  try {
+    const d = csGetExportDims();
+    const prevW = 580, prevH = Math.round(prevW * d.H / d.W);
+    if (csPreviewGroups) {
+      const g = csPreviewGroups[csPreviewPage];
+      const imgs = await Promise.all(g.images.map(f => loadImgEl(`/api/image/${encodeURIComponent(f)}`)));
+      await csRender($('csCanvas'), prevW, null, 0, prevH, imgs, g.scene ? `Scene ${g.scene}` : '');
+    } else {
+      await csRender($('csCanvas'), prevW, csPreviewLoaded, csPreviewPage, prevH);
+    }
+    $('csStatus').textContent = csPageLabel();
+  } finally {
+    csRendering = false;
+    updateCSNavBtns();
+  }
+}
+
 async function generateCSPreview() {
   if (!$('wmModal').classList.contains('open') || $('setPaneCS').style.display === 'none') return;
   if (csRendering) { csPendingPreview = true; return; }
   csRendering = true; csPendingPreview = false;
+  csPreviewPage = 0; csPreviewLoaded = null; csPreviewGroups = null;
   $('csStatus').textContent = 'Rendering…';
   try {
     const d = csGetExportDims();
     const prevW = 580, prevH = Math.round(prevW * d.H / d.W);
-    const result = await csRender($('csCanvas'), prevW, null, 0, prevH);
-    $('csStatus').textContent = (result && result.totalPages > 1) ? `Page 1 / ${result.totalPages}` : '';
+    if ($('csSortScene').checked && clipsMetadata?.clips?.length) {
+      const groups = csGetSceneGroups(curSel());
+      csPreviewGroups = groups;
+      csPreviewTotal  = groups.length;
+      if (groups.length) {
+        const first = groups[0];
+        const imgs = await Promise.all(first.images.map(f => loadImgEl(`/api/image/${encodeURIComponent(f)}`)));
+        await csRender($('csCanvas'), prevW, null, 0, prevH, imgs, first.scene ? `Scene ${first.scene}` : '');
+      }
+    } else {
+      const result = await csRender($('csCanvas'), prevW, null, 0, prevH);
+      if (result) { csPreviewLoaded = result.loaded; csPreviewTotal = result.totalPages; }
+    }
+    $('csStatus').textContent = csPageLabel();
   } finally {
     csRendering = false;
+    updateCSNavBtns();
     if (csPendingPreview) generateCSPreview();
   }
 }
@@ -2297,7 +2736,67 @@ function csCalcGrid(n, availW, availH, ars, margin) {
   return best;
 }
 
-async function csDrawProdInfo(ctx, W, topY, margin) {
+function csSortByScene(sel) {
+  if (!clipsMetadata?.clips?.length) return sel;
+  const markers = clipsMetadata.markers_metadata || {};
+  const clipMeta = {};
+  clipsMetadata.clips.forEach(c => {
+    clipMeta[c.clip_name] = {
+      scene: c.metadata?.Scene ?? '', shot: c.metadata?.Shot ?? '',
+      take:  c.metadata?.Take  ?? '', frame: c.start_frame || 0
+    };
+  });
+  const fileMap = {};
+  Object.values(markers).forEach(m => {
+    if (m.exported_filename && clipMeta[m.clip_name])
+      fileMap[m.exported_filename] = clipMeta[m.clip_name];
+  });
+  const cmp = (a, b) => { const na = isNaN(a) ? a : +a, nb = isNaN(b) ? b : +b; return na < nb ? -1 : na > nb ? 1 : 0; };
+  return [...sel].sort((a, b) => {
+    const ma = fileMap[a], mb = fileMap[b];
+    if (!ma && !mb) return a.localeCompare(b);
+    if (!ma) return 1; if (!mb) return -1;
+    return cmp(ma.scene, mb.scene) || cmp(ma.shot, mb.shot) || cmp(ma.take, mb.take) || ma.frame - mb.frame;
+  });
+}
+
+function csGetSceneGroups(sel) {
+  if (!clipsMetadata?.clips?.length) return [{ scene: '', images: [...sel] }];
+  const markers = clipsMetadata.markers_metadata || {};
+  const clipMeta = {};
+  clipsMetadata.clips.forEach(c => {
+    clipMeta[c.clip_name] = {
+      scene: c.metadata?.Scene ?? '', shot: c.metadata?.Shot ?? '',
+      take:  c.metadata?.Take  ?? '', frame: c.start_frame || 0
+    };
+  });
+  const fileMap = {};
+  Object.values(markers).forEach(m => {
+    if (m.exported_filename && clipMeta[m.clip_name])
+      fileMap[m.exported_filename] = clipMeta[m.clip_name];
+  });
+  const cmp = (a, b) => { const na = isNaN(a) ? a : +a, nb = isNaN(b) ? b : +b; return na < nb ? -1 : na > nb ? 1 : 0; };
+  const sorted = [...sel].sort((a, b) => {
+    const ma = fileMap[a], mb = fileMap[b];
+    if (!ma && !mb) return a.localeCompare(b);
+    if (!ma) return 1; if (!mb) return -1;
+    return cmp(ma.scene, mb.scene) || cmp(ma.shot, mb.shot) || cmp(ma.take, mb.take) || ma.frame - mb.frame;
+  });
+  const groups = [], sceneIdx = new Map();
+  sorted.forEach(f => {
+    const scene = fileMap[f]?.scene ?? '';
+    if (!sceneIdx.has(scene)) { sceneIdx.set(scene, groups.length); groups.push({ scene, images: [] }); }
+    groups[sceneIdx.get(scene)].images.push(f);
+  });
+  return groups;
+}
+
+function csTextColor(bgHex) {
+  const r = parseInt(bgHex.slice(1,3)||'0',16), g = parseInt(bgHex.slice(3,5)||'0',16), b = parseInt(bgHex.slice(5,7)||'0',16);
+  return (r*299 + g*587 + b*114) / 1000 > 128 ? '#111111' : '#ffffff';
+}
+
+async function csDrawProdInfo(ctx, W, topY, margin, offsetX = 0, bgColor = '#000000') {
   const prod = loadProdData();
   const fs = Math.max(10, Math.round(W * 0.013));
   const lh = Math.round(fs * 1.55);
@@ -2307,93 +2806,132 @@ async function csDrawProdInfo(ctx, W, topY, margin) {
     prod.ac1      && `AC ${prod.ac1}`,
     prod.dit      && `DIT ${prod.dit}`,
   ].filter(Boolean).join('  ·  ');
-  const hasProd = prod.production || prod.project;
-  if (!hasProd && !crew) return 0;
+  const hasProject = !!prod.project;
+  const hasProd    = !!prod.production;
+  if (!hasProject && !hasProd && !crew) return 0;
 
   const pad = Math.round(margin * 1.4) || Math.round(W * 0.012);
-  const blockH = pad + (hasProd ? lh : 0) + (crew ? lh : 0) + pad;
+  const lines = (hasProject ? 1 : 0) + (hasProd ? 1 : 0) + (crew ? 1 : 0);
+  const blockH = pad + lines * lh + pad;
 
-  // Background strip + bottom separator
-  ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  ctx.fillRect(0, topY, W, blockH);
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = Math.max(1, Math.round(W * 0.0005));
-  ctx.beginPath(); ctx.moveTo(0, topY + blockH); ctx.lineTo(W, topY + blockH); ctx.stroke();
+  const baseColor = csTextColor(bgColor);
+  const font = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+  let ty = topY + pad;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
   // Logo (right side)
-  let rightX = W - pad;
   if (prod.logo) {
     try {
       const img = await loadImgEl(prod.logo);
       const logoH = blockH * 0.65;
       const logoW = Math.round(logoH * img.naturalWidth / img.naturalHeight);
-      ctx.drawImage(img, W - pad - logoW, topY + (blockH - logoH) / 2, logoW, logoH);
-      rightX = W - pad - logoW - pad;
+      ctx.save();
+      if ($('csInvertLogo').checked) ctx.filter = 'invert(1)';
+      ctx.drawImage(img, offsetX + W - pad - logoW, topY + (blockH - logoH) / 2, logoW, logoH);
+      ctx.restore();
     } catch(e) {}
   }
 
-  const font = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
-  let ty = topY + pad;
-  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-
-  if (hasProd) {
-    const parts = [prod.production && prod.production.toUpperCase(), prod.project].filter(Boolean);
+  // Project name — first, prominent
+  if (hasProject) {
     ctx.font = `700 ${fs}px ${font}`;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(parts.join('  —  '), pad, ty);
+    ctx.fillStyle = baseColor;
+    ctx.globalAlpha = 1;
+    ctx.fillText(prod.project, offsetX + pad, ty);
     ty += lh;
   }
+  // Production — smaller, muted
+  if (hasProd) {
+    ctx.font = `400 ${Math.round(fs * 0.85)}px ${font}`;
+    ctx.fillStyle = baseColor;
+    ctx.globalAlpha = 0.5;
+    ctx.fillText(prod.production, offsetX + pad, ty);
+    ctx.globalAlpha = 1;
+    ty += lh;
+  }
+  // Crew line
   if (crew) {
-    ctx.font = `${Math.round(fs * 0.85)}px ${font}`;
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText(crew, pad, ty);
+    ctx.font = `${Math.round(fs * 0.8)}px ${font}`;
+    ctx.fillStyle = baseColor;
+    ctx.globalAlpha = 0.45;
+    ctx.fillText(crew, offsetX + pad, ty);
+    ctx.globalAlpha = 1;
   }
   return blockH;
 }
 
-async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0) {
-  const sel = curSel(); if (!sel.length) return null;
+async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0, forcedImages = null, pageTitle = null) {
+  const isSceneOverride = forcedImages !== null;
+  let sel;
+  if (!isSceneOverride) {
+    sel = curSel(); if (!sel.length) return null;
+    if ($('csSortScene').checked) sel = csSortByScene(sel);
+  }
   const margin    = parseInt($('csMargin').value) || 0;
   const bgColor   = $('csBg').value;
-  const title     = $('csTitle').value.trim();
+  const titleColor = $('csTitleColor').value || '#ffffff';
+  const title     = pageTitle !== null ? String(pageTitle) : $('csTitle').value.trim();
   const forceCols = parseInt($('csCols').value) || 0;
   const forceRows = parseInt($('csRows').value) || 0;
+  const dims = csGetExportDims();
+  // A4 page margin: convert mm → px using actual canvas width
+  const a4MarginMm = dims.a4 ? (parseInt($('csA4Margin').value) || 0) : 0;
+  const a4Margin = dims.a4 ? Math.round(a4MarginMm * W / dims.a4.PW) : 0;
 
   const H = overrideH || Math.round(W / csGetRatio());
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = bgColor; ctx.fillRect(0, 0, W, H);
 
-  let headerH = 0;
+  let headerH = a4Margin;
   if ($('csProdInfo').checked) {
-    headerH = await csDrawProdInfo(ctx, W, 0, margin);
+    headerH = a4Margin + await csDrawProdInfo(ctx, W - 2*a4Margin, a4Margin, margin, a4Margin, bgColor);
   }
 
   let titleH = headerH;
   if (title) {
-    const fs = Math.max(14, Math.round(W * 0.022));
-    const tPad = Math.round(margin * 0.8) || Math.round(W * 0.008);
-    titleH = headerH + fs + tPad * 2;
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `600 ${fs}px -apple-system, BlinkMacSystemFont, sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText(title, W/2, headerH + tPad);
+    const fs  = Math.max(8, Math.round(W * 0.010));
+    const tPad = Math.round(margin * 1.2) || Math.round(W * 0.014);
+    const bottomExtra = Math.round(tPad * 0.8);
+    titleH = headerH + fs + tPad + tPad + bottomExtra;
+    if (pageIndex === 0) {
+      const sysFont = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+      ctx.font = `400 ${fs}px ${sysFont}`;
+      const leftOffset = Math.round(W * 0.018);
+      const tx = a4Margin + margin + leftOffset;
+      const ty = headerH + tPad;
+      const tw = ctx.measureText(title).width;
+      const rph = Math.round(fs * 0.5), rpv = Math.round(fs * 0.3);
+      const isLightBg = csTextColor(bgColor) === '#111111';
+      ctx.fillStyle = isLightBg ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.82)';
+      ctxRoundRect(ctx, tx - rph, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
+      ctx.fill();
+      ctx.fillStyle = titleColor;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(title, tx, ty);
+    }
   }
 
-  const availW = W - 2*margin;
-  const availH = H - titleH - 2*margin;
+  const colorBandH = $('csColorPalette').checked ? Math.max(6, Math.round(H * 0.018)) : 0;
+  const availW = W - 2*a4Margin - 2*margin;
+  const availH = H - titleH - a4Margin - 2*margin - (colorBandH > 0 ? colorBandH + margin : 0);
 
   const pw = $('csProgressWrap'), pf = $('csProgressFill');
-  const isFirstLoad = !preloadedImgs;
-  if (isFirstLoad) {
+  const isFirstLoad = !preloadedImgs && !isSceneOverride;
+  let loaded;
+  if (isSceneOverride) {
+    loaded = forcedImages;
+  } else if (isFirstLoad) {
     pw.style.display = 'block'; pf.style.width = '0%';
     preloadedImgs = [];
     for (let i = 0; i < sel.length; i++) {
       preloadedImgs.push(await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`));
       pf.style.width = `${(i+1)/sel.length*50}%`;
     }
+    loaded = preloadedImgs;
+  } else {
+    loaded = preloadedImgs;
   }
-  const loaded = preloadedImgs;
   const allArs = loaded.map(img => img.naturalWidth / img.naturalHeight);
 
   // Compute grid dimensions
@@ -2425,7 +2963,7 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
   for (let i = 0; i < pageImgs.length; i++) {
     const img = pageImgs[i];
     const col = i % cols, row = Math.floor(i / cols);
-    const cellX = margin + col*(cellW+margin);
+    const cellX = a4Margin + margin + col*(cellW+margin);
     const cellY = margin + titleH + row*(cellH+margin);
     const ar = pageArs[i]; let w = cellW, h = cellH;
     if (w/h > ar) w = h*ar; else h = w/ar;
@@ -2433,9 +2971,54 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
     if (isFirstLoad) pf.style.width = `${50 + (i+1)/pageImgs.length*50}%`;
   }
 
+  if (colorBandH > 0 && pageImgs.length > 0) {
+    const bandY = H - a4Margin - colorBandH;
+    const bandTotalW = W - 2*a4Margin;
+    const segW = bandTotalW / pageImgs.length;
+    pageImgs.forEach((img, i) => {
+      const colors = extractDominantColors(img, 3);
+      if (!colors.length) return;
+      const bx = a4Margin + i * segW;
+      const cw = segW / colors.length;
+      colors.forEach((c, ci) => { ctx.fillStyle = c; ctx.fillRect(bx + ci*cw, bandY, cw, colorBandH); });
+      if (i < pageImgs.length - 1) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(bx+segW, bandY); ctx.lineTo(bx+segW, bandY+colorBandH); ctx.stroke();
+      }
+    });
+  }
+
   if ($('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
   if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
   return { loaded, cols, rows, itemsPerPage, totalPages };
+}
+
+function extractDominantColors(img, n = 3) {
+  const sz = 80;
+  const tc = document.createElement('canvas'); tc.width = sz; tc.height = sz;
+  const tx = tc.getContext('2d'); tx.drawImage(img, 0, 0, sz, sz);
+  let data; try { data = tx.getImageData(0, 0, sz, sz).data; } catch { return []; }
+  const cmap = new Map();
+  for (let i = 0; i < data.length; i += 6*4) {
+    const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3]; if (a < 200) continue;
+    const qr=Math.floor(r/18)*18, qg=Math.floor(g/18)*18, qb=Math.floor(b/18)*18;
+    const br=(qr+qg+qb)/3, mx=Math.max(qr,qg,qb), mn=Math.min(qr,qg,qb);
+    const sat=mx===0?0:(mx-mn)/mx;
+    if (br<25||br>230||sat<0.12) continue;
+    const key=`${qr},${qg},${qb}`;
+    cmap.set(key,(cmap.get(key)||0)+sat*(1-Math.abs(br-128)/128));
+  }
+  return [...cmap.entries()].sort(([,a],[,b])=>b-a).slice(0,n)
+    .map(([k])=>{ const [r,g,b]=k.split(',').map(Number); return `rgb(${r},${g},${b})`; });
+}
+
+function ctxRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
 }
 
 function csDrawWatermark(ctx, W, H) {
@@ -2482,40 +3065,106 @@ async function exportCS(fmt) {
     const baseName = (activeSel||'contact-sheet').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'contact-sheet';
     const suffix = `${baseName}_contact_sheet`;
 
-    // Render page 0 (loads images, returns metadata)
-    const canvas = document.createElement('canvas');
-    const result = await csRender(canvas, dims.W, null, 0, dims.H);
-    const { loaded, totalPages } = result;
+    if ($('csSortScene').checked && clipsMetadata?.clips?.length) {
+      // ── Scene-grouped export ──────────────────────────────────────
+      const sel = curSel();
+      const groups = csGetSceneGroups(sel);
 
-    if (fmt === 'pdf') {
-      const { jsPDF } = window.jspdf;
-      const PW = dims.a4 ? dims.a4.PW : 297;
-      const PH = dims.a4 ? dims.a4.PH : Math.round(297 * dims.H / dims.W * 1000) / 1000;
-      const pdf = new jsPDF({ unit:'mm', format: dims.a4 ? 'a4' : [PW,PH], orientation: PW>=PH?'landscape':'portrait' });
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
-      for (let p = 1; p < totalPages; p++) {
-        const c = document.createElement('canvas');
-        await csRender(c, dims.W, loaded, p, dims.H);
-        pdf.addPage();
-        pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+      // Preload all images once
+      const allImgMap = new Map();
+      const pw = $('csProgressWrap'), pf = $('csProgressFill');
+      pw.style.display = 'block'; pf.style.width = '0%';
+      for (let i = 0; i < sel.length; i++) {
+        allImgMap.set(sel[i], await loadImgEl(`/api/image/${encodeURIComponent(sel[i])}`));
+        pf.style.width = `${(i+1)/sel.length*100}%`;
       }
-      pdf.save(`${suffix}.pdf`);
+      setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+
+      if (fmt === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const PW = dims.a4 ? dims.a4.PW : 297;
+        const PH = dims.a4 ? dims.a4.PH : Math.round(297 * dims.H / dims.W * 1000) / 1000;
+        const pdf = new jsPDF({ unit:'mm', format: dims.a4 ? 'a4' : [PW,PH], orientation: PW>=PH?'landscape':'portrait' });
+        let firstPage = true;
+        for (const group of groups) {
+          const sceneImgs = group.images.map(f => allImgMap.get(f)).filter(Boolean);
+          if (!sceneImgs.length) continue;
+          const sceneTitle = group.scene ? `Scene ${group.scene}` : '';
+          const canvas = document.createElement('canvas');
+          const result = await csRender(canvas, dims.W, null, 0, dims.H, sceneImgs, sceneTitle);
+          if (!firstPage) pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+          firstPage = false;
+          for (let p = 1; p < result.totalPages; p++) {
+            const c = document.createElement('canvas');
+            await csRender(c, dims.W, null, p, dims.H, sceneImgs, sceneTitle);
+            pdf.addPage();
+            pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+          }
+        }
+        await pdfSave(pdf, `${suffix}.pdf`, 'contactSheet');
+      } else {
+        const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+        const q = fmt === 'jpg' ? 0.92 : 1;
+        for (const group of groups) {
+          const sceneImgs = group.images.map(f => allImgMap.get(f)).filter(Boolean);
+          if (!sceneImgs.length) continue;
+          const sceneTitle = group.scene ? `Scene ${group.scene}` : '';
+          const sceneLabel = group.scene ? `_scene${group.scene}` : '';
+          const canvas = document.createElement('canvas');
+          const result = await csRender(canvas, dims.W, null, 0, dims.H, sceneImgs, sceneTitle);
+          const subLabel = result.totalPages > 1 ? '_p1' : '';
+          const fn0 = `${suffix}${sceneLabel}${subLabel}.${fmt}`;
+          const uri0 = canvas.toDataURL(mime, q);
+          if (!await saveFileToServer(fn0, uri0, 'contactSheet')) {
+            const a = document.createElement('a'); a.download = fn0; a.href = uri0; a.click();
+          }
+          for (let p = 1; p < result.totalPages; p++) {
+            await new Promise(r => setTimeout(r, 300));
+            const c = document.createElement('canvas');
+            await csRender(c, dims.W, null, p, dims.H, sceneImgs, sceneTitle);
+            const fn = `${suffix}${sceneLabel}_p${p+1}.${fmt}`;
+            const uri = c.toDataURL(mime, q);
+            if (!await saveFileToServer(fn, uri, 'contactSheet')) {
+              const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+            }
+          }
+        }
+      }
     } else {
-      const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
-      const q = fmt === 'jpg' ? 0.92 : 1;
-      const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
-      const a0 = document.createElement('a');
-      a0.download = `${suffix}${pageLabel(0)}.${fmt}`;
-      a0.href = canvas.toDataURL(mime, q);
-      a0.click();
-      for (let p = 1; p < totalPages; p++) {
-        await new Promise(r => setTimeout(r, 300));
-        const c = document.createElement('canvas');
-        await csRender(c, dims.W, loaded, p, dims.H);
-        const a = document.createElement('a');
-        a.download = `${suffix}${pageLabel(p)}.${fmt}`;
-        a.href = c.toDataURL(mime, q);
-        a.click();
+      // ── Standard export (all images, row-based pagination) ────────
+      const canvas = document.createElement('canvas');
+      const result = await csRender(canvas, dims.W, null, 0, dims.H);
+      const { loaded, totalPages } = result;
+
+      if (fmt === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const PW = dims.a4 ? dims.a4.PW : 297;
+        const PH = dims.a4 ? dims.a4.PH : Math.round(297 * dims.H / dims.W * 1000) / 1000;
+        const pdf = new jsPDF({ unit:'mm', format: dims.a4 ? 'a4' : [PW,PH], orientation: PW>=PH?'landscape':'portrait' });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+        for (let p = 1; p < totalPages; p++) {
+          const c = document.createElement('canvas');
+          await csRender(c, dims.W, loaded, p, dims.H);
+          pdf.addPage();
+          pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+        }
+        await pdfSave(pdf, `${suffix}.pdf`, 'contactSheet');
+      } else {
+        const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+        const q = fmt === 'jpg' ? 0.92 : 1;
+        const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
+        for (let p = 0; p < totalPages; p++) {
+          if (p > 0) await new Promise(r => setTimeout(r, 300));
+          const c = p === 0 ? canvas : document.createElement('canvas');
+          if (p > 0) await csRender(c, dims.W, loaded, p, dims.H);
+          const fn = `${suffix}${pageLabel(p)}.${fmt}`;
+          const dataUri = c.toDataURL(mime, q);
+          if (!await saveFileToServer(fn, dataUri, 'contactSheet')) {
+            const a = document.createElement('a');
+            a.download = fn; a.href = dataUri; a.click();
+          }
+        }
       }
     }
   } catch(e) { alert('Export error: ' + e.message); }
@@ -2534,9 +3183,11 @@ $('exportBtn').onclick      = exportPDF;
 $('csBtn').onclick   = openCS;
 $('setTabWm').onclick   = () => { switchSettingsTab('wm');   renderWmPreview(); };
 $('setTabCS').onclick   = () => { switchSettingsTab('cs');   generateCSPreview(); };
-$('setTabProd').onclick = () => switchSettingsTab('prod');
-$('prodDone').onclick   = closeWm;
-$('settingsHeaderBtn').onclick  = openProd;
+$('setTabProd').onclick  = () => switchSettingsTab('prod');
+$('setTabPaths').onclick = () => switchSettingsTab('paths');
+$('prodDone').onclick    = closeWm;
+$('pathsDone').onclick   = closeWm;
+$('settingsHeaderBtn').onclick  = openSettings;
 $('exportHeaderBtn').onclick    = openExportModal;
 
 // Production form — autosave on change
@@ -2555,15 +3206,47 @@ $('prodLogoInput').addEventListener('change', e => setLogoFromFile(e.target.file
 $('prodLogoClear').addEventListener('click',  e => { e.stopPropagation(); clearLogo(); });
 
 initProdForm();
+initPathsForm();
+{ const isA4 = ['a4p','a4l'].includes($('csExportW').value); $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none'; }
+
+// ─── Theme toggle ──────────────────────────────────────────────────────────
+function applyTheme(t) {
+  document.body.classList.toggle('light', t === 'light');
+  $('themeToggle').textContent = t === 'light' ? '☾' : '☀';
+  $('themeToggle').title = t === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+  localStorage.setItem('stills-theme', t);
+}
+$('themeToggle').onclick = () => applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+applyTheme(localStorage.getItem('stills-theme') || 'dark');
+
+// Paths tab events
+$('pathsGang').addEventListener('change', () => { updatePathsVis(); savePathsData(); });
+$('pathsCreateFolder').addEventListener('change', savePathsData);
+PATH_IDS.forEach(id => { const el = $('path_'+id); if (el) el.addEventListener('input', savePathsData); });
+document.querySelectorAll('.paths-browse').forEach(btn => {
+  btn.addEventListener('click', () => openPathPicker(btn.dataset.for));
+});
+$('ppSelect').onclick = () => { if(ppTargetId){ $(ppTargetId).value = ppCurrentPath; savePathsData(); } $('pathPicker').classList.remove('open'); };
+$('ppCancel').onclick = () => $('pathPicker').classList.remove('open');
+$('pathPicker').addEventListener('click', e => { if(e.target===$('pathPicker')) $('pathPicker').classList.remove('open'); });
 $('csJpgBtn').onclick = () => exportCS('jpg');
 $('csPngBtn').onclick = () => exportCS('png');
 $('csPdfBtn').onclick = () => exportCS('pdf');
+$('csPrevPage').onclick = () => navigateCSPreview(-1);
+$('csNextPage').onclick = () => navigateCSPreview(1);
 
 // Live preview — CS modal settings
-['csTitle','csMargin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
-$('csBg').addEventListener('input', csQueuePreview);
+['csTitle','csMargin','csA4Margin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
+['csBg','csTitleColor'].forEach(id => $(id).addEventListener('input', csQueuePreview));
 ['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csQueuePreview));
+$('csExportW').addEventListener('change', () => {
+  const isA4 = ['a4p','a4l'].includes($('csExportW').value);
+  $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
+});
+$('csSortScene').addEventListener('change', csQueuePreview);
+$('csColorPalette').addEventListener('change', csQueuePreview);
 $('csProdInfo').addEventListener('change', csQueuePreview);
+$('csInvertLogo').addEventListener('change', csQueuePreview);
 $('csWmEnabled').addEventListener('change', csQueuePreview);
 
 // Report search
@@ -2672,7 +3355,7 @@ function downloadText(content, filename, mime) {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-function exportALE() {
+async function exportALE() {
   if (!clipsMetadata?.clips?.length) return;
   const clips = clipsMetadata.clips;
   const keySet = new Set();
@@ -2688,10 +3371,10 @@ function exportALE() {
     const m = Object.assign({}, c.clip_properties || {}, c.metadata || {});
     ale += [c.clip_name || '', ...keys.map(k => String(m[k] ?? '').replace(/\t/g,' '))].join(T) + NL;
   });
-  downloadText(ale, (clipsMetadata.timeline || 'export') + '.ale', 'text/plain');
+  await textSave(ale, (clipsMetadata.timeline || 'export') + '.ale', 'text/plain', 'ale');
 }
 
-function exportCSV() {
+async function exportCSV() {
   if (!clipsMetadata?.clips?.length) return;
   const clips = clipsMetadata.clips;
   const keySet = new Set();
@@ -2706,7 +3389,7 @@ function exportCSV() {
     const m = Object.assign({}, c.clip_properties || {}, c.metadata || {});
     csv += [c.clip_name || '', ...keys.map(k => esc(m[k] ?? ''))].join(',') + '\n';
   });
-  downloadText(csv, (clipsMetadata.timeline || 'export') + '.csv', 'text/csv');
+  await textSave(csv, (clipsMetadata.timeline || 'export') + '.csv', 'text/csv', 'csv');
 }
 
 function pdfParseCard(name){const m=String(name||'').match(/^([A-Z](?:_\d{4}|\d+))C\d+/);return m?m[1]:null;}
@@ -2735,7 +3418,7 @@ function addThumb(doc,th,x,y,maxW,maxH){
   try{doc.addImage(th.data,'JPEG',x+(maxW-dw)/2,y+(maxH-dh)/2,dw,dh,'','FAST');}catch(e){}
 }
 
-function exportShootReport() {
+async function exportShootReport() {
   if (!clipsMetadata?.clips?.length) { alert('No clips data available.'); return; }
   const { jsPDF } = window.jspdf;
   const clips = clipsMetadata.clips;
@@ -2884,7 +3567,7 @@ function exportShootReport() {
     doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(190,190,190);
     hline(ML,W-MR,H-MB+2,0.2,210);T('Be4Post - Shoot Report',ML,H-MB+5);T(`Generated ${today}`,ML+CW/2,H-MB+5,{align:'center'});T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
   }
-  doc.save(`${timeline}_shoot_report.pdf`);
+  await pdfSave(doc, `${timeline}_shoot_report.pdf`, 'shootReport');
 }
 
 async function exportQCReport() {
@@ -3047,7 +3730,7 @@ async function exportQCReport() {
     T(`Generated ${today}`,ML+CW/2,H-MB+5,{align:'center'});
     T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
   }
-  doc.save(`${timeline}_qc_report.pdf`);
+  await pdfSave(doc, `${timeline}_qc_report.pdf`, 'qcReport');
 }
 
 async function exportClipsReport() {
@@ -3223,7 +3906,7 @@ async function exportClipsReport() {
     T(`Generated ${today}`,ML+CW/2+ML/2,H-MB+5,{align:'center'});
     T(`${i} / ${np}`,W-MR,H-MB+5,{align:'right'});
   }
-  doc.save(`${timeline}_clips_report.pdf`);
+  await pdfSave(doc, `${timeline}_clips_report.pdf`, 'clipsReport');
 }
 
 function runExports() {
