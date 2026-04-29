@@ -2,7 +2,7 @@
 
 A local web app for browsing, curating and exporting image stills from a film shoot. Runs entirely on your machine — no cloud, no upload.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-grey) ![Flask](https://img.shields.io/badge/Flask-3.0-grey)
+![Python](https://img.shields.io/badge/Python-3.9%2B-grey) ![Flask](https://img.shields.io/badge/Flask-3.0-grey) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 ![Main screen](readme/examples/stillsManager.png)        
@@ -185,6 +185,12 @@ Stills-Manager/
 ├── index.html       # Single-page app (HTML + CSS + JS)
 └── requirements.txt
 ```
+
+---
+
+## License
+
+MIT — free to use, modify and distribute. See [LICENSE](LICENSE) for details.
 
 ---
 
