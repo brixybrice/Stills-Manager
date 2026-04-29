@@ -191,3 +191,7 @@ Stills-Manager/
 ## Credits
 
 Contact sheet layout concept and colour palette feature — [**Ben Chaude Woodman**](https://240p-is-fine.com/ContactSheetCreator.html)
+
+Beta testing — **Simon Jayet**
+
+Ideas & feedback — [**Olivier Patron**](https://github.com/Luronnade)
