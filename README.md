@@ -15,12 +15,12 @@ A local web app for browsing, curating and exporting image stills from a film sh
 
 - **Browse** any local folder containing JPG, PNG or TIF images
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
-- **Fullscreen lightbox** — Cmd+click to view full size; vertical carousel with scroll/swipe navigation
+- **Fullscreen lightbox** — `Cmd`+`click to view full size; vertical carousel with scroll/swipe navigation
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
 - **Multiple selections** via tabs — add, rename (double-click), reorder and delete
 - **Drag & drop** reordering of images within a selection
-- **Reorder from fullscreen** — Cmd+↑/↓ moves the current image up or down in the selection order
-- **Undo / Redo** — full history for all selection edits (Cmd+Z / Cmd+Shift+Z)
+- **Reorder from fullscreen** — `Cmd`+`↑/↓` moves the current image up or down in the selection order
+- **Undo / Redo** — full history for all selection edits (`Cmd`+`Z` / `Cmd`+`Shift`+`Z`)
 - **Auto-save** — selections written as `.stills-selections.json` in the open folder, debounced at 350 ms
 - **URL persistence** — the open folder is encoded in the URL; reloading the page reopens it automatically
 - **Light / dark mode** — toggle with the ☀/☾ button; preference persisted in `localStorage`
@@ -95,7 +95,7 @@ When the layout produces multiple pages (scene mode or rows-per-page pagination)
 **Append to PDF Stills export**
 When *Append to PDF export* is checked, the contact sheet is appended to the PDF Stills export respecting all current Contact Sheet settings — including scene grouping, pagination, background colour, production info and colour palette.
 
-### Settings (`Cmd+;`)
+### Settings (`Cmd`+`;`)
 
 Four-tab panel (remembers the last open tab):
 
@@ -142,16 +142,16 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `←` / `↑` | Previous image (fullscreen) |
 | `→` / `↓` | Next image (fullscreen) |
 | `Space` | Add / remove from selection (fullscreen) |
-| `Cmd+↑` | Move image up in selection (fullscreen) |
-| `Cmd+↓` | Move image down in selection (fullscreen) |
+| `Cmd`+`↑` | Move image up in selection (fullscreen) |
+| `Cmd`+`↓` | Move image down in selection (fullscreen) |
 | `Esc` | Close fullscreen or modal |
-| `Cmd+Z` | Undo |
-| `Cmd+Shift+Z` | Redo |
-| `Cmd+O` | Open folder |
-| `Cmd+;` | Open settings |
-| `Cmd+E` | Open export panel |
-| `Cmd+Shift+N` | New selection |
-| `Cmd+click` | Open image fullscreen (gallery) |
+| `Cmd`+`Z` | Undo |
+| `Cmd`+`Shift`+`Z` | Redo |
+| `Cmd`+`O` | Open folder |
+| `Cmd`+`;` | Open settings |
+| `Cmd`+`E` | Open export panel |
+| `Cmd`+`Shift`+`N` | New selection |
+| `Cmd`+`click` | Open image fullscreen (gallery) |
 | `Enter` | Trigger exports (export panel open) |
 
 ---
@@ -171,7 +171,7 @@ Selections are saved as a JSON file (`.stills-selections.json`) in the open fold
 }
 ```
 
-The file is created automatically when a folder is opened and updated on every change. It is hidden by default on macOS and Linux (dot-prefixed); use `ls -a` or **Show Hidden Files** in Finder (`Cmd+Shift+.`) to reveal it.
+The file is created automatically when a folder is opened and updated on every change. It is hidden by default on macOS and Linux (dot-prefixed); use `ls -a` or **Show Hidden Files** in Finder (`Cmd`+`Shift`+`.`) to reveal it.
 
 Production info, theme preference, export paths and contact sheet settings are stored in `localStorage` and persist across sessions.
 
@@ -190,4 +190,4 @@ Stills-Manager/
 
 ## Credits
 
-Contact sheet layout concept and colour palette feature — **Ben Chaude Woodman**
+Contact sheet layout concept and colour palette feature — [**Ben Chaude Woodman**](https://240p-is-fine.com/ContactSheetCreator.html)
