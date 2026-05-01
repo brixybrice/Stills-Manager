@@ -100,12 +100,43 @@ When *Append to PDF export* is checked, the contact sheet is appended to the PDF
 
 ### Settings (`Cmd`+`;`)
 
-Four-tab panel (remembers the last open tab):
+Five-tab panel (remembers the last open tab):
 
 - **Production** — project name, production company, Director, DOP, DIT, ACs, Data Manager, logo (PNG); stored in `localStorage`; injected into all PDF report headers and the contact sheet production info block
 - **Contact Sheet** — all layout and content options described above; live preview with page navigation
 - **Watermark** — tiled text overlay with font, size, opacity and angle; live preview; applied to PDF Stills and optionally to the contact sheet
 - **Paths** — configure the destination folder for each export type independently, or gang all exports to a single folder; optional "create sub-folder with title name"; folder browser included
+- **Live Mode** — crop stills to a sensor area for exports and fullscreen preview (see below)
+
+### Live Mode
+
+![Live Mode](readme/examples/liveMode.png)  
+
+
+Two-column panel — **Crop** on the left, **Framelines** on the right.
+
+**Crop**
+- **Crop stills** checkbox — enables the crop pipeline for thumbnails, lightbox and all exports
+- **Image source** — camera preset or Custom:
+  | Preset | Dimensions |
+  |--------|-----------|
+  | Arri Alexa 35 — 16:9 | 1739 × 980 px |
+  | Arri Alexa 35 — Open Gate 3:2 | 1430 × 983 px |
+  | Arri Alexa LF — 4.5K Magnum | 1711 × 998 px |
+  | Red Raptor 8K VV — 17:9 | 1793 × 946 px |
+  | Sony Venice 2 — 17:9 | 1728 × 913 px |
+  | Custom | user-defined W × H |
+- **Width / Height** — always visible; disabled when a preset is selected, editable in Custom mode
+- **Rotation** — None, 90° CW, 90° CCW, 180°
+- **PDF background colour** — canvas fill colour for PDF Stills exports
+
+**Framelines**
+- **Apply framelines** — crops further to a target aspect ratio within the sensor area
+- **Format** — 16:9, 17:9, 2.39:1 (Scope), 1.85:1 (Flat), 2:1, 4:3, 3:2, 5:4, 1:1, or Custom ratio
+- **Safety %** — scales the frameline crop down by the given percentage (50–100)
+- **Offset X / Y** — shifts the frameline window within the sensor area (pixels)
+
+Settings take effect when **Done** is clicked or on page load.
 
 ---
 
@@ -158,6 +189,7 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `Cmd`+`Shift`+`N` | New selection |
 | `Cmd`+`click` | Open image fullscreen (gallery) |
 | `Enter` | Trigger exports (export panel open) |
+| `Enter` | Apply Live Mode settings (Live Mode tab open) |
 
 ---
 

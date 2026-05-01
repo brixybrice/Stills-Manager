@@ -544,11 +544,11 @@ kbd {
 }
 .prod-field { display: flex; flex-direction: column; gap: 5px; }
 .prod-field label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; }
-.prod-field input {
+.prod-field input, .prod-field select {
   background: #212121; border: 1px solid #2e2e2e; border-radius: 4px;
   color: #bbb; font-size: 13px; padding: 7px 10px; font-family: inherit; width: 100%;
 }
-.prod-field input:focus { outline: none; border-color: #006D78; }
+.prod-field input:focus, .prod-field select:focus { outline: none; border-color: #006D78; }
 .prod-logo-panel {
   width: 240px; flex-shrink: 0; border-left: 1px solid #252525;
   padding: 24px; display: flex; flex-direction: column; gap: 10px;
@@ -601,6 +601,23 @@ hr.cs-sep { border: none; border-top: 1px solid #222; }
 
 /* ── Paths tab ── */
 .paths-body { display:flex; flex-direction:column; padding:16px 20px; gap:10px; overflow-y:auto; flex:1; min-height:0; }
+
+/* ── Live Mode tab ── */
+.live-body { display:flex; flex-direction:column; padding:20px; flex:1; overflow-y:auto; min-height:0; }
+.live-fields { display:grid; grid-template-columns:1fr 1fr; gap:0 24px; align-items:start; }
+.live-col { display:flex; flex-direction:column; gap:12px; }
+.live-col-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:#666; margin-bottom:2px; }
+.live-rot-btn {
+  flex:1; padding:5px 4px; font-size:11px; background:#212121;
+  border:1px solid #2e2e2e; border-radius:4px; color:#666; cursor:pointer;
+}
+.live-rot-btn:hover { border-color:#555; color:#aaa; }
+.live-rot-btn.active { border-color:#006D78; color:#00b8c8; background:#0d2e31; }
+body.light .live-rot-btn { background:#efefef; border-color:#d4d4d4; color:#888; }
+body.light .live-rot-btn:hover { border-color:#aaa; color:#444; }
+body.light .live-rot-btn.active { border-color:#006D78; color:#006D78; background:#e0f4f5; }
+.live-col input:disabled { opacity:.45; cursor:default; }
+
 .paths-opt-row { display:flex; gap:24px; flex-wrap:wrap; }
 .paths-opt { display:flex; align-items:center; gap:7px; color:#aaa; font-size:12px; cursor:pointer; user-select:none; }
 .paths-opt input[type=checkbox] { accent-color:#006D78; }
@@ -988,7 +1005,7 @@ body.light #csStatus { color: #bbb; }
 
 /* Production pane */
 body.light .prod-field label { color: #aaa; }
-body.light .prod-field input { background: #fff; border-color: #d4d4d4; color: #333; }
+body.light .prod-field input, body.light .prod-field select { background: #fff; border-color: #d4d4d4; color: #333; }
 body.light .prod-logo-panel { border-left-color: #e8e8e8; }
 body.light .prod-logo-label { color: #aaa; }
 body.light .prod-logo-drop { background: #f0f0f0; border-color: #d4d4d4; }
@@ -1155,6 +1172,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <button class="set-tab" id="setTabCS">Contact Sheet</button>
         <button class="set-tab" id="setTabWm">Watermark</button>
         <button class="set-tab" id="setTabPaths">Paths</button>
+        <button class="set-tab" id="setTabLive">Live Mode</button>
       </div>
       <button class="btn-ghost" id="wmClose">✕</button>
     </div>
@@ -1372,6 +1390,130 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       </div>
     </div>
 
+    <!-- Live Mode pane -->
+    <div class="set-pane" id="setPaneLive" style="display:none">
+      <div class="live-body">
+        <div class="live-fields">
+
+          <!-- ── Left column : Crop ─────────────────────────────────── -->
+          <div class="live-col">
+            <div class="live-col-title">Crop</div>
+
+            <label class="paths-opt">
+              <input type="checkbox" id="liveCrop" style="accent-color:#006D78">
+              Crop stills
+            </label>
+
+            <div class="prod-field">
+              <label>Image source</label>
+              <select id="liveSource">
+                <option value="alexa35">Arri Alexa 35 — 16:9</option>
+                <option value="alexa35og">Arri Alexa 35 — Open Gate 3:2</option>
+                <option value="alexalf">Arri Alexa LF — 4.5K Magnified</option>
+                <option value="raptorvv">Red Raptor 8K VV — 17:9</option>
+                <option value="venice2">Sony Venice 2 — 17:9</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="prod-field">
+                <label>Width (px)</label>
+                <input type="number" id="liveCustomW" value="1920" min="1" step="1">
+              </div>
+              <div class="prod-field">
+                <label>Height (px)</label>
+                <input type="number" id="liveCustomH" value="1080" min="1" step="1">
+              </div>
+            </div>
+
+            <div class="prod-field">
+              <label>Rotation</label>
+              <div style="display:flex;gap:5px">
+                <button class="live-rot-btn active" data-rot="0">—</button>
+                <button class="live-rot-btn" data-rot="90cw">90° CW</button>
+                <button class="live-rot-btn" data-rot="90ccw">90° CCW</button>
+                <button class="live-rot-btn" data-rot="180">180°</button>
+              </div>
+            </div>
+
+            <div class="prod-field">
+              <label>PDF background colour</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="color" id="liveBgColor" value="#000000" style="width:36px;height:30px;padding:2px;border:1px solid #2e2e2e;border-radius:4px;background:#212121;cursor:pointer">
+                <input type="text" id="liveBgColorHex" value="#000000" style="flex:1" placeholder="#000000">
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Right column : Framelines ──────────────────────────── -->
+          <div class="live-col">
+            <div class="live-col-title">Framelines</div>
+
+            <label class="paths-opt">
+              <input type="checkbox" id="liveFlEnable" style="accent-color:#006D78">
+              Apply framelines
+            </label>
+
+            <div id="liveFlOptions" style="display:none;flex-direction:column;gap:12px">
+
+              <div class="prod-field">
+                <label>Format</label>
+                <select id="liveFlFormat">
+                  <option value="16:9">16:9</option>
+                  <option value="17:9">17:9</option>
+                  <option value="2.39:1">2.39:1 — Scope</option>
+                  <option value="1.85:1">1.85:1 — Flat</option>
+                  <option value="2:1">2:1</option>
+                  <option value="4:3">4:3</option>
+                  <option value="3:2">3:2</option>
+                  <option value="5:4">5:4</option>
+                  <option value="1:1">1:1</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+
+              <div id="liveFlCustomRatio" style="display:none">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div class="prod-field">
+                    <label>Ratio W</label>
+                    <input type="number" id="liveFlCustomW" value="16" min="1" step="0.01">
+                  </div>
+                  <div class="prod-field">
+                    <label>Ratio H</label>
+                    <input type="number" id="liveFlCustomH" value="9" min="1" step="0.01">
+                  </div>
+                </div>
+              </div>
+
+              <div class="prod-field">
+                <label>Safety %</label>
+                <input type="number" id="liveFlSafety" value="100" min="50" max="100" step="1">
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="prod-field">
+                  <label>Offset X (px)</label>
+                  <input type="number" id="liveOffsetX" value="0" step="1">
+                </div>
+                <div class="prod-field">
+                  <label>Offset Y (px)</label>
+                  <input type="number" id="liveOffsetY" value="0" step="1">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="wm-foot">
+        <span style="color:#555;font-size:12px">Settings saved in localStorage.</span>
+        <div style="flex:1"></div>
+        <button class="btn-primary" id="liveDone">Done</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1464,6 +1606,15 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <p><strong>Contact Sheet</strong> — grid layout, format, background colour, title, production info, colour palette, watermark. Live preview with page navigation.</p>
         <p><strong>Watermark</strong> — text, font, size, opacity and angle with live preview.</p>
         <p><strong>Paths</strong> — configure the destination folder for each export type independently.</p>
+        <p><strong>Live Mode</strong> — crop stills to a specific sensor area for exports and fullscreen preview.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Live Mode</h4>
+        <p>Enable <strong>Crop stills</strong> to restrict the image to a sensor window. Choose a camera preset (Arri Alexa 35, Alexa LF, Red Raptor 8K VV, Sony Venice 2) or enter custom <strong>Width × Height</strong> dimensions in pixels. The W/H fields always show the active dimensions but are only editable in Custom mode.</p>
+        <p><strong>Rotation</strong> — apply 90° CW, 90° CCW or 180° to every image. <strong>PDF background colour</strong> sets the canvas fill for PDF Stills exports.</p>
+        <p>Enable <strong>Apply framelines</strong> to crop further to a given aspect ratio. Choose a format (16:9, 17:9, 2.39:1, 1.85:1, 2:1, 4:3, 3:2, 5:4, 1:1, or custom) and set a <strong>Safety %</strong> to tighten the crop. <strong>Offset X/Y</strong> shifts the frameline window within the sensor area.</p>
+        <p>The crop is applied to thumbnails, the fullscreen lightbox and all exports. Settings take effect when you click <strong>Done</strong> or on page load.</p>
       </div>
 
       <div class="help-section">
@@ -1483,6 +1634,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
           <span><kbd>Cmd</kbd>+<kbd>E</kbd></span>                            <span class="kb-desc">Open export panel</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>          <span class="kb-desc">New selection</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Trigger export (export panel open)</span>
+          <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Apply Live Mode settings (Live Mode tab open)</span>
         </div>
       </div>
 
@@ -2243,6 +2395,10 @@ function renderGallery() {
   $('galleryTitle').textContent = `Images (${allImages.length})`;
   grid.innerHTML = '';
 
+  const liveCropOn = $('liveCrop').checked;
+  const liveCrop   = liveCropOn ? getLiveCropDims() : null;
+  const liveBg     = liveCropOn ? getLiveBgColor() : null;
+
   // sync select-all button state
   const allSelected = allImages.length > 0 && allImages.every(n => isInSel(n));
   const btn = $('selectAllBtn');
@@ -2268,9 +2424,15 @@ function renderGallery() {
 
     const img = document.createElement('img');
     img.className = 'thumb-img';
-    img.src = imgUrl(name);
-    img.loading = 'lazy';
     img.alt = name;
+    if (liveCrop) {
+      img.src = imgUrl(name);
+      const apply = () => applyCropPreview(img, liveCrop.w, liveCrop.h, liveBg, liveCrop.sensorW, liveCrop.sensorH);
+      if (img.complete && img.naturalWidth) apply(); else img.onload = apply;
+    } else {
+      img.src = imgUrl(name);
+      img.loading = 'lazy';
+    }
     wrap.appendChild(img);
 
     // Hover overlay (gradient)
@@ -2403,8 +2565,8 @@ function renderCarousel() {
       else if (Math.abs(offset) === 1) cls += ' lb-car-near';
       slot.className = cls;
       const img = document.createElement('img');
-      img.src = imgUrl(lbImages[i]);
       img.draggable = false;
+      applyLbCrop(img, lbImages[i]);
       if (offset !== 0) {
         const captured = i;
         slot.onclick = () => { lbIdx = captured; updateLb(); };
@@ -2415,9 +2577,17 @@ function renderCarousel() {
   }
 }
 
+async function applyLbCrop(imgEl, name) {
+  if (!$('liveCrop').checked) { imgEl.src = imgUrl(name); return; }
+  const loaded = await loadImgEl(imgUrl(name));
+  const { w, h, sensorW, sensorH } = getLiveCropDims();
+  const cropped = cropImgEl(loaded, w, h, sensorW, sensorH);
+  imgEl.src = cropped.toDataURL('image/jpeg', 0.92);
+}
+
 function updateLb() {
   const name = lbImages[lbIdx]; if (!name) return;
-  $('lbImg').src = imgUrl(name);
+  applyLbCrop($('lbImg'), name);
   $('lbInfo').textContent = `${name}   ${lbIdx + 1} / ${lbImages.length}`;
   renderCarousel();
   const ctxEl = $('lbContext');
@@ -2460,17 +2630,24 @@ async function exportPDF() {
     const PW = 297, PH = Math.round(297 * 9 / 16 * 1000) / 1000;
     const pdf = new jsPDF({ unit: 'mm', format: [PW, PH], orientation: 'landscape' });
 
+    const pdfCropOn = $('liveCrop').checked;
+    const pdfBg     = pdfCropOn ? getLiveBgColor() : '#000000';
+    const bgR = parseInt(pdfBg.slice(1,3),16), bgG = parseInt(pdfBg.slice(3,5),16), bgB = parseInt(pdfBg.slice(5,7),16);
+
     for (let i = 0; i < sel.length; i++) {
       if (i > 0) pdf.addPage([PW, PH], 'landscape');
-      const el = await loadImgEl(imgUrl(sel[i]));
+      pdf.setFillColor(bgR, bgG, bgB);
+      pdf.rect(0, 0, PW, PH, 'F');
+      const el = await loadImgForExport(imgUrl(sel[i]));
       const canvas = document.createElement('canvas');
-      canvas.width = el.naturalWidth; canvas.height = el.naturalHeight;
+      canvas.width = el.naturalWidth || el.width;
+      canvas.height = el.naturalHeight || el.height;
       const ctx2d = canvas.getContext('2d');
       ctx2d.drawImage(el, 0, 0);
       csDrawWatermark(ctx2d, canvas.width, canvas.height);
       const data  = canvas.toDataURL('image/jpeg', 0.92);
-      const scale = Math.min(PW / el.naturalWidth, PH / el.naturalHeight);
-      const w = el.naturalWidth * scale, h = el.naturalHeight * scale;
+      const scale = Math.min(PW / canvas.width, PH / canvas.height);
+      const w = canvas.width * scale, h = canvas.height * scale;
       pdf.addImage(data, 'JPEG', (PW - w) / 2, (PH - h) / 2, w, h);
     }
 
@@ -2485,7 +2662,7 @@ async function exportPDF() {
         const sel = curSel();
         const groups = csGetSceneGroups(sel);
         const imgMap = new Map();
-        for (const f of sel) imgMap.set(f, await loadImgEl(imgUrl(f)));
+        for (const f of sel) imgMap.set(f, await loadImgForExport(imgUrl(f)));
         for (const group of groups) {
           const sceneImgs = group.images.map(f => imgMap.get(f)).filter(Boolean);
           if (!sceneImgs.length) continue;
@@ -2579,7 +2756,7 @@ function clearLogo() {
 }
 
 function switchSettingsTab(tab) {
-  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'] };
+  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'], live:['setTabLive','setPaneLive'] };
   Object.entries(map).forEach(([t,[tabId,paneId]]) => {
     $(tabId).classList.toggle('active', t === tab);
     $(paneId).style.display = t === tab ? 'flex' : 'none';
@@ -3027,7 +3204,7 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
     pw.style.display = 'block'; pf.style.width = '0%';
     preloadedImgs = [];
     for (let i = 0; i < sel.length; i++) {
-      preloadedImgs.push(await loadImgEl(imgUrl(sel[i])));
+      preloadedImgs.push(await loadImgForExport(imgUrl(sel[i])));
       pf.style.width = `${(i+1)/sel.length*50}%`;
     }
     loaded = preloadedImgs;
@@ -3177,7 +3354,7 @@ async function exportCS(fmt) {
       const pw = $('csProgressWrap'), pf = $('csProgressFill');
       pw.style.display = 'block'; pf.style.width = '0%';
       for (let i = 0; i < sel.length; i++) {
-        allImgMap.set(sel[i], await loadImgEl(imgUrl(sel[i])));
+        allImgMap.set(sel[i], await loadImgForExport(imgUrl(sel[i])));
         pf.style.width = `${(i+1)/sel.length*100}%`;
       }
       setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
@@ -3294,8 +3471,212 @@ $('setTabWm').onclick   = () => { switchSettingsTab('wm');   renderWmPreview(); 
 $('setTabCS').onclick   = () => { switchSettingsTab('cs');   generateCSPreview(); };
 $('setTabProd').onclick  = () => switchSettingsTab('prod');
 $('setTabPaths').onclick = () => switchSettingsTab('paths');
+$('setTabLive').onclick  = () => switchSettingsTab('live');
 $('prodDone').onclick    = closeWm;
 $('pathsDone').onclick   = closeWm;
+$('liveDone').onclick    = () => { liveSave(); renderGallery(); closeWm(); };
+
+// ─── Live Mode ────────────────────────────────────────────────────────────
+const LIVE_KEY = 'stills-liveMode';
+const LIVE_PRESETS = {
+  alexa35:   { w: 1718, h: 981  },
+  alexa35og: { w: 1430, h: 983  },
+  alexalf:   { w: 1711, h: 998  },
+  raptorvv:  { w: 1793, h: 946  },
+  venice2:   { w: 1728, h: 913  },
+};
+function getLiveCropDims() {
+  const src = $('liveSource').value;
+  const sensor = src === 'custom'
+    ? { w: parseInt($('liveCustomW').value)||1920, h: parseInt($('liveCustomH').value)||1080 }
+    : (LIVE_PRESETS[src] || { w: 1920, h: 1080 });
+  const sensorW = sensor.w, sensorH = sensor.h;
+
+  if ($('liveFlEnable').checked) {
+    const flRatio = getLiveFlRatio();
+    const safety  = (parseInt($('liveFlSafety').value) || 100) / 100;
+    let w, h;
+    if (flRatio > sensorW / sensorH) { w = Math.round(sensorW * safety); h = Math.round(w / flRatio); }
+    else                              { h = Math.round(sensorH * safety); w = Math.round(h * flRatio); }
+    return { w, h, sensorW, sensorH };
+  }
+  return { w: sensorW, h: sensorH, sensorW, sensorH };
+}
+// ─── Live crop helpers ────────────────────────────────────────────────────
+
+function applyCropPreview(imgEl, cropW, cropH, bgColor, sensorW, sensorH) {
+  const nw = imgEl.naturalWidth, nh = imgEl.naturalHeight;
+  if (!nw || !nh) return;
+  const cw = Math.min(cropW, nw), ch = Math.min(cropH, nh);
+  const { offsetX, offsetY, rotation } = getLiveTransform();
+  let sx, sy;
+  const hasFrameline = sensorW && sensorH && (sensorW !== cropW || sensorH !== cropH);
+  if (hasFrameline) {
+    const sw = Math.min(sensorW, nw), sh = Math.min(sensorH, nh);
+    const ssx = Math.floor((nw - sw) / 2), ssy = Math.floor((nh - sh) / 2);
+    const cx = ssx + Math.floor((sw - cw) / 2), cy = ssy + Math.floor((sh - ch) / 2);
+    sx = Math.max(ssx, Math.min(ssx + sw - cw, cx + offsetX));
+    sy = Math.max(ssy, Math.min(ssy + sh - ch, cy + offsetY));
+  } else {
+    sx = Math.floor((nw - cw) / 2);
+    sy = Math.floor((nh - ch) / 2);
+  }
+  // effective crop dims after rotation
+  const rotated = rotation === '90cw' || rotation === '90ccw';
+  const ecw = rotated ? ch : cw, ech = rotated ? cw : ch;
+  // draw crop into temp canvas, then rotate
+  const tmp = document.createElement('canvas');
+  tmp.width = cw; tmp.height = ch;
+  tmp.getContext('2d').drawImage(imgEl, sx, sy, cw, ch, 0, 0, cw, ch);
+  let src = tmp;
+  if (rotation !== '0') {
+    const r = document.createElement('canvas');
+    const rc = r.getContext('2d');
+    if (rotation === '180') {
+      r.width = cw; r.height = ch;
+      rc.translate(cw, ch); rc.rotate(Math.PI);
+    } else if (rotation === '90cw') {
+      r.width = ch; r.height = cw;
+      rc.translate(ch, 0); rc.rotate(Math.PI / 2);
+    } else if (rotation === '90ccw') {
+      r.width = ch; r.height = cw;
+      rc.translate(0, cw); rc.rotate(-Math.PI / 2);
+    }
+    rc.drawImage(tmp, 0, 0);
+    src = r;
+  }
+  const PW = 320, PH = Math.round(320 * 9 / 16);
+  const cropAsp = ecw / ech, contAsp = PW / PH;
+  let dw, dh;
+  if (cropAsp > contAsp) { dw = PW; dh = Math.round(PW / cropAsp); }
+  else                   { dh = PH; dw = Math.round(PH * cropAsp); }
+  const ox = Math.round((PW - dw) / 2), oy = Math.round((PH - dh) / 2);
+  const c = document.createElement('canvas');
+  c.width = PW; c.height = PH;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = bgColor || '#000000';
+  ctx.fillRect(0, 0, PW, PH);
+  ctx.drawImage(src, ox, oy, dw, dh);
+  imgEl.src = c.toDataURL('image/jpeg', 0.88);
+}
+function getLiveTransform() {
+  return {
+    offsetX:  parseInt($('liveOffsetX').value) || 0,
+    offsetY:  parseInt($('liveOffsetY').value) || 0,
+    rotation: document.querySelector('.live-rot-btn.active')?.dataset.rot || '0',
+  };
+}
+function cropImgEl(el, cropW, cropH, sensorW, sensorH) {
+  const nw = el.naturalWidth || el.width;
+  const nh = el.naturalHeight || el.height;
+  const cw = Math.min(cropW, nw), ch = Math.min(cropH, nh);
+  const { offsetX, offsetY, rotation } = getLiveTransform();
+  let sx, sy;
+  const hasFrameline = sensorW && sensorH && (sensorW !== cropW || sensorH !== cropH);
+  if (hasFrameline) {
+    const sw = Math.min(sensorW, nw), sh = Math.min(sensorH, nh);
+    const ssx = Math.floor((nw - sw) / 2), ssy = Math.floor((nh - sh) / 2);
+    const cx = ssx + Math.floor((sw - cw) / 2), cy = ssy + Math.floor((sh - ch) / 2);
+    sx = Math.max(ssx, Math.min(ssx + sw - cw, cx + offsetX));
+    sy = Math.max(ssy, Math.min(ssy + sh - ch, cy + offsetY));
+  } else {
+    sx = Math.floor((nw - cw) / 2);
+    sy = Math.floor((nh - ch) / 2);
+  }
+
+  // draw crop
+  const tmp = document.createElement('canvas');
+  tmp.width = cw; tmp.height = ch;
+  tmp.getContext('2d').drawImage(el, sx, sy, cw, ch, 0, 0, cw, ch);
+
+  if (rotation === '0') { tmp.naturalWidth = cw; tmp.naturalHeight = ch; return tmp; }
+
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  if (rotation === '180') {
+    c.width = cw; c.height = ch;
+    ctx.translate(cw, ch); ctx.rotate(Math.PI);
+  } else if (rotation === '90cw') {
+    c.width = ch; c.height = cw;
+    ctx.translate(ch, 0); ctx.rotate(Math.PI / 2);
+  } else if (rotation === '90ccw') {
+    c.width = ch; c.height = cw;
+    ctx.translate(0, cw); ctx.rotate(-Math.PI / 2);
+  }
+  ctx.drawImage(tmp, 0, 0);
+  c.naturalWidth = c.width; c.naturalHeight = c.height;
+  return c;
+}
+async function loadImgForExport(url) {
+  const el = await loadImgEl(url);
+  if (!$('liveCrop').checked) return el;
+  const { w, h, sensorW, sensorH } = getLiveCropDims();
+  return cropImgEl(el, w, h, sensorW, sensorH);
+}
+function liveLoad() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LIVE_KEY)) || {};
+    $('liveCrop').checked         = !!d.crop;
+    $('liveSource').value         = d.source  || 'alexa35';
+    $('liveCustomW').value        = d.customW || 1920;
+    $('liveCustomH').value        = d.customH || 1080;
+    $('liveBgColor').value        = d.bgColor || '#000000';
+    $('liveBgColorHex').value     = d.bgColor || '#000000';
+    $('liveFlEnable').checked     = !!d.flEnable;
+    $('liveFlFormat').value       = d.flFormat  || '16:9';
+    $('liveFlCustomW').value      = d.flCustomW || 16;
+    $('liveFlCustomH').value      = d.flCustomH || 9;
+    $('liveOffsetX').value        = d.offsetX || 0;
+    $('liveOffsetY').value        = d.offsetY || 0;
+    document.querySelectorAll('.live-rot-btn').forEach(b => b.classList.toggle('active', b.dataset.rot === (d.rotation || '0')));
+    $('liveFlSafety').value       = d.flSafety !== undefined ? d.flSafety : 100;
+    const isCustom = d.source === 'custom';
+    $('liveCustomW').disabled = !isCustom;
+    $('liveCustomH').disabled = !isCustom;
+    if (!isCustom) { const p = LIVE_PRESETS[d.source]; if (p) { $('liveCustomW').value = p.w; $('liveCustomH').value = p.h; } }
+    $('liveFlOptions').style.display     = d.flEnable  ? 'flex' : 'none';
+    $('liveFlCustomRatio').style.display = (d.flFormat === 'custom') ? 'block' : 'none';
+  } catch {}
+}
+function liveSave() {
+  localStorage.setItem(LIVE_KEY, JSON.stringify({
+    crop:      $('liveCrop').checked,
+    source:    $('liveSource').value,
+    customW:   parseInt($('liveCustomW').value)  || 1920,
+    customH:   parseInt($('liveCustomH').value)  || 1080,
+    offsetX:   parseInt($('liveOffsetX').value)     || 0,
+    offsetY:   parseInt($('liveOffsetY').value)     || 0,
+    rotation:  document.querySelector('.live-rot-btn.active')?.dataset.rot || '0',
+    bgColor:   $('liveBgColor').value              || '#000000',
+    flEnable:  $('liveFlEnable').checked,
+    flFormat:  $('liveFlFormat').value,
+    flCustomW: parseFloat($('liveFlCustomW').value) || 16,
+    flCustomH: parseFloat($('liveFlCustomH').value) || 9,
+    flSafety:  parseInt($('liveFlSafety').value)    || 100,
+  }));
+}
+
+function getLiveBgColor() { return $('liveBgColor').value || '#000000'; }
+function getLiveFlRatio() {
+  const fmt = $('liveFlFormat').value;
+  if (fmt === 'custom') return (parseFloat($('liveFlCustomW').value)||16) / (parseFloat($('liveFlCustomH').value)||9);
+  const parts = fmt.split(':');
+  return parseFloat(parts[0]) / parseFloat(parts[1]);
+}
+
+$('liveCrop').onchange       = () => {};
+$('liveSource').onchange     = () => { const isCustom = $('liveSource').value === 'custom'; $('liveCustomW').disabled = !isCustom; $('liveCustomH').disabled = !isCustom; if (!isCustom) { const p = LIVE_PRESETS[$('liveSource').value]; if (p) { $('liveCustomW').value = p.w; $('liveCustomH').value = p.h; } } };
+$('liveCustomW').oninput     = () => {};
+$('liveCustomH').oninput     = () => {};
+$('liveBgColor').oninput     = () => { $('liveBgColorHex').value = $('liveBgColor').value; };
+$('liveBgColorHex').oninput  = () => { if (/^#[0-9a-f]{6}$/i.test($('liveBgColorHex').value)) $('liveBgColor').value = $('liveBgColorHex').value; };
+document.querySelectorAll('.live-rot-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.live-rot-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+}));
+$('liveFlEnable').onchange   = () => { $('liveFlOptions').style.display = $('liveFlEnable').checked ? 'flex' : 'none'; };
+$('liveFlFormat').onchange   = () => { $('liveFlCustomRatio').style.display = $('liveFlFormat').value === 'custom' ? 'block' : 'none'; };
+liveLoad();
 $('settingsHeaderBtn').onclick  = openSettings;
 $('exportHeaderBtn').onclick    = openExportModal;
 
@@ -4089,6 +4470,7 @@ document.addEventListener('keydown', async e => {
     if (e.key === 'Escape') $('helpModal').classList.remove('open');
   } else if ($('wmModal').classList.contains('open')) {
     if (e.key === 'Escape') closeWm();
+    if (e.key === 'Enter' && $('setPaneLive').style.display !== 'none') { e.preventDefault(); liveSave(); renderGallery(); closeWm(); }
   } else if ($('exportModal').classList.contains('open')) {
     if (e.key === 'Escape') closeExportModal();
     if (e.key === 'Enter') { e.preventDefault(); runExports(); }
