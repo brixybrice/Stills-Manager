@@ -15,7 +15,7 @@ A local web app for browsing, curating and exporting image stills from a film sh
 
 - **Browse** any local folder containing JPG, PNG or TIF images
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
-- **Fullscreen lightbox** — `Cmd`+`click to view full size; vertical carousel with scroll/swipe navigation
+- **Fullscreen lightbox** — `Cmd`+`click` to view full size; vertical carousel with scroll/swipe navigation
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
 - **Multiple selections** via tabs — add, rename (double-click), reorder and delete
 - **Drag & drop** reordering of images within a selection

@@ -1,10 +1,17 @@
-from flask import Flask, jsonify, request, send_from_directory
-import os, json, re, threading, webbrowser, base64
+from flask import Flask, jsonify, request, send_from_directory, send_file
+import os, json, re, threading, webbrowser, base64, io, subprocess, sys
+
+try:
+    from PIL import Image
+except ImportError:
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'Pillow'], stdout=subprocess.DEVNULL)
+    from PIL import Image
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-current_dir  = None
-IMAGE_EXTS   = {'.jpg', '.jpeg', '.png', '.tif', '.tiff'}
-JSON_FILE    = '.stills-selections.json'
+current_dir    = None
+recursive_mode = False
+IMAGE_EXTS     = {'.jpg', '.jpeg', '.png', '.tif', '.tiff'}
+JSON_FILE      = '.stills-selections.json'
 
 def nat_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
@@ -41,21 +48,31 @@ def browse():
 # ── Open folder ───────────────────────────────────────────────────────────
 @app.route('/api/open', methods=['POST'])
 def open_dir():
-    global current_dir
+    global current_dir, recursive_mode
     path = os.path.abspath(os.path.expanduser(request.json.get('path', '')))
     if not os.path.isdir(path):
         return jsonify({'error': 'Not a directory'}), 400
-    current_dir = path
-    return jsonify({'ok': True, 'path': path, 'name': os.path.basename(path)})
+    current_dir    = path
+    recursive_mode = bool(request.json.get('recursive', False))
+    return jsonify({'ok': True, 'path': path, 'name': os.path.basename(path), 'recursive': recursive_mode})
 
 # ── List images ───────────────────────────────────────────────────────────
 @app.route('/api/images')
 def list_images():
     if not current_dir:
         return jsonify({'error': 'No folder open'}), 400
-    images = [n for n in os.listdir(current_dir)
-              if os.path.splitext(n)[1].lower() in IMAGE_EXTS]
-    images.sort(key=nat_key)
+    images = []
+    if recursive_mode:
+        for root, dirs, files in os.walk(current_dir):
+            dirs[:] = sorted([d for d in dirs if not d.startswith('.')], key=nat_key)
+            for name in sorted(files, key=nat_key):
+                if os.path.splitext(name)[1].lower() in IMAGE_EXTS:
+                    rel = os.path.relpath(os.path.join(root, name), current_dir)
+                    images.append(rel)
+    else:
+        images = [n for n in os.listdir(current_dir)
+                  if os.path.splitext(n)[1].lower() in IMAGE_EXTS]
+        images.sort(key=nat_key)
     return jsonify({'images': images, 'folder': current_dir, 'name': os.path.basename(current_dir)})
 
 # ── Serve image ───────────────────────────────────────────────────────────
@@ -63,6 +80,18 @@ def list_images():
 def get_image(filename):
     if not current_dir:
         return jsonify({'error': 'No folder open'}), 400
+    ext = os.path.splitext(filename)[1].lower()
+    if ext in ('.tif', '.tiff'):
+        try:
+            full = os.path.join(current_dir, filename)
+            with Image.open(full) as img:
+                img = img.convert('RGB')
+                buf = io.BytesIO()
+                img.save(buf, format='JPEG', quality=92)
+                buf.seek(0)
+            return send_file(buf, mimetype='image/jpeg')
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
     return send_from_directory(current_dir, filename)
 
 # ── Selections ────────────────────────────────────────────────────────────
@@ -97,23 +126,32 @@ def get_metadata():
     if not current_dir:
         return jsonify(None), 200
     combined = {}
+    walk_dirs = []
+    if recursive_mode:
+        for root, dirs, _ in os.walk(current_dir):
+            dirs[:] = sorted([d for d in dirs if not d.startswith('.')], key=nat_key)
+            walk_dirs.append(root)
+    else:
+        walk_dirs = [current_dir]
     try:
-        for name in sorted(os.listdir(current_dir)):
-            if not name.startswith('.'):
-                continue
-            if not (name.endswith('_clips.json') or name.endswith('_stills_metadata.json')):
-                continue
-            p = os.path.join(current_dir, name)
-            try:
-                with open(p, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                if 'clips' in data:
-                    combined['timeline'] = data.get('timeline', '')
-                    combined['clips'] = data['clips']
-                if 'markers_metadata' in data:
-                    combined['markers_metadata'] = data['markers_metadata']
-            except Exception:
-                pass
+        for dirpath in walk_dirs:
+            for name in sorted(os.listdir(dirpath)):
+                if not name.startswith('.'):
+                    continue
+                if not (name.endswith('_clips.json') or name.endswith('_stills_metadata.json')):
+                    continue
+                p = os.path.join(dirpath, name)
+                try:
+                    with open(p, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    if 'clips' in data:
+                        combined.setdefault('clips', []).extend(data['clips'])
+                        if 'timeline' not in combined:
+                            combined['timeline'] = data.get('timeline', '')
+                    if 'markers_metadata' in data:
+                        combined.setdefault('markers_metadata', {}).update(data['markers_metadata'])
+                except Exception:
+                    pass
     except Exception:
         pass
     return jsonify(combined if combined else None), 200
@@ -147,9 +185,9 @@ def save_file():
 # ── Start ─────────────────────────────────────────────────────────────────
 def _open_browser():
     import time; time.sleep(0.9)
-    webbrowser.open('http://localhost:5000')
+    webbrowser.open('http://127.0.0.1:5000')
 
 if __name__ == '__main__':
-    print('\n  Stills Manager → http://localhost:5000\n  Ctrl+C to stop\n')
+    print('\n  Stills Manager → http://127.0.0.1:5000\n  Ctrl+C to stop\n')
     threading.Thread(target=_open_browser, daemon=True).start()
     app.run(host='127.0.0.1', port=5000, debug=False)
