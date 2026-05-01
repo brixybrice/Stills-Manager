@@ -1422,7 +1422,9 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
 
       <div class="help-section">
         <h4>Opening a folder</h4>
-        <p>Click <strong>Open Folder</strong> to browse your filesystem and open any folder containing images (JPG, PNG, TIF).</p>
+        <p>Click <strong>Open Folder</strong> (or <kbd>Cmd</kbd>+<kbd>O</kbd>) to browse your filesystem and open any folder containing images (JPG, PNG, TIF).</p>
+        <p>Check <strong>Include subfolders</strong> to load images from all nested folders at once. Press <kbd>Enter</kbd> to confirm, <kbd>Esc</kbd> to cancel.</p>
+        <p>The last 8 opened folders appear as a <strong>Recent</strong> list at the top of the browser for quick access. Click ✕ on any entry to remove it.</p>
         <p>The open folder is stored in the URL — reloading the page automatically reopens the same folder.</p>
       </div>
 
@@ -1431,6 +1433,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <p><strong>Click</strong> a thumbnail to add or remove the image from the active selection.</p>
         <p><strong>Cmd+click</strong> or the expand button on a thumbnail to open the image fullscreen.</p>
         <p>Selected images show a teal border and a numbered badge indicating their position in the current selection.</p>
+        <p>The <strong>Select all</strong> button (next to the image count) adds all images in order to the active selection. It becomes <strong>Deselect all</strong> when every image is already selected.</p>
       </div>
 
       <div class="help-section">
@@ -1449,16 +1452,18 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       </div>
 
       <div class="help-section">
-        <h4>PDF export</h4>
-        <p>The <strong>PDF</strong> button in the selection panel exports one image per page in 16:9 landscape format.</p>
-        <p>If a <strong>watermark</strong> is configured, it is composited over every page.</p>
+        <h4>Export</h4>
+        <p>Open the export panel with <kbd>Cmd</kbd>+<kbd>E</kbd>. Available exports: PDF Stills, Contact Sheet, Shoot Report, Clips Report, QC Report, ALE, CSV.</p>
+        <p>If a <strong>watermark</strong> is configured in Settings, it is composited over PDF and contact sheet exports.</p>
+        <p>The <strong>Contact Sheet</strong> supports scene grouping, colour palette band, production info header and multi-page pagination with live preview.</p>
       </div>
 
       <div class="help-section">
-        <h4>Paramètres</h4>
-        <p>The <strong>Paramètres</strong> button opens a two-tab settings panel.</p>
-        <p><strong>Watermark</strong> — configure text, font, size, opacity and angle, with a live preview on a synthetic image. The watermark is applied to all PDF exports when text is set.</p>
-        <p><strong>Contact Sheet</strong> — configure grid layout, aspect ratio, gap, export resolution and watermark. Live canvas preview. Export as JPG, PNG or PDF. The <em>Append to PDF export</em> checkbox adds the contact sheet as a final page to the main PDF.</p>
+        <h4>Settings <kbd>Cmd</kbd>+<kbd>;</kbd></h4>
+        <p><strong>Production</strong> — project name, production company, crew and logo; injected into all PDF report headers.</p>
+        <p><strong>Contact Sheet</strong> — grid layout, format, background colour, title, production info, colour palette, watermark. Live preview with page navigation.</p>
+        <p><strong>Watermark</strong> — text, font, size, opacity and angle with live preview.</p>
+        <p><strong>Paths</strong> — configure the destination folder for each export type independently.</p>
       </div>
 
       <div class="help-section">
@@ -1470,12 +1475,14 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
           <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image up in selection (fullscreen)</span>
           <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image down in selection (fullscreen)</span>
           <span><kbd>Esc</kbd></span>                                          <span class="kb-desc">Close fullscreen or modal</span>
+          <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Open selected folder (folder browser)</span>
           <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>          <span class="kb-desc">Redo</span>
           <span><kbd>Cmd</kbd>+<kbd>O</kbd></span>                            <span class="kb-desc">Open folder</span>
           <span><kbd>Cmd</kbd>+<kbd>;</kbd></span>                            <span class="kb-desc">Open settings</span>
           <span><kbd>Cmd</kbd>+<kbd>E</kbd></span>                            <span class="kb-desc">Open export panel</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>          <span class="kb-desc">New selection</span>
+          <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Trigger export (export panel open)</span>
         </div>
       </div>
 

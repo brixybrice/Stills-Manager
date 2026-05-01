@@ -14,7 +14,10 @@ A local web app for browsing, curating and exporting image stills from a film sh
 ### Gallery & selections
 
 - **Browse** any local folder containing JPG, PNG or TIF images
+- **Include subfolders** — option in the folder browser to load images from all nested folders at once
+- **Recent folders** — the last 8 opened folders are listed for quick access in the folder browser
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
+- **Select all / Deselect all** — button next to the image count; adds or clears all images in the active selection in one click
 - **Fullscreen lightbox** — `Cmd`+`click` to view full size; vertical carousel with scroll/swipe navigation
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
 - **Multiple selections** via tabs — add, rename (double-click), reorder and delete
@@ -110,6 +113,7 @@ Four-tab panel (remembers the last open tab):
 
 - Python 3.9+
 - Flask 3.0+
+- Pillow 10.0+ (TIF support — installed automatically via `pip install -r requirements.txt`)
 
 ---
 
@@ -145,6 +149,7 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `Cmd`+`↑` | Move image up in selection (fullscreen) |
 | `Cmd`+`↓` | Move image down in selection (fullscreen) |
 | `Esc` | Close fullscreen or modal |
+| `Enter` | Open selected folder (folder browser) |
 | `Cmd`+`Z` | Undo |
 | `Cmd`+`Shift`+`Z` | Redo |
 | `Cmd`+`O` | Open folder |
