@@ -1990,7 +1990,7 @@ function renderReport() {
       .sort((a, b) => (a.start_frame || 0) - (b.start_frame || 0))
       .forEach(clip => {
         const clipMarkers = markersByClip[clip.clip_name] || [];
-        buildClipCard(container, clip.clip_name, clip.metadata || {}, clip.clip_properties || {}, clipMarkers, null);
+        buildClipCard(container, clip.clip_name, clip.metadata || {}, clip.clip_properties || {}, clipMarkers, null, clip.file_size_bytes);
       });
   } else {
     // markers-only fallback (old format)
@@ -2010,7 +2010,7 @@ function renderReport() {
   container.scrollTop = scrollTop;
 }
 
-function buildClipCard(container, clipName, meta, props, allMarkers, srcRes) {
+function buildClipCard(container, clipName, meta, props, allMarkers, srcRes, fileSizeBytes) {
   const prefIdx     = Math.min(getThumbPref(clipName), allMarkers.length - 1);
   const firstMarker = allMarkers[Math.max(0, prefIdx)] || null;
   const card = document.createElement('div');
@@ -2067,6 +2067,16 @@ function buildClipCard(container, clipName, meta, props, allMarkers, srcRes) {
   const grid = document.createElement('div');
   grid.className = 'clip-meta-grid';
   renderMetaFields(grid, get);
+  const sizeStr = fmtBytes(fileSizeBytes);
+  if (sizeStr) {
+    const sizeRow = document.createElement('div'); sizeRow.className = 'clip-meta-row';
+    const sizeK = document.createElement('span'); sizeK.className = 'clip-meta-key'; sizeK.textContent = 'File size';
+    const sizeV = document.createElement('span'); sizeV.className = 'clip-meta-val'; sizeV.textContent = sizeStr;
+    sizeRow.appendChild(sizeK); sizeRow.appendChild(sizeV);
+    const firstGroup = grid.querySelector('.clip-meta-group');
+    if (firstGroup) firstGroup.insertBefore(sizeRow, firstGroup.firstChild);
+    else grid.appendChild(sizeRow);
+  }
   body.appendChild(grid);
 
   const notes = document.createElement('div');
@@ -3905,6 +3915,12 @@ function pdfFmtDur(s){
   if(h)return`${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')} h`;
   if(m)return`${m}:${String(sec).padStart(2,'0')} min`;return`${sec} sec`;
 }
+function fmtBytes(b){
+  if(!b||b<=0)return'';
+  if(b>=1e12)return parseFloat((b/1e12).toFixed(2))+' TB';
+  if(b>=1e9) return parseFloat((b/1e9).toFixed(2))+' GB';
+  return parseFloat((b/1e6).toFixed(2))+' MB';
+}
 async function imgToBase64(url){
   return new Promise(resolve=>{
     const img=new Image();img.crossOrigin='anonymous';
@@ -3936,7 +3952,7 @@ async function exportShootReport() {
   function checkY(n){if(y+n>H-MB){doc.addPage();y=MT;}}
 
   // ── Aggregate ──────────────────────────────────────────────────────
-  let totalDur=0,totalFrames=0,selClips=0,selFrames=0,selDur=0;
+  let totalDur=0,totalFrames=0,totalSize=0,selClips=0,selFrames=0,selDur=0;
   const camMap={},reelMap={},sceneMap={};
   clips.forEach(clip=>{
     const camRaw=gm(clip,'Camera #');
@@ -3948,14 +3964,15 @@ async function exportShootReport() {
     const fps=parseFloat(gm(clip,'Camera FPS'))||24;
     const dur=tcToSec(gm(clip,'Duration'),fps);
     const frames=Math.round(dur*fps);
+    const sz=clip.file_size_bytes||0;
     const stc=gm(clip,'Start TC'), etc=gm(clip,'End TC');
-    totalDur+=dur;totalFrames+=frames;
+    totalDur+=dur;totalFrames+=frames;totalSize+=sz;
     if(good==='1'){selClips++;selFrames+=frames;selDur+=dur;}
-    if(!camMap[cam])camMap[cam]={clips:0,dur:0,frames:0};
-    camMap[cam].clips++;camMap[cam].dur+=dur;camMap[cam].frames+=frames;
+    if(!camMap[cam])camMap[cam]={clips:0,dur:0,frames:0,size:0};
+    camMap[cam].clips++;camMap[cam].dur+=dur;camMap[cam].frames+=frames;camMap[cam].size+=sz;
     const codec=gm(clip,'Video Codec');
-    if(!reelMap[reel])reelMap[reel]={cam,clips:0,dur:0,frames:0,codec,startTC:stc,endTC:etc};
-    reelMap[reel].clips++;reelMap[reel].dur+=dur;reelMap[reel].frames+=frames;if(etc)reelMap[reel].endTC=etc;
+    if(!reelMap[reel])reelMap[reel]={cam,clips:0,dur:0,frames:0,size:0,codec,startTC:stc,endTC:etc};
+    reelMap[reel].clips++;reelMap[reel].dur+=dur;reelMap[reel].frames+=frames;reelMap[reel].size+=sz;if(etc)reelMap[reel].endTC=etc;
     if(!sceneMap[scene])sceneMap[scene]={shots:{}};
     if(!sceneMap[scene].shots[shot])sceneMap[scene].shots[shot]={takes:[],goodTakes:0,cams:new Set(),dur:0};
     if(!sceneMap[scene].shots[shot].takes.includes(take))sceneMap[scene].shots[shot].takes.push(take);
@@ -3963,6 +3980,7 @@ async function exportShootReport() {
     sceneMap[scene].shots[shot].cams.add(cam);
     if(good==='1')sceneMap[scene].shots[shot].goodTakes++;
   });
+  const hasSz=totalSize>0;
 
   // ── Drawing helpers ────────────────────────────────────────────────
   const RH=4.8;
@@ -4023,12 +4041,13 @@ async function exportShootReport() {
   const camE=Object.entries(camMap).sort();
   const ovH=7+(camE.length+3)*RH+3;
   checkY(ovH+4);secTitle('Clips Overview',y);y+=7;
-  const oC=[{v:'',w:CW-68},{v:'Clips',w:22,r:true},{v:'Frames',w:23,r:true},{v:'Duration',w:23,r:true}];
+  const oW=hasSz?CW-94:CW-68,oSz=hasSz?26:0;
+  const oC=[{v:'',w:oW},{v:'Clips',w:22,r:true},...(hasSz?[{v:'Size',w:oSz,r:true}]:[]),{v:'Frames',w:23,r:true},{v:'Duration',w:23,r:true}];
   y+=tblHeader(oC,y);
-  camE.forEach(([cam,d],i)=>{checkY(RH+2);y+=tblRow([{v:`Camera ${cam}`,w:CW-68},{v:String(d.clips),w:22,r:true},{v:String(d.frames),w:23,r:true},{v:fmtDur(d.dur),w:23,r:true}],y,i<camE.length-1);});
-  y+=tblTotal([{v:'Total',w:CW-68},{v:String(clips.length),w:22,r:true},{v:String(totalFrames),w:23,r:true},{v:fmtDur(totalDur),w:23,r:true}],y);
+  camE.forEach(([cam,d],i)=>{checkY(RH+2);y+=tblRow([{v:`Camera ${cam}`,w:oW},{v:String(d.clips),w:22,r:true},...(hasSz?[{v:fmtBytes(d.size),w:oSz,r:true}]:[]),{v:String(d.frames),w:23,r:true},{v:fmtDur(d.dur),w:23,r:true}],y,i<camE.length-1);});
+  y+=tblTotal([{v:'Total',w:oW},{v:String(clips.length),w:22,r:true},...(hasSz?[{v:fmtBytes(totalSize),w:oSz,r:true}]:[]),{v:String(totalFrames),w:23,r:true},{v:fmtDur(totalDur),w:23,r:true}],y);
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(180,180,180);
-  y+=tblRow([{v:'Selected Takes',w:CW-68},{v:String(selClips),w:22,r:true},{v:String(selFrames),w:23,r:true},{v:fmtDur(selDur),w:23,r:true}],y,false)+4;
+  y+=tblRow([{v:'Selected Takes',w:oW},{v:String(selClips),w:22,r:true},...(hasSz?[{v:'',w:oSz,r:true}]:[]),{v:String(selFrames),w:23,r:true},{v:fmtDur(selDur),w:23,r:true}],y,false)+4;
 
   // ══════════════════════════════════════════════════════════════════
   // 4. CARDS / REELS
@@ -4036,9 +4055,10 @@ async function exportShootReport() {
   const reelE=Object.entries(reelMap).sort();
   const rlH=7+(reelE.length+1)*RH+3;
   checkY(rlH+4);secTitle('Cards / Reels',y);y+=7;
-  const rC=[{v:'Card',w:40},{v:'Cam',w:16,c:true},{v:'Clips',w:18,c:true},{v:'Codec',w:42},{v:'Frames',w:24,r:true},{v:'Duration',w:CW-140,r:true}];
+  const rCdW=hasSz?30:42,rSzW=hasSz?28:0,rDurW=hasSz?CW-154:CW-140;
+  const rC=[{v:'Card',w:40},{v:'Cam',w:16,c:true},{v:'Clips',w:18,c:true},{v:'Codec',w:rCdW},...(hasSz?[{v:'Size',w:rSzW,r:true}]:[]),{v:'Frames',w:24,r:true},{v:'Duration',w:rDurW,r:true}];
   y+=tblHeader(rC,y);
-  reelE.forEach(([reel,d],i)=>{checkY(RH+2);y+=tblRow([{v:reel,w:40,b:true},{v:d.cam,w:16,c:true},{v:String(d.clips),w:18,c:true},{v:d.codec||'',w:42},{v:String(d.frames),w:24,r:true},{v:fmtDur(d.dur),w:CW-140,r:true}],y,i<reelE.length-1);});
+  reelE.forEach(([reel,d],i)=>{checkY(RH+2);y+=tblRow([{v:reel,w:40,b:true},{v:d.cam,w:16,c:true},{v:String(d.clips),w:18,c:true},{v:d.codec||'',w:rCdW},...(hasSz?[{v:fmtBytes(d.size),w:rSzW,r:true}]:[]),{v:String(d.frames),w:24,r:true},{v:fmtDur(d.dur),w:rDurW,r:true}],y,i<reelE.length-1);});
   y+=4;
 
   // ══════════════════════════════════════════════════════════════════
@@ -4089,11 +4109,12 @@ async function exportQCReport() {
   Object.values(markersByClip).forEach(arr=>arr.sort((a,b)=>(a.timeline_frame||0)-(b.timeline_frame||0)));
 
   // Stats
-  let totalDur=0,circled=0,qcCount=0;
+  let totalDur=0,totalSize=0,circled=0,qcCount=0;
   const camSet=new Set(),reelSet=new Set(),sceneSet=new Set();
   clips.forEach(clip=>{
     const fps=parseFloat(gm(clip,'Camera FPS'))||24;
     totalDur+=pdfTcToSec(gm(clip,'Duration'),fps);
+    totalSize+=clip.file_size_bytes||0;
     if(gm(clip,'Good Take')==='1')circled++;
     if(gm(clip,'Reviewers Notes'))qcCount++;
     camSet.add(gm(clip,'Camera #')||pdfParseCamLetter(clip.clip_name)||'?');
@@ -4146,6 +4167,7 @@ async function exportQCReport() {
   statRow('Clips',String(clips.length));
   statRow('Good Takes',String(circled));
   statRow('Duration',pdfFmtDur(totalDur));
+  if(totalSize>0)statRow('Total size',fmtBytes(totalSize));
   statRow('Cameras',cams||'—');
   if(scenes){checkY(5);doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(140,140,140);T('Sequences:',KL,y);doc.setFont('helvetica','bold');doc.setTextColor(25,25,25);const sw=doc.splitTextToSize(scenes,CW-KW2-6);sw.forEach((l,i)=>{if(i>0){checkY(5);y+=4.5;}T(l,VX,y);});y+=4.5;}
   if(qcCount){statRow('QC notes',String(qcCount)+' clips');}
