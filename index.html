@@ -98,11 +98,12 @@ body.light #poweredBy a:hover { color: #888; }
 }
 #galleryHeader h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
 #galleryHeader span { font-size: 12px; color: #444; }
-#selectAllBtn {
+#selectAllBtn, #invertGalSelBtn {
   font-size: 11px; color: #555; background: transparent; border: 1px solid #333;
   border-radius: 4px; padding: 2px 8px; cursor: pointer; margin-left: 8px; flex-shrink: 0;
 }
-#selectAllBtn:hover { color: #aaa; border-color: #555; }
+#selectAllBtn:hover, #invertGalSelBtn:hover { color: #aaa; border-color: #555; }
+#invertGalSelBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ── Image grid ── */
 
@@ -967,8 +968,8 @@ body.light .modal-recent { border-bottom-color: #e8e8e8; }
 body.light .modal-recent-title { color: #bbb; }
 body.light .recent-item { color: #999; }
 body.light .recent-item:hover { background: #f2f2f2; color: #333; }
-body.light #selectAllBtn { color: #bbb; border-color: #d0d0d0; }
-body.light #selectAllBtn:hover { color: #888; border-color: #aaa; }
+body.light #selectAllBtn, body.light #invertGalSelBtn { color: #bbb; border-color: #d0d0d0; }
+body.light #selectAllBtn:hover, body.light #invertGalSelBtn:hover { color: #888; border-color: #aaa; }
 
 /* Help modal */
 body.light .help-box { background: #fff; border-color: #d8d8d8; }
@@ -1116,6 +1117,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
           <div style="display:flex;align-items:center;gap:0">
             <h2 id="galleryTitle">Images</h2>
             <button id="selectAllBtn">Select all</button>
+            <button id="invertGalSelBtn">Inverse</button>
           </div>
           <span id="galleryHint">Click to select · Cmd+click to view large</span>
         </div>
@@ -2452,6 +2454,7 @@ function renderGallery() {
   const allSelected = allImages.length > 0 && allImages.every(n => isInSel(n));
   const btn = $('selectAllBtn');
   btn.textContent = allSelected ? 'Deselect all' : 'Select all';
+  $('invertGalSelBtn').disabled = allImages.length === 0;
 
   if (!allImages.length) {
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No images found<br>(jpg, png, tif)</p></div>';
@@ -3516,6 +3519,11 @@ $('selectAllBtn').onclick = () => {
   pushHistory();
   const allSelected = allImages.length > 0 && allImages.every(n => isInSel(n));
   selections[activeSel] = allSelected ? [] : [...allImages];
+  queueSave(); renderGallery(); renderSelection();
+};
+$('invertGalSelBtn').onclick = () => {
+  pushHistory();
+  selections[activeSel] = allImages.filter(n => !isInSel(n));
   queueSave(); renderGallery(); renderSelection();
 };
 $('exportBtn').onclick      = exportPDF;
