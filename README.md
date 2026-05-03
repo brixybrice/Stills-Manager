@@ -19,9 +19,11 @@ A local web app for browsing, curating and exporting image stills from a film sh
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
 - **Select all / Deselect all** — button next to the image count; adds or clears all images in the active selection in one click
 - **Inverse selection** — button next to "Select all"; selects all images that are not in the current selection and deselects those that are
+- **Shift+click range selection** — click a thumbnail to set the anchor, then Shift+click another to add or remove the entire range at once
 - **Fullscreen lightbox** — `Cmd`+`click` to view full size; vertical carousel with scroll/swipe navigation
+- **A/B comparison** — "A/B" button in the lightbox locks the current image as A and shows the next image as B side by side; navigate with arrows or carousel to change B
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
-- **Multiple selections** via tabs — add, rename (double-click), reorder and delete
+- **Multiple selections** via tabs — each tab shows its image count in parentheses; add, rename (double-click), reorder and delete
 - **Drag & drop** reordering of images within a selection
 - **Shuffle** — randomises the order of images in the active selection (button in the selection panel header)
 - **Invert order** — reverses the order of images in the active selection (button in the selection panel header)

@@ -350,6 +350,33 @@ body.light #poweredBy a:hover { color: #888; }
 }
 #lbSelBadge.visible { display: block; }
 
+/* ── A/B compare ── */
+#lbCompareSplit {
+  display: none; position: fixed;
+  left: 206px; right: 14px; top: 58px; bottom: 68px;
+}
+#lbCompareSplit.active { display: flex; }
+.lb-compare-side {
+  flex: 1; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: #000;
+}
+.lb-compare-side + .lb-compare-side { border-left: 2px solid #2a2a2a; }
+.lb-compare-side img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; user-select: none; }
+.lb-compare-label {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 9px; border-radius: 4px;
+}
+.lb-compare-fname {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.55); color: #999;
+  font-size: 11px; padding: 3px 10px; border-radius: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;
+}
+#lbCompareBtn.compare-active { background: #006D78; color: #fff; border-color: #006D78; }
+
 /* ── Folder browser modal ── */
 #modal {
   display: none; position: fixed; inset: 0;
@@ -1179,11 +1206,24 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
   <div id="lbCarousel"></div>
   <button class="lb-arrow" id="lbPrev">‹</button>
   <img id="lbImg" src="" alt="">
+  <div id="lbCompareSplit">
+    <div class="lb-compare-side">
+      <img id="lbCompImgA" draggable="false">
+      <span class="lb-compare-label">A</span>
+      <div class="lb-compare-fname" id="lbCompNameA"></div>
+    </div>
+    <div class="lb-compare-side">
+      <img id="lbCompImgB" draggable="false">
+      <span class="lb-compare-label">B</span>
+      <div class="lb-compare-fname" id="lbCompNameB"></div>
+    </div>
+  </div>
   <button class="lb-arrow" id="lbNext">›</button>
   <div id="lbBottom">
     <button id="lbUpBtn"  class="btn-secondary">↑</button>
     <button id="lbAddBtn" class="btn-primary">Add to selection</button>
     <button id="lbDownBtn" class="btn-secondary">↓</button>
+    <button id="lbCompareBtn" class="btn-secondary">A/B</button>
   </div>
   <div id="lbFlash"></div>
 </div>
@@ -1599,6 +1639,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       <div class="help-section">
         <h4>Gallery</h4>
         <p><strong>Click</strong> a thumbnail to add or remove the image from the active selection.</p>
+        <p><strong>Shift+click</strong> a second thumbnail to add or remove every image between the last clicked one and the current one in one action.</p>
         <p><strong>Cmd+click</strong> or the expand button on a thumbnail to open the image fullscreen.</p>
         <p>Selected images show a teal border and a numbered badge indicating their position in the current selection.</p>
         <p>The <strong>Select all</strong> button (next to the image count) adds all images in order to the active selection. It becomes <strong>Deselect all</strong> when every image is already selected.</p>
@@ -1607,7 +1648,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
 
       <div class="help-section">
         <h4>Selections</h4>
-        <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images.</p>
+        <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images and shows the image count in parentheses.</p>
         <p><strong>+</strong> creates a new tab · <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
         <p>Images within a selection can be reordered by <strong>drag and drop</strong>.</p>
         <p>The <strong>shuffle icon</strong> in the selection header randomises the order of images in the active selection. The <strong>invert icon</strong> reverses the order (first becomes last).</p>
@@ -1619,6 +1660,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <p>A <strong>vertical carousel</strong> on the left shows surrounding images — click any thumbnail to jump to it.</p>
         <p>The <strong>context badge</strong> (top right) shows whether you are browsing the Gallery or a named selection. The <strong>#N</strong> badge shows the image's position in the active selection.</p>
         <p>The <strong>Up</strong> and <strong>Down</strong> buttons (and their keyboard shortcuts) move the image within the selection order.</p>
+        <p>The <strong>A/B</strong> button locks the current image as A and immediately shows the next image as B, side by side. Navigate with the arrows or carousel to change the B image. Click <strong>Exit A/B</strong> to return to normal view.</p>
       </div>
 
       <div class="help-section">
@@ -1745,6 +1787,9 @@ let lbContext   = 'gallery'; // 'gallery' | selection name
 let sortable    = null;
 let saveTimer   = null;
 let lastToggled = null;
+let lastRangeAnchor  = null; // { idx, adding } for shift+click range
+let lbCompareMode   = false;
+let lbCompareNameA  = null;
 let browserPath = '';
 let folderName  = '';
 let clipsMetadata = null;
@@ -2315,6 +2360,7 @@ function toggleInSel(name) {
   pushHistory();
   if (adding) s.push(name); else s.splice(i, 1);
   selections[activeSel] = s;
+  lastRangeAnchor = { idx: allImages.indexOf(name), adding };
   lastToggled = { name, adding };
   queueSave(); renderGallery(); renderSelection();
   lastToggled = null;
@@ -2358,7 +2404,8 @@ function renderTabs() {
     const lbl = document.createElement('span');
     lbl.className       = 'tab-label';
     lbl.contentEditable = 'false';
-    lbl.textContent     = name;
+    const cnt = (selections[name] || []).length;
+    lbl.textContent     = cnt > 0 ? `${name} (${cnt})` : name;
     lbl.title           = 'Double-click to rename';
 
     const x = document.createElement('button');
@@ -2387,6 +2434,7 @@ function renderTabs() {
 
 function startRename(lbl, oldName) {
   lbl.contentEditable = 'true';
+  lbl.textContent = oldName; // strip count for clean editing
   lbl.focus();
   // select all
   const range = document.createRange();
@@ -2400,7 +2448,7 @@ function startRename(lbl, oldName) {
     if (n && n !== oldName && !selections[n]) {
       renameSel(oldName, n);
     } else {
-      lbl.textContent = oldName;
+      renderTabs(); // restore name + count
     }
   };
   lbl.onblur    = commit;
@@ -2472,8 +2520,23 @@ function renderGallery() {
       wrapCls += lastToggled.adding ? ' gal-flash-add' : ' gal-flash-remove';
     wrap.className = wrapCls;
     wrap.onclick = e => {
-      if (e.metaKey || e.ctrlKey) openLightbox(allImages, i);
-      else toggleInSel(name);
+      if (e.metaKey || e.ctrlKey) { openLightbox(allImages, i); return; }
+      if (e.shiftKey && lastRangeAnchor !== null) {
+        pushHistory();
+        const s      = curSel();
+        const adding = lastRangeAnchor.adding;
+        const lo     = Math.min(lastRangeAnchor.idx, i);
+        const hi     = Math.max(lastRangeAnchor.idx, i);
+        for (let j = lo; j <= hi; j++) {
+          const n = allImages[j];
+          if (adding && !s.includes(n)) s.push(n);
+          else if (!adding) { const k = s.indexOf(n); if (k !== -1) s.splice(k, 1); }
+        }
+        selections[activeSel] = s;
+        queueSave(); renderGallery(); renderSelection();
+      } else {
+        toggleInSel(name);
+      }
     };
 
     const img = document.createElement('img');
@@ -2595,11 +2658,15 @@ function renderAll() { renderTabs(); renderGallery(); renderSelection(); }
 
 // ─── Lightbox ──────────────────────────────────────────────────────────────
 function openLightbox(images, idx, context = 'gallery') {
+  lbCompareMode = false; lbCompareNameA = null;
   lbImages = images; lbIdx = idx; lbContext = context;
   updateLb();
   $('lightbox').classList.add('open');
 }
-function closeLb() { $('lightbox').classList.remove('open'); }
+function closeLb() {
+  lbCompareMode = false; lbCompareNameA = null;
+  $('lightbox').classList.remove('open');
+}
 function flashLb(adding) {
   const el = $('lbFlash');
   el.classList.remove('flash-add', 'flash-remove');
@@ -2643,8 +2710,22 @@ async function applyLbCrop(imgEl, name) {
 
 function updateLb() {
   const name = lbImages[lbIdx]; if (!name) return;
-  applyLbCrop($('lbImg'), name);
-  $('lbInfo').textContent = `${name}   ${lbIdx + 1} / ${lbImages.length}`;
+  const comparing = lbCompareMode && lbCompareNameA;
+  $('lbImg').style.display = comparing ? 'none' : '';
+  $('lbCompareSplit').classList.toggle('active', !!comparing);
+  $('lbCompareBtn').classList.toggle('compare-active', lbCompareMode);
+  $('lbCompareBtn').textContent = lbCompareMode ? 'Exit A/B' : 'A/B';
+  if (comparing) {
+    applyLbCrop($('lbCompImgA'), lbCompareNameA);
+    applyLbCrop($('lbCompImgB'), name);
+    $('lbCompNameA').textContent = lbCompareNameA;
+    $('lbCompNameB').textContent = name;
+  } else {
+    applyLbCrop($('lbImg'), name);
+  }
+  $('lbInfo').textContent = comparing
+    ? `${lbCompareNameA}  ·  ${name}`
+    : `${name}   ${lbIdx + 1} / ${lbImages.length}`;
   renderCarousel();
   const ctxEl = $('lbContext');
   if (lbContext === 'gallery') {
@@ -3866,6 +3947,17 @@ function lbToggleSel() {
   if (!adding) syncLightboxToSel(); else updateLb();
 }
 $('lbAddBtn').onclick  = lbToggleSel;
+$('lbCompareBtn').onclick = () => {
+  if (!lbCompareMode) {
+    lbCompareMode  = true;
+    lbCompareNameA = lbImages[lbIdx];
+    if (lbIdx < lbImages.length - 1) lbIdx++;
+  } else {
+    lbCompareMode  = false;
+    lbCompareNameA = null;
+  }
+  updateLb();
+};
 $('lightbox').onclick  = e => { if (e.target === $('lightbox')) closeLb(); };
 
 // Two-finger horizontal swipe (trackpad) on the lightbox image
