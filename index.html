@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager</title>
+<title>Stills Manager v1.0.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,11 +39,13 @@ a, label, select, input[type="checkbox"], input[type="radio"] { cursor: pointer;
   flex-shrink: 0; position: relative;
 }
 #header h1 { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
-#appFooter { flex-shrink:0; text-align:center; padding:6px; border-top:1px solid #2a2a2a; }
+#appFooter { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:14px; padding:6px; border-top:1px solid #2a2a2a; }
+#appVersion { font-size: 10px; color: #3a3a3a; white-space: nowrap; }
 #poweredBy { font-size: 10px; color: #3a3a3a; white-space: nowrap; }
 #poweredBy a { color: #3a3a3a; text-decoration: none; }
 #poweredBy a:hover { color: #666; }
 body.light #appFooter { border-top-color: #e4e4e4; }
+body.light #appVersion { color: #fff; }
 body.light #poweredBy, body.light #poweredBy a { color: #bbb; }
 body.light #poweredBy a:hover { color: #888; }
 #folderName { font-size: 13px; color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1178,6 +1180,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
   </div>
 </div>
 <div id="appFooter">
+  <span id="appVersion">v1.0.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1770,8 +1773,8 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="/vendor/sortable.min.js"></script>
+<script src="/vendor/jspdf.umd.min.js"></script>
 <script>
 'use strict';
 
