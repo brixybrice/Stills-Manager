@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.0.0</title>
+<title>Stills Manager v1.1.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -311,6 +311,7 @@ body.light #poweredBy a:hover { color: #888; }
 .lb-car-slot.lb-car-near   { opacity: 1; }
 .lb-car-slot:not(.lb-car-active):hover { opacity: 0.85; border-color: #555; }
 .lb-car-slot.lb-car-empty { opacity: 0; pointer-events: none; }
+.lb-car-slot.lb-car-checked { border-color: #f5a623; box-shadow: 0 0 0 1px #f5a623; opacity: 1; }
 #lbClose {
   position: fixed; top: 16px; right: 20px; font-size: 20px; color: #888;
   background: rgba(0,0,0,0.55); border: none; border-radius: 5px; padding: 8px 13px;
@@ -1174,13 +1175,14 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <span id="selCount">0 images</span>
         <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
         <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
+        <button class="btn-teal" id="edlBtn" disabled>EDL Marker</button>
       </div>
     </div>
 
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.0.0</span>
+  <span id="appVersion">v1.1.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1652,7 +1654,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       <div class="help-section">
         <h4>Selections</h4>
         <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images and shows the image count in parentheses.</p>
-        <p><strong>+</strong> creates a new tab · <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
+        <p><strong>+</strong> creates a new tab pre-filled with a copy of the active selection — useful to branch off from an existing curation. <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
         <p>Images within a selection can be reordered by <strong>drag and drop</strong>.</p>
         <p>The <strong>shuffle icon</strong> in the selection header randomises the order of images in the active selection. The <strong>invert icon</strong> reverses the order (first becomes last).</p>
         <p>Selections are saved automatically to <strong>.stills-selections.json</strong> in the open folder (debounced at 350 ms).</p>
@@ -1662,21 +1664,23 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <h4>Fullscreen (Lightbox)</h4>
         <p>A <strong>vertical carousel</strong> on the left shows surrounding images — click any thumbnail to jump to it.</p>
         <p>The <strong>context badge</strong> (top right) shows whether you are browsing the Gallery or a named selection. The <strong>#N</strong> badge shows the image's position in the active selection.</p>
-        <p>The <strong>Up</strong> and <strong>Down</strong> buttons (and their keyboard shortcuts) move the image within the selection order.</p>
+        <p><strong>Group move</strong> — when browsing a selection, <strong>Shift+click</strong> carousel thumbnails to add them to a move group (orange border). The ↑/↓ buttons then move the entire group at once, preserving their relative order. The badge shows <em>↑ ×N</em> when a group is active. Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> to clear the group.</p>
         <p>The <strong>A/B</strong> button locks the current image as A and immediately shows the next image as B, side by side. Navigate with the arrows or carousel to change the B image. Click <strong>Exit A/B</strong> to return to normal view.</p>
       </div>
 
       <div class="help-section">
         <h4>Export</h4>
-        <p>Open the export panel with <kbd>Cmd</kbd>+<kbd>E</kbd>. Available exports: PDF Stills, Contact Sheet, Shoot Report, Clips Report, QC Report, ALE, CSV.</p>
+        <p><strong>Export PDF</strong> — one still per page, 16:9 landscape; optional watermark.</p>
+        <p><strong>Contact Sheet</strong> — configurable grid, multi-page, scene grouping, production info header, colour palette band, watermark. Formats: JPG, PNG, PDF. Contact Sheet settings are saved automatically and restored on reload.</p>
+        <p><strong>EDL Marker</strong> — exports the active selection as a DaVinci Resolve Markers EDL (<code>.edl</code>). Timecodes come from the <code>._stills_metadata.json</code> file if present; falls back to the timecode embedded in the filename. The filename without extension is used as the marker name.</p>
+        <p>Open the <strong>Clips Report export panel</strong> with <kbd>Cmd</kbd>+<kbd>E</kbd> for additional exports: Shoot Report, Clips Report, QC Report, ALE, CSV.</p>
         <p>If a <strong>watermark</strong> is configured in Settings, it is composited over PDF and contact sheet exports.</p>
-        <p>The <strong>Contact Sheet</strong> supports scene grouping, colour palette band, production info header and multi-page pagination with live preview.</p>
       </div>
 
       <div class="help-section">
         <h4>Settings <kbd>Cmd</kbd>+<kbd>;</kbd></h4>
         <p><strong>Production</strong> — project name, production company, crew and logo; injected into all PDF report headers.</p>
-        <p><strong>Contact Sheet</strong> — grid layout, format, background colour, title, production info, colour palette, watermark. Live preview with page navigation.</p>
+        <p><strong>Contact Sheet</strong> — grid layout, format, background colour, title, production info, colour palette, watermark. Live preview with page navigation. All settings are saved automatically to <code>localStorage</code> and restored on reload.</p>
         <p><strong>Watermark</strong> — text, font, size, opacity and angle with live preview.</p>
         <p><strong>Paths</strong> — configure the destination folder for each export type independently.</p>
         <p><strong>Live Mode</strong> — crop stills to a specific sensor area for exports and fullscreen preview.</p>
@@ -1696,16 +1700,18 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
           <span><kbd>←</kbd> <kbd>↑</kbd></span>                              <span class="kb-desc">Previous image (fullscreen)</span>
           <span><kbd>→</kbd> <kbd>↓</kbd></span>                              <span class="kb-desc">Next image (fullscreen)</span>
           <span><kbd>Space</kbd></span>                                        <span class="kb-desc">Add / remove from selection (fullscreen)</span>
-          <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image up in selection (fullscreen)</span>
-          <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image down in selection (fullscreen)</span>
+          <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image (or group) up in selection (fullscreen)</span>
+          <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image (or group) down in selection (fullscreen)</span>
+          <span><kbd>Shift</kbd>+<kbd>click</kbd> carousel</span>             <span class="kb-desc">Add / remove image from move group (fullscreen, selection)</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></span>          <span class="kb-desc">Clear move group (fullscreen)</span>
           <span><kbd>Esc</kbd></span>                                          <span class="kb-desc">Close fullscreen or modal</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Open selected folder (folder browser)</span>
           <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>          <span class="kb-desc">Redo</span>
           <span><kbd>Cmd</kbd>+<kbd>O</kbd></span>                            <span class="kb-desc">Open folder</span>
           <span><kbd>Cmd</kbd>+<kbd>;</kbd></span>                            <span class="kb-desc">Open settings</span>
-          <span><kbd>Cmd</kbd>+<kbd>E</kbd></span>                            <span class="kb-desc">Open export panel</span>
-          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>          <span class="kb-desc">New selection</span>
+          <span><kbd>Cmd</kbd>+<kbd>E</kbd></span>                            <span class="kb-desc">Open export panel (Clips Report)</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></span>          <span class="kb-desc">New selection (duplicates active selection)</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Trigger export (export panel open)</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Apply Live Mode settings (Live Mode tab open)</span>
         </div>
@@ -1793,6 +1799,7 @@ let lastToggled = null;
 let lastRangeAnchor  = null; // { idx, adding } for shift+click range
 let lbCompareMode   = false;
 let lbCompareNameA  = null;
+let lbMultiSel      = new Set(); // filenames selected for group move in lightbox
 let browserPath = '';
 let folderName  = '';
 let clipsMetadata = null;
@@ -1844,6 +1851,8 @@ function syncLightboxToSel() {
   lbImages = [...newSel];
   const newIdx = lbImages.indexOf(currentName);
   lbIdx = newIdx !== -1 ? newIdx : Math.min(lbIdx, lbImages.length - 1);
+  // Remove stale items from multi-select
+  for (const f of lbMultiSel) { if (!newSel.includes(f)) lbMultiSel.delete(f); }
   updateLb();
 }
 function undo() {
@@ -2470,7 +2479,7 @@ function addNewSel() {
   let n = selOrder.length + 1, name;
   do { name = `Selection ${n++}`; } while (selections[name] !== undefined);
   pushHistory();
-  selections[name] = []; selOrder.push(name); activeSel = name;
+  selections[name] = [...curSel()]; selOrder.push(name); activeSel = name;
   queueSave(); renderAll();
 }
 function renameSel(oldName, newName) {
@@ -2598,6 +2607,7 @@ function renderSelection() {
   $('selCount').textContent      = sel.length === 1 ? '1 image' : `${sel.length} images`;
   $('exportBtn').disabled        = sel.length === 0;
   $('csBtn').disabled            = sel.length === 0;
+  $('edlBtn').disabled           = sel.length === 0;
   $('clearSelBtn').disabled      = sel.length === 0;
   $('shuffleSelBtn').disabled    = sel.length < 2;
   $('invertSelBtn').disabled     = sel.length < 2;
@@ -2661,13 +2671,13 @@ function renderAll() { renderTabs(); renderGallery(); renderSelection(); }
 
 // ─── Lightbox ──────────────────────────────────────────────────────────────
 function openLightbox(images, idx, context = 'gallery') {
-  lbCompareMode = false; lbCompareNameA = null;
+  lbCompareMode = false; lbCompareNameA = null; lbMultiSel.clear();
   lbImages = images; lbIdx = idx; lbContext = context;
   updateLb();
   $('lightbox').classList.add('open');
 }
 function closeLb() {
-  lbCompareMode = false; lbCompareNameA = null;
+  lbCompareMode = false; lbCompareNameA = null; lbMultiSel.clear();
   $('lightbox').classList.remove('open');
 }
 function flashLb(adding) {
@@ -2680,23 +2690,33 @@ function renderCarousel() {
   const el = $('lbCarousel');
   el.innerHTML = '';
   const spread = 3;
+  const inSelCtx = lbContext !== 'gallery';
   for (let offset = -spread; offset <= spread; offset++) {
     const i = lbIdx + offset;
     const slot = document.createElement('div');
     if (i < 0 || i >= lbImages.length) {
       slot.className = 'lb-car-slot lb-car-empty';
     } else {
+      const imgName = lbImages[i];
       let cls = 'lb-car-slot';
-      if (offset === 0)          cls += ' lb-car-active';
+      if (offset === 0)                cls += ' lb-car-active';
       else if (Math.abs(offset) === 1) cls += ' lb-car-near';
+      if (inSelCtx && lbMultiSel.has(imgName)) cls += ' lb-car-checked';
       slot.className = cls;
       const img = document.createElement('img');
       img.draggable = false;
-      applyLbCrop(img, lbImages[i]);
-      if (offset !== 0) {
-        const captured = i;
-        slot.onclick = () => { lbIdx = captured; updateLb(); };
-      }
+      applyLbCrop(img, imgName);
+      const captured = i;
+      slot.onclick = e => {
+        if (inSelCtx && e.shiftKey) {
+          // Shift+click toggles multi-select without navigating
+          if (lbMultiSel.has(lbImages[captured])) lbMultiSel.delete(lbImages[captured]);
+          else lbMultiSel.add(lbImages[captured]);
+          updateLb();
+        } else if (offset !== 0) {
+          lbIdx = captured; updateLb();
+        }
+      };
       slot.appendChild(img);
     }
     el.appendChild(slot);
@@ -2748,8 +2768,18 @@ function updateLb() {
   const inSelCtx = lbContext !== 'gallery';
   $('lbUpBtn').style.visibility   = inSelCtx ? 'visible' : 'hidden';
   $('lbDownBtn').style.visibility = inSelCtx ? 'visible' : 'hidden';
-  $('lbUpBtn').disabled           = !inSelCtx || pos <= 0;
-  $('lbDownBtn').disabled         = !inSelCtx || pos === -1 || pos >= curSel().length - 1;
+  if (inSelCtx) {
+    const s = curSel();
+    const group = lbMultiSel.size > 0 ? [...lbMultiSel].filter(f => s.includes(f)) : [name];
+    const positions = group.map(f => s.indexOf(f)).filter(p => p !== -1).sort((a, b) => a - b);
+    $('lbUpBtn').disabled   = positions.length === 0 || positions[0] <= 0;
+    $('lbDownBtn').disabled = positions.length === 0 || positions[positions.length - 1] >= s.length - 1;
+    $('lbUpBtn').textContent   = lbMultiSel.size > 1 ? `↑ ×${lbMultiSel.size}` : '↑';
+    $('lbDownBtn').textContent = lbMultiSel.size > 1 ? `↓ ×${lbMultiSel.size}` : '↓';
+  } else {
+    $('lbUpBtn').disabled   = true;
+    $('lbDownBtn').disabled = true;
+  }
   const badge = $('lbSelBadge');
   if (pos !== -1) {
     badge.textContent = `# ${pos + 1}`;
@@ -2938,6 +2968,21 @@ function updatePathsVis() {
 function getExportPath(type) {
   const d = loadPathsData();
   return (d.gang ? d.paths?.gang : d.paths?.[type]) || '';
+}
+
+// ─── Contact Sheet settings persistence ──────────────────────────────────────
+const CS_SETTING_IDS = ['csTitle','csTitleColor','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS'];
+function loadCsSettings() { try { return JSON.parse(localStorage.getItem('stills-cs-settings') || '{}'); } catch { return {}; } }
+function saveCsSettings() {
+  const d = {};
+  CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.type === 'checkbox' ? el.checked : el.value; });
+  localStorage.setItem('stills-cs-settings', JSON.stringify(d));
+}
+function initCsSettings() {
+  const d = loadCsSettings();
+  CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
+  const isA4 = ['a4p','a4l'].includes($('csExportW').value);
+  $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
 }
 function getExportSubfolder() {
   const d = loadPathsData();
@@ -3614,6 +3659,7 @@ $('invertGalSelBtn').onclick = () => {
 };
 $('exportBtn').onclick      = exportPDF;
 $('csBtn').onclick   = openCS;
+$('edlBtn').onclick  = exportEDL;
 $('setTabWm').onclick   = () => { switchSettingsTab('wm');   renderWmPreview(); };
 $('setTabCS').onclick   = () => { switchSettingsTab('cs');   generateCSPreview(); };
 $('setTabProd').onclick  = () => switchSettingsTab('prod');
@@ -3844,7 +3890,7 @@ $('prodLogoClear').addEventListener('click',  e => { e.stopPropagation(); clearL
 
 initProdForm();
 initPathsForm();
-{ const isA4 = ['a4p','a4l'].includes($('csExportW').value); $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none'; }
+initCsSettings();
 
 // ─── Theme toggle ──────────────────────────────────────────────────────────
 function applyTheme(t) {
@@ -3872,19 +3918,21 @@ $('csPdfBtn').onclick = () => exportCS('pdf');
 $('csPrevPage').onclick = () => navigateCSPreview(-1);
 $('csNextPage').onclick = () => navigateCSPreview(1);
 
-// Live preview — CS modal settings
-['csTitle','csMargin','csA4Margin'].forEach(id => $(id).addEventListener('input', csQueuePreview));
-['csBg','csTitleColor'].forEach(id => $(id).addEventListener('input', csQueuePreview));
-['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csQueuePreview));
+// Live preview — CS modal settings (also auto-save)
+function csChanged() { csQueuePreview(); saveCsSettings(); }
+['csTitle','csMargin','csA4Margin'].forEach(id => $(id).addEventListener('input', csChanged));
+['csBg','csTitleColor'].forEach(id => $(id).addEventListener('input', csChanged));
+['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csChanged));
 $('csExportW').addEventListener('change', () => {
   const isA4 = ['a4p','a4l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
 });
-$('csSortScene').addEventListener('change', csQueuePreview);
-$('csColorPalette').addEventListener('change', csQueuePreview);
-$('csProdInfo').addEventListener('change', csQueuePreview);
-$('csInvertLogo').addEventListener('change', csQueuePreview);
-$('csWmEnabled').addEventListener('change', csQueuePreview);
+$('csSortScene').addEventListener('change', csChanged);
+$('csColorPalette').addEventListener('change', csChanged);
+$('csProdInfo').addEventListener('change', csChanged);
+$('csInvertLogo').addEventListener('change', csChanged);
+$('csWmEnabled').addEventListener('change', csChanged);
+$('pdfAppendCS').addEventListener('change', saveCsSettings);
 
 // Report search
 $('reportSearchInput').addEventListener('input', e => filterReport(e.target.value));
@@ -3924,24 +3972,28 @@ $('lbCarousel').addEventListener('wheel', e => {
 }, { passive: false });
 $('lbPrev').onclick    = () => { if (lbIdx > 0)                      { lbIdx--; updateLb(); } };
 $('lbNext').onclick    = () => { if (lbIdx < lbImages.length - 1)    { lbIdx++; updateLb(); } };
-$('lbUpBtn').onclick   = () => {
+function lbMoveGroup(dir) {
+  // dir: -1 = up, +1 = down
   if (lbContext === 'gallery') return;
-  const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
-  if (pos <= 0) return;
+  const s = curSel();
+  const currentImg = lbImages[lbIdx];
+  const group = lbMultiSel.size > 0 ? [...lbMultiSel].filter(f => s.includes(f)) : [currentImg].filter(f => f && s.includes(f));
+  if (!group.length) return;
+  const positions = group.map(f => s.indexOf(f)).filter(p => p !== -1).sort((a, b) => a - b);
+  if (dir === -1 && positions[0] <= 0) return;
+  if (dir === +1 && positions[positions.length - 1] >= s.length - 1) return;
   pushHistory();
-  [s[pos - 1], s[pos]] = [s[pos], s[pos - 1]];
-  selections[activeSel] = s; lbImages = [...s]; lbIdx = pos - 1;
+  if (dir === -1) {
+    for (const p of positions) { [s[p - 1], s[p]] = [s[p], s[p - 1]]; }
+  } else {
+    for (let i = positions.length - 1; i >= 0; i--) { const p = positions[i]; [s[p], s[p + 1]] = [s[p + 1], s[p]]; }
+  }
+  selections[activeSel] = s; lbImages = [...s];
+  lbIdx = s.indexOf(currentImg);
   queueSave(); renderGallery(); renderSelection(); updateLb();
-};
-$('lbDownBtn').onclick = () => {
-  if (lbContext === 'gallery') return;
-  const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
-  if (pos === -1 || pos >= s.length - 1) return;
-  pushHistory();
-  [s[pos], s[pos + 1]] = [s[pos + 1], s[pos]];
-  selections[activeSel] = s; lbImages = [...s]; lbIdx = pos + 1;
-  queueSave(); renderGallery(); renderSelection(); updateLb();
-};
+}
+$('lbUpBtn').onclick   = () => lbMoveGroup(-1);
+$('lbDownBtn').onclick = () => lbMoveGroup(+1);
 function lbToggleSel() {
   const n = lbImages[lbIdx]; if (!n) return;
   const adding = !isInSel(n);
@@ -4038,6 +4090,51 @@ async function exportCSV() {
     csv += [c.clip_name || '', ...keys.map(k => esc(m[k] ?? ''))].join(',') + '\n';
   });
   await textSave(csv, (clipsMetadata.timeline || 'export') + '.csv', 'text/csv', 'csv');
+}
+
+async function exportEDL() {
+  const sel = curSel();
+  if (!sel.length) { alert('Aucune image dans la sélection active.'); return; }
+  const pad = n => String(n).padStart(2, '0');
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const title = clipsMetadata?.timeline || folderName || activeSel;
+
+  // Build lookup: "clipName__sourceTc" → marker  (exported_filename is null in current exports)
+  const markerLookup = {};
+  if (clipsMetadata) {
+    Object.values(clipsMetadata.markers_metadata || {}).forEach(m => {
+      if (m.clip_name && m.source_tc) markerLookup[`${m.clip_name}__${m.source_tc}`] = m;
+    });
+  }
+
+  function tcAddFrame(tc) {
+    const p = tc.split(':').map(Number);
+    p[3]++; return p.map(n => pad(n)).join(':');
+  }
+  // Extract clip_name and source_tc from filename pattern:
+  // {prefix}_{ClipName.mxf}_{HH}_{MM}_{SS}_{FF}.ext
+  function parseStillName(filename) {
+    const base = filename.replace(/\.[^.]+$/, '');
+    const m = base.match(/([A-Z]\d+C\d+_\w+\.mxf)_(\d{2})_(\d{2})_(\d{2})_(\d{2})$/);
+    if (!m) return null;
+    return { clipName: m[1], sourceTc: `${m[2]}:${m[3]}:${m[4]}:${m[5]}` };
+  }
+
+  let edl = `TITLE: ${title}\nFCM: NON-DROP FRAME\n* MARKERS EDL EXPORT ${dateStr}\n\n`;
+  sel.forEach((filename, i) => {
+    const num = String(i + 1).padStart(3, '0');
+    const parsed = parseStillName(filename);
+    const marker = parsed ? markerLookup[`${parsed.clipName}__${parsed.sourceTc}`] : undefined;
+    const tcIn   = marker?.timeline_tc || '00:00:00:00';
+    const tcOut  = tcAddFrame(tcIn);
+    const clipName   = parsed?.clipName || filename;
+    const markerName = filename.replace(/\.[^.]+$/, ''); // filename without extension
+    edl += `${num}  AX       V     C        00:00:00:00 00:00:00:01 ${tcIn} ${tcOut}\n`;
+    edl += `${clipName}\n`;
+    edl += `|C:ResolveColorPurple |M:${markerName} |D:1\n\n`;
+  });
+  await textSave(edl, `${activeSel}.edl`, 'text/plain', 'edl');
 }
 
 function pdfParseCard(name){const m=String(name||'').match(/^([A-Z](?:_\d{4}|\d+))C\d+/);return m?m[1]:null;}
@@ -4614,16 +4711,10 @@ document.addEventListener('keydown', async e => {
     if (e.key === 'ArrowLeft'  || (e.key === 'ArrowUp'   && !(e.metaKey || e.ctrlKey))) { e.preventDefault(); if (lbIdx > 0) { lbIdx--; updateLb(); } }
     if (e.key === 'ArrowRight' || (e.key === 'ArrowDown'  && !(e.metaKey || e.ctrlKey))) { e.preventDefault(); if (lbIdx < lbImages.length - 1) { lbIdx++; updateLb(); } }
     // Reorder in selection — Cmd/Ctrl + up/down
-    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowUp' && lbContext !== 'gallery') {
-      e.preventDefault();
-      const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
-      if (pos > 0) { pushHistory(); [s[pos-1],s[pos]]=[s[pos],s[pos-1]]; selections[activeSel]=s; lbImages=[...s]; lbIdx=pos-1; queueSave(); renderGallery(); renderSelection(); updateLb(); }
-    }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowDown' && lbContext !== 'gallery') {
-      e.preventDefault();
-      const s = curSel(), pos = s.indexOf(lbImages[lbIdx]);
-      if (pos !== -1 && pos < s.length-1) { pushHistory(); [s[pos],s[pos+1]]=[s[pos+1],s[pos]]; selections[activeSel]=s; lbImages=[...s]; lbIdx=pos+1; queueSave(); renderGallery(); renderSelection(); updateLb(); }
-    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowUp'   && lbContext !== 'gallery') { e.preventDefault(); lbMoveGroup(-1); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowDown'  && lbContext !== 'gallery') { e.preventDefault(); lbMoveGroup(+1); }
+    // Cmd/Ctrl+Shift+A — clear multi-select group
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') { e.preventDefault(); lbMultiSel.clear(); updateLb(); }
     if (e.key === ' ') { e.preventDefault(); lbToggleSel(); }
   } else if ($('clipDetail').classList.contains('open')) {
     if (e.key === 'Escape') { closeClipDetail(); }

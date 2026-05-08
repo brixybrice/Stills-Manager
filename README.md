@@ -1,4 +1,4 @@
-# Stills Manager
+# Stills Manager v1.1.0
 
 A local web app for browsing, curating and exporting image stills from a film shoot. Runs entirely on your machine — no cloud, no upload.
 
@@ -24,10 +24,12 @@ A local web app for browsing, curating and exporting image stills from a film sh
 - **A/B comparison** — "A/B" button in the lightbox locks the current image as A and shows the next image as B side by side; navigate with arrows or carousel to change B
 - **Selections** — click a thumbnail to add/remove it; spacebar works in fullscreen
 - **Multiple selections** via tabs — each tab shows its image count in parentheses; add, rename (double-click), reorder and delete
+- **Duplicate selection** — the **+** button creates a new tab pre-filled with a copy of the active selection
 - **Drag & drop** reordering of images within a selection
 - **Shuffle** — randomises the order of images in the active selection (button in the selection panel header)
 - **Invert order** — reverses the order of images in the active selection (button in the selection panel header)
-- **Reorder from fullscreen** — `Cmd`+`↑/↓` moves the current image up or down in the selection order
+- **Reorder from fullscreen** — `Cmd`+`↑/↓` moves the current image (or group) up or down in the selection order
+- **Group move in lightbox** — `Shift+click` carousel thumbnails to build a move group (orange border); `↑`/`↓` buttons move the whole group at once; `Cmd`+`Shift`+`A` clears the group
 - **Undo / Redo** — full history for all selection edits (`Cmd`+`Z` / `Cmd`+`Shift`+`Z`)
 - **Auto-save** — selections written as `.stills-selections.json` in the open folder, debounced at 350 ms
 - **URL persistence** — the open folder is encoded in the URL; reloading the page reopens it automatically
@@ -65,12 +67,18 @@ Accessible via the top navigation.
 ![Export](readme/examples/exports.png)        
 
 
-All exports are triggered from the **Export panel** (`Cmd+E`).
+**Stills Manager exports** (selection panel footer):
 
 | Export | Format | Description |
 |--------|--------|-------------|
 | PDF Stills | PDF | One still per page, 16:9 landscape; optional watermark; optional contact sheet appended |
-| Contact Sheet | JPG / PNG / PDF | Configurable grid; multi-page pagination; scene-grouped pages; production info header; colour palette band; optional watermark |
+| Contact Sheet | JPG / PNG / PDF | Configurable grid; multi-page pagination; scene-grouped pages; production info header; colour palette band; optional watermark. Settings auto-saved to `localStorage` |
+| EDL Marker | `.edl` | DaVinci Resolve Markers EDL — active selection only; timeline TC from `._stills_metadata.json`, falls back to TC embedded in filename |
+
+**Clips Report exports** — triggered from the export panel (`Cmd+E`), require `._stills_metadata.json`:
+
+| Export | Format | Description |
+|--------|--------|-------------|
 | Shoot Report | PDF A4 | Clips overview by camera, cards/reels table, scene breakdown with takes and good-take count |
 | Clips Report | PDF A4 landscape | One row per clip with thumbnail, slate, metadata columns (Camera, Card, Optics, Color, Timing) and comments |
 | QC Report | PDF A4 | Clip table with thumbnail, slate, comments and reviewer notes; production info header |
@@ -182,16 +190,18 @@ The app opens automatically at `http://localhost:5000`. Stop the server with **C
 | `←` / `↑` | Previous image (fullscreen) |
 | `→` / `↓` | Next image (fullscreen) |
 | `Space` | Add / remove from selection (fullscreen) |
-| `Cmd`+`↑` | Move image up in selection (fullscreen) |
-| `Cmd`+`↓` | Move image down in selection (fullscreen) |
+| `Cmd`+`↑` | Move image (or group) up in selection (fullscreen) |
+| `Cmd`+`↓` | Move image (or group) down in selection (fullscreen) |
+| `Shift`+click carousel | Add / remove image from move group (fullscreen, selection) |
+| `Cmd`+`Shift`+`A` | Clear move group (fullscreen) |
 | `Esc` | Close fullscreen or modal |
 | `Enter` | Open selected folder (folder browser) |
 | `Cmd`+`Z` | Undo |
 | `Cmd`+`Shift`+`Z` | Redo |
 | `Cmd`+`O` | Open folder |
 | `Cmd`+`;` | Open settings |
-| `Cmd`+`E` | Open export panel |
-| `Cmd`+`Shift`+`N` | New selection |
+| `Cmd`+`E` | Open export panel (Clips Report) |
+| `Cmd`+`Shift`+`N` | New selection (duplicates active selection) |
 | `Cmd`+`click` | Open image fullscreen (gallery) |
 | `Enter` | Trigger exports (export panel open) |
 | `Enter` | Apply Live Mode settings (Live Mode tab open) |
