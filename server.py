@@ -127,7 +127,8 @@ def get_metadata():
         return jsonify(None), 200
     combined = {}
     walk_dirs = []
-    if recursive_mode:
+    force_recursive = request.args.get('recursive', '0') == '1'
+    if recursive_mode or force_recursive:
         for root, dirs, _ in os.walk(current_dir):
             dirs[:] = sorted([d for d in dirs if not d.startswith('.')], key=nat_key)
             walk_dirs.append(root)
@@ -149,12 +150,102 @@ def get_metadata():
                         if 'timeline' not in combined:
                             combined['timeline'] = data.get('timeline', '')
                     if 'markers_metadata' in data:
-                        combined.setdefault('markers_metadata', {}).update(data['markers_metadata'])
+                        # Prefix each frame key with the folder name to avoid
+                        # collisions when combining multiple days (each day
+                        # restarts frame numbering from its own timeline origin)
+                        prefix = os.path.basename(dirpath) + '/'
+                        prefixed = {prefix + k: v for k, v in data['markers_metadata'].items()}
+                        combined.setdefault('markers_metadata', {}).update(prefixed)
                 except Exception:
                     pass
     except Exception:
         pass
     return jsonify(combined if combined else None), 200
+
+# ── Aggregate all sub-folder selections ──────────────────────────────────
+@app.route('/api/aggregate-selections')
+def aggregate_selections():
+    if not current_dir:
+        return jsonify({'error': 'No folder open'}), 400
+    seen = set()
+    images = []
+    folders = []       # ordered list of source folder rel paths
+    image_folder = {}  # { image_rel_path: folder_rel_path }
+    for root, dirs, files in os.walk(current_dir):
+        dirs[:] = sorted([d for d in dirs if not d.startswith('.')], key=nat_key)
+        if root == current_dir:
+            continue  # skip root — it's the merge destination, not a source
+        json_path = os.path.join(root, JSON_FILE)
+        if not os.path.exists(json_path):
+            continue
+        rel_folder = os.path.relpath(root, current_dir).replace(os.sep, '/')
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            sel_data = data.get('selections', {})
+            sel_order = data.get('selOrder', list(sel_data.keys()))
+            folder_imgs = []
+            for tab_name in sel_order:
+                for img in sel_data.get(tab_name, []):
+                    abs_img = os.path.join(root, img)
+                    rel = os.path.relpath(abs_img, current_dir).replace(os.sep, '/')
+                    if rel not in seen and os.path.exists(abs_img):
+                        seen.add(rel)
+                        folder_imgs.append(rel)
+                        image_folder[rel] = rel_folder
+            if folder_imgs:
+                folders.append(rel_folder)
+                images.extend(folder_imgs)
+        except Exception:
+            pass
+    return jsonify({'images': images, 'folder_count': len(folders),
+                    'folders': folders, 'image_folder': image_folder})
+
+# ── File modification dates ───────────────────────────────────────────────
+@app.route('/api/file-dates')
+def file_dates():
+    if not current_dir:
+        return jsonify({'dates': {}}), 200
+    dates = {}
+    if recursive_mode:
+        for root, dirs, files in os.walk(current_dir):
+            dirs[:] = sorted([d for d in dirs if not d.startswith('.')], key=nat_key)
+            for name in files:
+                if os.path.splitext(name)[1].lower() in IMAGE_EXTS:
+                    full = os.path.join(root, name)
+                    rel = os.path.relpath(full, current_dir).replace(os.sep, '/')
+                    try:
+                        dates[rel] = os.path.getmtime(full)
+                    except Exception:
+                        pass
+    else:
+        for name in os.listdir(current_dir):
+            if os.path.splitext(name)[1].lower() in IMAGE_EXTS:
+                full = os.path.join(current_dir, name)
+                try:
+                    dates[name] = os.path.getmtime(full)
+                except Exception:
+                    pass
+    return jsonify({'dates': dates})
+
+# ── Reveal file in Finder (macOS) ────────────────────────────────────────
+@app.route('/api/reveal', methods=['POST'])
+def reveal_file():
+    if not current_dir:
+        return jsonify({'error': 'No folder open'}), 400
+    rel = request.json.get('path', '')
+    if not rel:
+        return jsonify({'error': 'Missing path'}), 400
+    full = os.path.abspath(os.path.join(current_dir, rel))
+    if not full.startswith(current_dir):
+        return jsonify({'error': 'Invalid path'}), 403
+    if not os.path.exists(full):
+        return jsonify({'error': 'File not found'}), 404
+    try:
+        subprocess.run(['open', '-R', full], check=False)
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ── Save exported file ───────────────────────────────────────────────────
 @app.route('/api/save-file', methods=['POST'])

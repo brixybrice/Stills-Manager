@@ -1,4 +1,4 @@
-# Stills Manager v1.1.0
+# Stills Manager v1.3.0
 
 A local web app for browsing, curating and exporting image stills from a film shoot. Runs entirely on your machine — no cloud, no upload.
 
@@ -15,6 +15,8 @@ A local web app for browsing, curating and exporting image stills from a film sh
 
 - **Browse** any local folder containing JPG, PNG or TIF images
 - **Include subfolders** — option in the folder browser to load images from all nested folders at once
+- **Merge Mode** — aggregates the selected images from all nested `.stills-selections.json` files into a single gallery view; folder picker lets you exclude individual subfolders on the fly; the resulting refined selection is saved back to the root folder's JSON
+- **Sort** — three sort modes for the gallery: **A-Z** (filename), **Scene** (reads `metadata.Scene` from clip metadata), **Date** (file modification time); click the active button to restore original order
 - **Recent folders** — the last 8 opened folders are listed for quick access in the folder browser
 - **Gallery** view with 16:9 thumbnails, up to 6 columns
 - **Select all / Deselect all** — button next to the image count; adds or clears all images in the active selection in one click
@@ -58,7 +60,9 @@ Accessible via the top navigation.
 - One card per clip with thumbnail, full metadata (Camera, Optics, Color, Timing), Comments and Reviewer Notes
 - Searchable by clip name or any metadata field
 - Persists thumbnail choice per clip across sessions
-- Half-page detail panel with all metadata fields
+- Half-page detail panel: **Scene / Shot / Take** displayed in the header, remaining metadata fields below
+- `↑` / `↓` in the detail panel navigates every image in the gallery — images without metadata display the still with a "no metadata" notice
+- Clip details are available in **Merge Mode**: metadata is loaded recursively across all subfolders
 
 ---
 
@@ -72,6 +76,7 @@ Accessible via the top navigation.
 | Export | Format | Description |
 |--------|--------|-------------|
 | PDF Stills | PDF | One still per page, 16:9 landscape; optional watermark; optional contact sheet appended |
+| Individual Stills | JPG / PNG | Exports every image in the active selection as a separate file; configurable format, quality and resolution; optional watermark; optional sub-folder creation from selection title. Progress bar shown during export |
 | Contact Sheet | JPG / PNG / PDF | Configurable grid; multi-page pagination; scene-grouped pages; production info header; colour palette band; optional watermark. Settings auto-saved to `localStorage` |
 | EDL Marker | `.edl` | DaVinci Resolve Markers EDL — active selection only; timeline TC from `._stills_metadata.json`, falls back to TC embedded in filename |
 
@@ -113,11 +118,12 @@ When *Append to PDF export* is checked, the contact sheet is appended to the PDF
 
 ### Settings (`Cmd`+`;`)
 
-Five-tab panel (remembers the last open tab):
+Six-tab panel (remembers the last open tab):
 
 - **Production** — project name, production company, Director, DOP, DIT, ACs, Data Manager, logo (PNG); stored in `localStorage`; injected into all PDF report headers and the contact sheet production info block
 - **Contact Sheet** — all layout and content options described above; live preview with page navigation
-- **Watermark** — tiled text overlay with font, size, opacity and angle; live preview; applied to PDF Stills and optionally to the contact sheet
+- **Individual Still** — format (JPEG / PNG), quality (1–100), resolution (Original / HD / Full HD / 4K / Custom width), optional watermark, optional folder creation from selection title, optional subfolder name. Export path configured in Paths
+- **Watermark** — tiled text overlay with font, size, opacity and angle; live preview; applied to PDF Stills, Individual Stills and optionally to the contact sheet
 - **Paths** — configure the destination folder for each export type independently, or gang all exports to a single folder; optional "create sub-folder with title name"; folder browser included
 - **Live Mode** — crop stills to a sensor area for exports and fullscreen preview (see below)
 

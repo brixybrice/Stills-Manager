@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.1.0</title>
+<title>Stills Manager v1.2.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -274,6 +274,11 @@ body.light #poweredBy a:hover { color: #888; }
   display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
 }
 #selCount { font-size: 12px; color: #555; }
+#indivProgressWrap { display: none; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
+#indivProgressFill { height: 100%; background: #006D78; border-radius: 2px; transition: width 0.12s; width: 0%; }
+#indivProgressLabel { display: none; font-size: 11px; color: #666; text-align: center; }
+body.light #indivProgressWrap { background: #d4d4d4; }
+body.light #indivProgressLabel { color: #aaa; }
 
 /* ── Sortable ── */
 .sortable-ghost  { opacity: 0.2; background: #006D7822 !important; }
@@ -915,7 +920,12 @@ body.light .cs-nav-btn:hover { background: rgba(255,255,255,0.95); }
 #clipDetailTitle {
   font-size: 13px; font-weight: 700; color: #ddd;
   font-family: 'Courier New', monospace;
-  padding-bottom: 10px; border-bottom: 1px solid #252525; flex-shrink: 0;
+  padding-bottom: 6px; flex-shrink: 0;
+}
+#clipDetailSubtitle {
+  font-size: 12px; color: #888; padding-bottom: 10px;
+  border-bottom: 1px solid #252525; flex-shrink: 0;
+  min-height: 0;
 }
 #clipDetailFields {
   display: grid;
@@ -1097,11 +1107,79 @@ body.light #clipDetail { background: #f8f8f8; border-top-color: #d0d0d0; }
 body.light #clipDetailClose { color: #bbb; }
 body.light #clipDetailClose:hover { color: #444; }
 body.light #clipDetailImg { background: #f2f2f2; border-right-color: #e8e8e8; }
-body.light #clipDetailTitle { color: #222; border-bottom-color: #e8e8e8; }
+body.light #clipDetailTitle { color: #222; }
+body.light #clipDetailSubtitle { color: #888; border-bottom-color: #e8e8e8; }
 body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
 
 /* Theme toggle button */
 #themeToggle { font-size: 17px; padding: 4px 9px; line-height: 1; }
+
+/* ── Thumbnail context menu ── */
+#thumbContextMenu {
+  position: fixed; z-index: 1000; display: none;
+  background: #1e1e1e; border: 1px solid #333; border-radius: 6px;
+  padding: 4px 0; min-width: 190px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+#thumbContextMenu button {
+  display: block; width: 100%; text-align: left;
+  padding: 7px 14px; font-size: 12px; color: #ccc;
+  background: transparent; border: none; cursor: pointer; white-space: nowrap;
+}
+#thumbContextMenu button:hover:not(:disabled) { background: #006D78; color: #fff; }
+#thumbContextMenu button:disabled { color: #3a3a3a; cursor: default; }
+body.light #thumbContextMenu { background: #fff; border-color: #ddd; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+body.light #thumbContextMenu button { color: #333; }
+body.light #thumbContextMenu button:hover:not(:disabled) { background: #006D78; color: #fff; }
+body.light #thumbContextMenu button:disabled { color: #ccc; }
+
+/* ── Sort & Merge controls ── */
+.sort-group { display: flex; }
+.sort-group .sort-btn { border-radius: 0; }
+.sort-group .sort-btn:first-child { border-radius: 4px 0 0 4px; }
+.sort-group .sort-btn:last-child { border-radius: 0 4px 4px 0; }
+.sort-group .sort-btn:not(:first-child) { border-left: none; }
+.sort-btn {
+  font-size: 11px; color: #555; background: transparent; border: 1px solid #333;
+  border-radius: 4px; padding: 2px 8px; cursor: pointer; flex-shrink: 0;
+}
+.sort-btn:hover { color: #aaa; border-color: #555; }
+.sort-btn.active { color: #fff; background: #006D78; border-color: #006D78; }
+.merge-btn.active { background: #5c3f8f; border-color: #5c3f8f; color: #d4b8ff; }
+#mergeBanner {
+  padding: 5px 16px; border-bottom: 1px solid #3d2a6e;
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(92,63,143,0.15); flex-shrink: 0;
+}
+#mergeBanner > span { font-size: 11px; color: #b39ddb; }
+#mergeBanner button {
+  font-size: 11px; color: #b39ddb; background: transparent;
+  border: 1px solid #5c3f8f; border-radius: 4px; padding: 2px 8px; cursor: pointer;
+}
+#mergeBanner button:hover { color: #fff; border-color: #9c7fd4; }
+#mergeFolderPicker {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 200;
+  background: #1e1e2e; border: 1px solid #5c3f8f; border-radius: 6px;
+  padding: 4px 0; min-width: 180px; max-height: 260px; overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+#mergeFolderPicker label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px; cursor: pointer; font-size: 11px; color: #c0b8d4; white-space: nowrap;
+}
+#mergeFolderPicker label:hover { background: rgba(92,63,143,0.3); }
+#mergeFolderPicker input[type="checkbox"] { accent-color: #9c7fd4; cursor: pointer; }
+
+body.light .sort-btn { color: #888; border-color: #ccc; }
+body.light .sort-btn:hover { color: #444; border-color: #999; }
+body.light .sort-btn.active { color: #fff; background: #006D78; border-color: #006D78; }
+body.light .merge-btn.active { background: #7c5cbf; border-color: #7c5cbf; color: #fff; }
+body.light #mergeBanner { background: rgba(124,92,191,0.08); border-bottom-color: #c5b3e8; }
+body.light #mergeBanner > span { color: #7c5cbf; }
+body.light #mergeBanner button { color: #7c5cbf; border-color: #c5b3e8; }
+body.light #mergeBanner button:hover { color: #fff; background: #7c5cbf; border-color: #7c5cbf; }
+body.light #mergeFolderPicker { background: #fff; border-color: #c5b3e8; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+body.light #mergeFolderPicker label { color: #555; }
+body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
 </style>
 </head>
 <body>
@@ -1149,7 +1227,23 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
             <button id="selectAllBtn">Select all</button>
             <button id="invertGalSelBtn">Inverse</button>
           </div>
-          <span id="galleryHint">Click to select · Cmd+click to view large</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="sort-group">
+              <button class="sort-btn" id="sortBtnAlpha" onclick="setSortMode('alpha')" title="Alphabetical sort">A-Z</button>
+              <button class="sort-btn" id="sortBtnScene" onclick="setSortMode('scene')" title="Sort by scene (metadata.Scene)">Scene</button>
+              <button class="sort-btn" id="sortBtnDate" onclick="setSortMode('date')" title="Sort by date modified">Date</button>
+            </div>
+            <button class="sort-btn" id="sortBtnSource" onclick="setSortMode('source')" title="Sort by original selection order (Merge Mode only)" style="display:none">Source</button>
+            <button class="sort-btn merge-btn" id="mergeBtn" onclick="toggleMergeMode()" title="Show selections from subfolders">Merge</button>
+          </div>
+        </div>
+        <div id="mergeBanner" style="display:none">
+          <span id="mergeBannerText">Merge Mode</span>
+          <div style="position:relative">
+            <button id="mergeFolderBtn" onclick="toggleFolderPicker()">Folders ▾</button>
+            <div id="mergeFolderPicker" style="display:none"></div>
+          </div>
+          <button onclick="exitMergeMode()">✕ Exit</button>
         </div>
         <div id="imageGrid"></div>
       </div>
@@ -1174,6 +1268,9 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       <div id="selFooter">
         <span id="selCount">0 images</span>
         <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
+        <button class="btn-teal" id="indivBtn" disabled>Export Stills</button>
+        <div id="indivProgressWrap"><div id="indivProgressFill"></div></div>
+        <span id="indivProgressLabel"></span>
         <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
         <button class="btn-teal" id="edlBtn" disabled>EDL Marker</button>
       </div>
@@ -1182,7 +1279,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.1.0</span>
+  <span id="appVersion">v1.2.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1196,6 +1293,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
   </div>
   <div id="clipDetailMeta">
     <div id="clipDetailTitle"></div>
+    <div id="clipDetailSubtitle"></div>
     <div id="clipDetailFields"></div>
   </div>
 </div>
@@ -1241,6 +1339,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       <div class="set-tabs">
         <button class="set-tab active" id="setTabProd">Production</button>
         <button class="set-tab" id="setTabCS">Contact Sheet</button>
+        <button class="set-tab" id="setTabIndiv">Individual Still</button>
         <button class="set-tab" id="setTabWm">Watermark</button>
         <button class="set-tab" id="setTabPaths">Paths</button>
         <button class="set-tab" id="setTabLive">Live Mode</button>
@@ -1348,8 +1447,11 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
               <option value="1280">HD — 1280 px</option>
               <option value="1920" selected>Full HD — 1920 px</option>
               <option value="3840">4K — 3840 px</option>
+              <option value="7680">8K — 7680 px</option>
               <option value="a4p">A4 Portrait — 300 dpi</option>
               <option value="a4l">A4 Landscape — 300 dpi</option>
+              <option value="a3p">A3 Portrait — 300 dpi</option>
+              <option value="a3l">A3 Landscape — 300 dpi</option>
             </select>
           </div>
           <hr class="cs-sep">
@@ -1429,6 +1531,58 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       </div>
     </div>
 
+    <!-- Individual Still pane -->
+    <div class="set-pane" id="setPaneIndiv" style="display:none">
+      <div class="wm-body" style="flex-direction:column;overflow-y:auto;padding:16px 20px;gap:0">
+        <div class="cs-settings">
+          <div class="cs-field">
+            <label>Format</label>
+            <select id="indivFormat">
+              <option value="jpeg">JPEG</option>
+              <option value="png">PNG</option>
+            </select>
+          </div>
+          <div class="cs-field" id="indivQualityRow">
+            <label>Quality — <span id="indivQualityVal">90</span>%</label>
+            <input type="range" id="indivQuality" min="1" max="100" value="90">
+          </div>
+          <div class="cs-field">
+            <label>Resolution</label>
+            <select id="indivResolution">
+              <option value="orig">Original</option>
+              <option value="hd">HD — 1280 px</option>
+              <option value="fhd" selected>Full HD — 1920 px</option>
+              <option value="4k">4K — 3840 px</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div class="cs-field" id="indivCustomWRow" style="display:none">
+            <label>Width (px)</label>
+            <input type="number" id="indivCustomW" value="1920" min="1" step="1">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="indivWatermark">
+            <label for="indivWatermark">Apply watermark</label>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="indivCreateFolder">
+            <label for="indivCreateFolder">Create folder from selection title</label>
+          </div>
+          <div class="cs-field">
+            <label>Subfolder</label>
+            <input type="text" id="indivSubfolder" placeholder="Optional…">
+          </div>
+        </div>
+      </div>
+      <div class="wm-foot">
+        Export path is configured in <button class="btn-ghost" onclick="switchSettingsTab('paths')" style="padding:2px 8px;font-size:12px">Paths</button>
+        <div style="flex:1"></div>
+        <button class="btn-primary" id="indivDone">Done</button>
+      </div>
+    </div>
+
     <!-- Paths pane -->
     <div class="set-pane" id="setPanePaths" style="display:none">
       <div class="paths-body">
@@ -1446,6 +1600,7 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         </div>
         <div id="pathsIndivSection" class="paths-rows">
           <div class="paths-entry"><span class="paths-lbl">PDF Stills</span><input type="text" class="paths-input" id="path_pdfStills" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_pdfStills">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">Individual Stills</span><input type="text" class="paths-input" id="path_indivStills" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_indivStills">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Contact Sheet</span><input type="text" class="paths-input" id="path_contactSheet" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_contactSheet">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Clips Report</span><input type="text" class="paths-input" id="path_clipsReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_clipsReport">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Shoot Report</span><input type="text" class="paths-input" id="path_shootReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_shootReport">…</button></div>
@@ -1625,6 +1780,12 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
 </div>
 
 <!-- Help modal -->
+<!-- Thumbnail context menu -->
+<div id="thumbContextMenu">
+  <button id="ctxReveal">Reveal in Finder</button>
+  <button id="ctxMeta">Show clip metadata</button>
+</div>
+
 <div id="helpModal">
   <div class="help-box">
     <div class="modal-head">
@@ -1639,6 +1800,20 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
         <p>Check <strong>Include subfolders</strong> to load images from all nested folders at once. Press <kbd>Enter</kbd> to confirm, <kbd>Esc</kbd> to cancel.</p>
         <p>The last 8 opened folders appear as a <strong>Recent</strong> list at the top of the browser for quick access. Click ✕ on any entry to remove it.</p>
         <p>The open folder is stored in the URL — reloading the page automatically reopens the same folder.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Gallery — Sort</h4>
+        <p>Three sort buttons appear in the gallery header: <strong>A-Z</strong> (alphabetical by filename), <strong>Scene</strong> (reads the <code>metadata.Scene</code> field from clip metadata — requires a <code>._stills_metadata.json</code> file), and <strong>Date</strong> (file modification time).</p>
+        <p>Clicking the active button a second time deactivates it and restores the original server order. Sort applies within Merge Mode as well.</p>
+      </div>
+
+      <div class="help-section">
+        <h4>Gallery — Merge Mode</h4>
+        <p>The <strong>Merge</strong> button aggregates the selected images from every <code>.stills-selections.json</code> found in the subfolders of the currently open folder. Only images that were previously selected (in any tab of any subfolder) appear in the gallery.</p>
+        <p>Use the <strong>Folders ▾</strong> button in the banner to open a folder picker — uncheck any subfolder to temporarily exclude it from the merged view. The gallery updates immediately.</p>
+        <p>While in Merge Mode you can select and deselect images normally. The resulting over-selection is saved to the <strong>root folder's</strong> <code>.stills-selections.json</code> like any other selection, and can be recalled in future sessions.</p>
+        <p>Click <strong>✕ Exit</strong> in the banner (or the Merge button again) to return to the normal gallery view.</p>
       </div>
 
       <div class="help-section">
@@ -1671,16 +1846,18 @@ body.light #clipDetailMeta::-webkit-scrollbar-thumb { background: #d8d8d8; }
       <div class="help-section">
         <h4>Export</h4>
         <p><strong>Export PDF</strong> — one still per page, 16:9 landscape; optional watermark.</p>
+        <p><strong>Export Stills</strong> — exports every image in the active selection as an individual file (JPEG or PNG). Format, quality and resolution are configured in <strong>Settings → Individual Still</strong>. A progress bar is shown during export.</p>
         <p><strong>Contact Sheet</strong> — configurable grid, multi-page, scene grouping, production info header, colour palette band, watermark. Formats: JPG, PNG, PDF. Contact Sheet settings are saved automatically and restored on reload.</p>
         <p><strong>EDL Marker</strong> — exports the active selection as a DaVinci Resolve Markers EDL (<code>.edl</code>). Timecodes come from the <code>._stills_metadata.json</code> file if present; falls back to the timecode embedded in the filename. The filename without extension is used as the marker name.</p>
         <p>Open the <strong>Clips Report export panel</strong> with <kbd>Cmd</kbd>+<kbd>E</kbd> for additional exports: Shoot Report, Clips Report, QC Report, ALE, CSV.</p>
-        <p>If a <strong>watermark</strong> is configured in Settings, it is composited over PDF and contact sheet exports.</p>
+        <p>If a <strong>watermark</strong> is configured in Settings, it is composited over PDF, individual still and contact sheet exports.</p>
       </div>
 
       <div class="help-section">
         <h4>Settings <kbd>Cmd</kbd>+<kbd>;</kbd></h4>
         <p><strong>Production</strong> — project name, production company, crew and logo; injected into all PDF report headers.</p>
         <p><strong>Contact Sheet</strong> — grid layout, format, background colour, title, production info, colour palette, watermark. Live preview with page navigation. All settings are saved automatically to <code>localStorage</code> and restored on reload.</p>
+        <p><strong>Individual Still</strong> — format (JPEG / PNG), quality, resolution (Original, HD, Full HD, 4K, or custom width), optional watermark, optional folder creation from selection title, optional subfolder. Export path is set in the Paths tab.</p>
         <p><strong>Watermark</strong> — text, font, size, opacity and angle with live preview.</p>
         <p><strong>Paths</strong> — configure the destination folder for each export type independently.</p>
         <p><strong>Live Mode</strong> — crop stills to a specific sensor area for exports and fullscreen preview.</p>
@@ -1804,6 +1981,12 @@ let browserPath = '';
 let folderName  = '';
 let clipsMetadata = null;
 let mainView    = 'gallery'; // 'gallery' | 'report'
+
+let mergeMode     = false;  // Over-selection (Merge) mode
+let allImagesBase = [];     // Images before sort (from server or cumul entry)
+let sortMode      = 'none'; // 'none' | 'alpha' | 'scene' | 'date'
+let fileDates     = {};     // { relPath: mtime } for date sort
+let _markerLookup = null;   // cached lookup built from clipsMetadata
 let clipDetailMarkers  = [];
 let clipDetailIdx      = 0;
 let clipDetailCardIdx  = -1;
@@ -1898,6 +2081,12 @@ async function loadFolder(path, recursive = false) {
 
   const imgRes = await api('/api/images');
   allImages = imgRes.images || [];
+  allImagesBase = [...allImages];
+  mergeMode = false; sortMode = 'none'; fileDates = {}; _markerLookup = null;
+  _mergeAllImages = []; _mergeFolderMap = {}; _mergeFolders = [];
+  _mergeExcluded = new Set(); _mergeImageOrder = {};
+  $('sortBtnSource').style.display = 'none';
+  updateMergeUI(); updateSortUI();
 
   folderName = res.name;
 
@@ -1951,13 +2140,15 @@ function resetMainView() {
   $('selPanel').style.display         = '';
 }
 
-async function loadMetadata() {
+async function loadMetadata(recursive = false) {
   try {
-    const res = await api('/api/metadata');
+    const url = recursive ? '/api/metadata?recursive=1' : '/api/metadata';
+    const res = await api(url);
     clipsMetadata = (res && (res.clips || res.markers_metadata)) ? res : null;
   } catch (e) {
     clipsMetadata = null;
   }
+  _markerLookup = null;  // invalidate cache — clipsMetadata just changed
   if (clipsMetadata) {
     $('viewToggle').classList.add('visible');
     if (location.pathname === '/report') switchMainView('report');
@@ -2186,9 +2377,11 @@ function updateClipDetailImage() {
   if (existing) existing.remove();
 
   const m = clipDetailMarkers[clipDetailIdx] || null;
-  if (m && m.exported_filename) {
+  const previewSrc = _clipDetailPreviewSrc;
+  _clipDetailPreviewSrc = null; // consume immediately
+  if (previewSrc || (m && m.exported_filename)) {
     const img = document.createElement('img');
-    img.src = imgUrl(m.exported_filename);
+    img.src = previewSrc || imgUrl(m.exported_filename);
     imgWrap.insertBefore(img, $('cdPrev'));
   } else {
     const ph = document.createElement('div');
@@ -2215,6 +2408,7 @@ function updateClipDetailImage() {
 }
 
 function openClipDetail(clipName, meta, props, allMarkers, srcRes, startIdx, cardIdx) {
+  _clipDetailGalleryImg = null; // report-mode entry; gallery sets it separately
   clipDetailMarkers  = allMarkers;
   clipDetailClipName = clipName;
   clipDetailCardIdx  = cardIdx ?? clipDetailCardIdx;
@@ -2232,8 +2426,18 @@ function openClipDetail(clipName, meta, props, allMarkers, srcRes, startIdx, car
 
   updateClipDetailImage();
 
-  // Title
+  // Title + subtitle (Scene / Shot / Take)
   $('clipDetailTitle').textContent = clipName.replace(/\.[^.]+$/, '');
+  const allMetaForTitle = Object.assign({}, props, meta);
+  const sceneStr = allMetaForTitle['Scene'] != null ? String(allMetaForTitle['Scene']).trim() : '';
+  const shotStr  = allMetaForTitle['Shot']  != null ? String(allMetaForTitle['Shot']).trim()  : '';
+  const takeStr  = allMetaForTitle['Take']  != null ? String(allMetaForTitle['Take']).trim()  : '';
+  const subtitleParts = [];
+  if (sceneStr) subtitleParts.push(`Scene ${sceneStr}`);
+  if (shotStr)  subtitleParts.push(`Shot ${shotStr}`);
+  if (takeStr)  subtitleParts.push(`Take ${takeStr}`);
+  $('clipDetailSubtitle').textContent = subtitleParts.join('  ·  ');
+  $('clipDetailSubtitle').style.display = subtitleParts.length ? '' : 'none';
 
   // All metadata fields
   const fields = $('clipDetailFields');
@@ -2270,6 +2474,7 @@ function closeClipDetail() {
   $('reportView').classList.remove('detail-open');
   $('reportView').querySelectorAll('.clip-card.active').forEach(c => c.classList.remove('active'));
   clipDetailCardIdx = -1;
+  _clipDetailGalleryImg = null;
 }
 
 // ─── Recent folders ────────────────────────────────────────────────────────
@@ -2502,10 +2707,220 @@ function deleteSel(name) {
   queueSave(); renderAll();
 }
 
+// ─── Sort & Merge ──────────────────────────────────────────────────────────
+
+let _ctxMenuImg           = null; // image path under the open context menu
+let _clipDetailPreviewSrc = null; // override still shown in clip detail (gallery-triggered)
+let _clipDetailGalleryImg = null; // set when detail opened from gallery; drives ↑/↓ navigation
+let _preMergeImageCount  = 0;    // allImages.length before entering merge mode (denominator in banner)
+
+let _mergeAllImages  = [];  // complete unfiltered aggregate
+let _mergeFolderMap  = {};  // { imagePath: folderRelPath }
+let _mergeFolders    = [];  // all discovered folder rel paths
+let _mergeExcluded   = new Set();
+let _mergeImageOrder = {};  // { imagePath: originalIndex } for 'source' sort
+
+function parseStillNameUtil(filename) {
+  const base = filename.replace(/\.[^.]+$/, '');
+  const m = base.match(/([A-Z]\d+C\d+_\w+\.(?:mxf|mov))_(\d{2})_(\d{2})_(\d{2})_(\d{2})$/i);
+  if (!m) return null;
+  return { clipName: m[1], sourceTc: `${m[2]}:${m[3]}:${m[4]}:${m[5]}` };
+}
+
+function getMarkerLookup() {
+  if (_markerLookup !== null) return _markerLookup;
+  _markerLookup = { byFilename: {}, byClipSrcTc: {} };
+  if (clipsMetadata?.markers_metadata) {
+    Object.values(clipsMetadata.markers_metadata).forEach(m => {
+      if (m.exported_filename)
+        _markerLookup.byFilename[m.exported_filename] = m;
+      if (m.clip_name && m.source_tc)
+        _markerLookup.byClipSrcTc[`${m.clip_name}__${m.source_tc}`] = m;
+    });
+  }
+  return _markerLookup;
+}
+
+function findMarkerForImage(filepath) {
+  const base = filepath.includes('/') ? filepath.split('/').pop() : filepath;
+  const lu = getMarkerLookup();
+  if (lu.byFilename[base]) return lu.byFilename[base];
+  const parsed = parseStillNameUtil(base);
+  if (!parsed) return null;
+  return lu.byClipSrcTc[`${parsed.clipName}__${parsed.sourceTc}`] ?? null;
+}
+
+function getImageScene(filepath) {
+  return findMarkerForImage(filepath)?.metadata?.Scene ?? '';
+}
+
+function _natCmp(a, b) {
+  // Split into alternating non-digit / digit chunks (captured group keeps delimiters)
+  // e.g. "27A" → ["", "27", "A"]  |  "AAAAA" → ["AAAAA"]
+  const ta = String(a).split(/(\d+)/);
+  const tb = String(b).split(/(\d+)/);
+  const len = Math.max(ta.length, tb.length);
+  for (let i = 0; i < len; i++) {
+    if (i >= ta.length) return -1;
+    if (i >= tb.length) return  1;
+    if (i & 1) {
+      // odd index = digit chunk → numeric comparison
+      const d = parseInt(ta[i], 10) - parseInt(tb[i], 10);
+      if (d) return d;
+    } else {
+      // even index = non-digit chunk → case-insensitive lexicographic
+      const la = ta[i].toLowerCase(), lb = tb[i].toLowerCase();
+      if (la < lb) return -1;
+      if (la > lb) return  1;
+    }
+  }
+  return 0;
+}
+
+function updateSortUI() {
+  $('sortBtnAlpha').classList.toggle('active',  sortMode === 'alpha');
+  $('sortBtnScene').classList.toggle('active',  sortMode === 'scene');
+  $('sortBtnDate').classList.toggle('active',   sortMode === 'date');
+  $('sortBtnSource').classList.toggle('active', sortMode === 'source');
+}
+
+async function applySortToImages() {
+  if (sortMode === 'date' && Object.keys(fileDates).length === 0) {
+    const res = await api('/api/file-dates');
+    fileDates = res.dates || {};
+  }
+  const base = [...allImagesBase];
+  const fname = p => p.includes('/') ? p.split('/').pop() : p;
+  if (sortMode === 'none') {
+    allImages = [...allImagesBase];
+  } else if (sortMode === 'alpha') {
+    allImages = base.sort((a, b) => _natCmp(fname(a), fname(b)));
+  } else if (sortMode === 'scene') {
+    allImages = base.sort((a, b) => {
+      const sa = getImageScene(a), sb = getImageScene(b);
+      return _natCmp(sa, sb) || _natCmp(fname(a), fname(b));
+    });
+  } else if (sortMode === 'date') {
+    allImages = base.sort((a, b) => (fileDates[a] || 0) - (fileDates[b] || 0));
+  } else if (sortMode === 'source') {
+    allImages = base.sort((a, b) => (_mergeImageOrder[a] ?? 0) - (_mergeImageOrder[b] ?? 0));
+  }
+  renderGallery();
+}
+
+async function setSortMode(mode) {
+  if (sortMode === mode) mode = 'none'; // toggle off
+  sortMode = mode;
+  updateSortUI();
+  await applySortToImages();
+}
+
+async function enterMergeMode() {
+  const res = await api('/api/aggregate-selections');
+  if (res.error) { alert(res.error); return; }
+  if (!res.images?.length) { alert('No selections found in subfolders.'); return; }
+  _preMergeImageCount = allImages.length; // capture before overwriting
+  mergeMode = true;
+  _mergeAllImages = [...res.images];
+  _mergeFolderMap = res.image_folder || {};
+  _mergeFolders   = res.folders || [];
+  _mergeExcluded  = new Set();
+  // build original-order index before any sort
+  _mergeImageOrder = {};
+  _mergeAllImages.forEach((img, i) => { _mergeImageOrder[img] = i; });
+  allImagesBase = [..._mergeAllImages];
+  sortMode = 'source'; fileDates = {}; _markerLookup = null;
+  $('sortBtnSource').style.display = '';
+  updateMergeUI();
+  buildFolderPicker();
+  updateSortUI();
+  await applySortToImages();
+  await loadMetadata(true);  // reload metadata recursively — parent folder may have none
+}
+
+function exitMergeMode() {
+  mergeMode = false;
+  if (sortMode === 'source') sortMode = 'none';
+  $('sortBtnSource').style.display = 'none';
+  api('/api/images').then(res => {
+    allImages = res.images || [];
+    allImagesBase = [...allImages];
+    fileDates = {};
+    _mergeImageOrder = {};
+    updateMergeUI();
+    updateSortUI();
+    renderGallery();
+  });
+}
+
+function toggleMergeMode() {
+  if (mergeMode) exitMergeMode(); else enterMergeMode();
+}
+
+function updateMergeUI() {
+  const activeFolders = _mergeFolders.filter(f => !_mergeExcluded.has(f));
+  const banner = $('mergeBanner');
+  const btn    = $('mergeBtn');
+  if (mergeMode) {
+    banner.style.display = 'flex';
+    const shown = allImagesBase.length;
+    const total = _preMergeImageCount || _mergeAllImages.length;
+    $('mergeBannerText').textContent =
+      `Merge Mode — ${shown}/${total} image${total !== 1 ? 's' : ''} · ${activeFolders.length} folder${activeFolders.length !== 1 ? 's' : ''}`;
+    btn.classList.add('active');
+    btn.title = 'Exit Merge Mode';
+  } else {
+    banner.style.display = 'none';
+    btn.classList.remove('active');
+    btn.title = 'Show selections from subfolders';
+  }
+}
+
+function buildFolderPicker() {
+  const picker = $('mergeFolderPicker');
+  picker.innerHTML = '';
+  _mergeFolders.forEach(folder => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = !_mergeExcluded.has(folder);
+    cb.onchange = () => {
+      if (!cb.checked) _mergeExcluded.add(folder);
+      else _mergeExcluded.delete(folder);
+      applyMergeFilter();
+    };
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(' ' + (folder === '' ? '(root)' : folder)));
+    picker.appendChild(label);
+  });
+}
+
+function toggleFolderPicker() {
+  const picker = $('mergeFolderPicker');
+  const isOpen = picker.style.display !== 'none';
+  picker.style.display = isOpen ? 'none' : '';
+  if (!isOpen) {
+    setTimeout(() => {
+      document.addEventListener('click', function _closePicker(e) {
+        if (!$('mergeFolderBtn').contains(e.target) && !picker.contains(e.target)) {
+          picker.style.display = 'none';
+          document.removeEventListener('click', _closePicker);
+        }
+      });
+    }, 0);
+  }
+}
+
+function applyMergeFilter() {
+  const filtered = _mergeAllImages.filter(img => !_mergeExcluded.has(_mergeFolderMap[img] ?? ''));
+  allImagesBase = [...filtered];
+  updateMergeUI();
+  applySortToImages(); // sets allImages and calls renderGallery
+}
+
 // ─── Gallery ───────────────────────────────────────────────────────────────
 function renderGallery() {
   const grid = $('imageGrid');
-  $('galleryTitle').textContent = `Images (${allImages.length})`;
+  $('galleryTitle').textContent = mergeMode ? `Merge (${allImages.length})` : `Images (${allImages.length})`;
   grid.innerHTML = '';
 
   const liveCropOn = $('liveCrop').checked;
@@ -2531,6 +2946,7 @@ function renderGallery() {
     if (lastToggled && lastToggled.name === name)
       wrapCls += lastToggled.adding ? ' gal-flash-add' : ' gal-flash-remove';
     wrap.className = wrapCls;
+    wrap.addEventListener('contextmenu', e => openThumbContextMenu(e, name));
     wrap.onclick = e => {
       if (e.metaKey || e.ctrlKey) { openLightbox(allImages, i); return; }
       if (e.shiftKey && lastRangeAnchor !== null) {
@@ -2606,6 +3022,7 @@ function renderSelection() {
 
   $('selCount').textContent      = sel.length === 1 ? '1 image' : `${sel.length} images`;
   $('exportBtn').disabled        = sel.length === 0;
+  $('indivBtn').disabled         = sel.length === 0;
   $('csBtn').disabled            = sel.length === 0;
   $('edlBtn').disabled           = sel.length === 0;
   $('clearSelBtn').disabled      = sel.length === 0;
@@ -2875,6 +3292,96 @@ function loadImgEl(url) {
   });
 }
 
+// ─── Individual Stills export ─────────────────────────────────────────────
+const INDIV_SETTING_IDS = ['indivFormat','indivResolution','indivCustomW','indivQuality','indivWatermark','indivCreateFolder','indivSubfolder'];
+function loadIndivSettings() { try { return JSON.parse(localStorage.getItem('stills-indiv-settings') || '{}'); } catch { return {}; } }
+function saveIndivSettings() {
+  const d = {};
+  INDIV_SETTING_IDS.forEach(id => {
+    const el = $(id); if (!el) return;
+    d[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  localStorage.setItem('stills-indiv-settings', JSON.stringify(d));
+}
+function initIndivSettings() {
+  const d = loadIndivSettings();
+  INDIV_SETTING_IDS.forEach(id => {
+    const el = $(id); if (!el) return;
+    if (id in d) { if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; }
+  });
+  if (!d.indivQuality) $('indivQuality').value = 90;
+  $('indivQualityVal').textContent = $('indivQuality').value;
+  updateIndivUI();
+}
+function updateIndivUI() {
+  $('indivQualityRow').style.display   = $('indivFormat').value === 'jpeg' ? '' : 'none';
+  $('indivCustomWRow').style.display   = $('indivResolution').value === 'custom' ? '' : 'none';
+}
+async function exportIndivStills() {
+  const sel = curSel(); if (!sel.length) return;
+
+  const exportPath = getExportPath('indivStills');
+  if (!exportPath) {
+    alert('No export path configured for Individual Stills.\nPlease set one in Settings → Paths.');
+    openPaths();
+    return;
+  }
+
+  const btn  = $('indivBtn');
+  const pw   = $('indivProgressWrap');
+  const pf   = $('indivProgressFill');
+  const pl   = $('indivProgressLabel');
+  const total = sel.length;
+
+  btn.disabled = true; btn.textContent = 'Exporting…';
+  pw.style.display = ''; pf.style.width = '0%';
+  pl.style.display = ''; pl.textContent = `0 / ${total}`;
+
+  try {
+    const fmt      = $('indivFormat').value;
+    const mimeType = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const ext      = fmt === 'jpeg' ? 'jpg' : 'png';
+    const quality  = parseFloat($('indivQuality').value) / 100;
+    const resMode  = $('indivResolution').value;
+    const customW  = parseInt($('indivCustomW').value) || 1920;
+    const applyWm  = $('indivWatermark').checked;
+    const createFolder = $('indivCreateFolder').checked;
+    const subInput = $('indivSubfolder').value.trim();
+
+    const targetW = { hd: 1280, fhd: 1920, '4k': 3840, custom: customW }[resMode] || 0;
+
+    let sub = subInput;
+    if (createFolder) {
+      const folderName = activeSel.replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
+      sub = sub ? (folderName + '/' + sub) : folderName;
+    }
+
+    for (let i = 0; i < total; i++) {
+      const imgPath = sel[i];
+      const el = await loadImgForExport(imgUrl(imgPath));
+      const srcW = el.naturalWidth || el.width;
+      const srcH = el.naturalHeight || el.height;
+      let outW = srcW, outH = srcH;
+      if (targetW > 0 && targetW < srcW) { outW = targetW; outH = Math.round(srcH * targetW / srcW); }
+      const canvas = document.createElement('canvas');
+      canvas.width = outW; canvas.height = outH;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(el, 0, 0, outW, outH);
+      if (applyWm) csDrawWatermark(ctx, outW, outH);
+      const dataUri = canvas.toDataURL(mimeType, fmt === 'jpeg' ? quality : undefined);
+      const base    = imgPath.includes('/') ? imgPath.split('/').pop() : imgPath;
+      const outName = base.replace(/\.[^.]+$/, '') + '.' + ext;
+      await saveFileToServer(outName, dataUri, 'indivStills', sub);
+      pf.style.width = `${Math.round((i + 1) / total * 100)}%`;
+      pl.textContent = `${i + 1} / ${total}`;
+    }
+  } catch(e) { alert('Export Stills error: ' + e.message); }
+  finally {
+    btn.textContent = 'Export Stills'; btn.disabled = curSel().length === 0;
+    setTimeout(() => { pw.style.display = 'none'; pl.style.display = 'none'; pf.style.width = '0%'; }, 1200);
+  }
+}
+
 // ─── Watermark modal ───────────────────────────────────────────────────────
 let wmPreviewTimer = null;
 
@@ -2926,7 +3433,7 @@ function clearLogo() {
 }
 
 function switchSettingsTab(tab) {
-  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'], live:['setTabLive','setPaneLive'] };
+  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], indiv:['setTabIndiv','setPaneIndiv'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'], live:['setTabLive','setPaneLive'] };
   Object.entries(map).forEach(([t,[tabId,paneId]]) => {
     $(tabId).classList.toggle('active', t === tab);
     $(paneId).style.display = t === tab ? 'flex' : 'none';
@@ -2943,7 +3450,7 @@ function openSettings() {
 }
 
 // ─── Paths data ───────────────────────────────────────────────────────────────
-const PATH_IDS = ['gang','pdfStills','contactSheet','clipsReport','shootReport','qcReport','ale','csv'];
+const PATH_IDS = ['gang','pdfStills','indivStills','contactSheet','clipsReport','shootReport','qcReport','ale','csv'];
 
 function loadPathsData() {
   try { return JSON.parse(localStorage.getItem('stills-paths') || '{}'); } catch { return {}; }
@@ -2981,7 +3488,7 @@ function saveCsSettings() {
 function initCsSettings() {
   const d = loadCsSettings();
   CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
-  const isA4 = ['a4p','a4l'].includes($('csExportW').value);
+  const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
 }
 function getExportSubfolder() {
@@ -2989,10 +3496,10 @@ function getExportSubfolder() {
   if (!d.createFolder) return '';
   return (clipsMetadata?.timeline || activeSel || '').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
 }
-async function saveFileToServer(filename, dataUri, type) {
+async function saveFileToServer(filename, dataUri, type, subOverride) {
   const dir = getExportPath(type);
   if (!dir) return false;
-  const sub = getExportSubfolder();
+  const sub = subOverride !== undefined ? subOverride : getExportSubfolder();
   try {
     const r = await fetch('/api/save-file', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -3171,8 +3678,10 @@ async function generateCSPreview() {
 
 function csGetExportDims() {
   const v = $('csExportW').value;
-  if (v === 'a4p') return { W: 2480, H: 3508, a4: { PW: 210, PH: 297 } };
-  if (v === 'a4l') return { W: 3508, H: 2480, a4: { PW: 297, PH: 210 } };
+  if (v === 'a4p') return { W: 2480, H: 3508, a4: { PW: 210,  PH: 297  } };
+  if (v === 'a4l') return { W: 3508, H: 2480, a4: { PW: 297,  PH: 210  } };
+  if (v === 'a3p') return { W: 3508, H: 4961, a4: { PW: 297,  PH: 420  } };
+  if (v === 'a3l') return { W: 4961, H: 3508, a4: { PW: 420,  PH: 297  } };
   const W = parseInt(v) || 1920;
   return { W, H: Math.round(W * 9/16), a4: null };
 }
@@ -3635,6 +4144,71 @@ async function exportCS(fmt) {
   finally { btn.disabled = false; btn.textContent = orig; }
 }
 
+// ─── Thumbnail context menu ────────────────────────────────────────────────
+
+function openThumbContextMenu(e, imgPath) {
+  e.preventDefault();
+  _ctxMenuImg = imgPath;
+  const menu = $('thumbContextMenu');
+  $('ctxMeta').disabled = !clipsMetadata?.markers_metadata;
+  menu.style.display = 'block';
+  // Position: keep inside viewport
+  const mw = menu.offsetWidth || 190, mh = menu.offsetHeight || 70;
+  menu.style.left = Math.min(e.clientX, window.innerWidth  - mw - 8) + 'px';
+  menu.style.top  = Math.min(e.clientY, window.innerHeight - mh - 8) + 'px';
+}
+
+function closeThumbContextMenu() {
+  $('thumbContextMenu').style.display = 'none';
+  _ctxMenuImg = null;
+}
+
+function navigateClipDetailInGallery(dir) {
+  const curIdx = allImages.indexOf(_clipDetailGalleryImg);
+  if (curIdx < 0) return;
+  const nextIdx = curIdx + dir;
+  if (nextIdx < 0 || nextIdx >= allImages.length) return;
+  const nextImg = allImages[nextIdx];
+  if (openClipDetailFromImage(nextImg, true)) return;
+  // Image has no metadata — show image-only view
+  _clipDetailGalleryImg = nextImg;
+  const imgWrap = $('clipDetailImg');
+  const existing = imgWrap.querySelector('img, .clip-card-no-thumb');
+  if (existing) existing.remove();
+  const img = document.createElement('img');
+  img.src = imgUrl(nextImg);
+  imgWrap.insertBefore(img, $('cdPrev'));
+  $('cdPrev').disabled = true;
+  $('cdNext').disabled = true;
+  $('cdCounter').textContent = '';
+  const base = nextImg.includes('/') ? nextImg.split('/').pop() : nextImg;
+  $('clipDetailTitle').textContent = base.replace(/\.[^.]+$/, '');
+  $('clipDetailSubtitle').textContent = '';
+  $('clipDetailSubtitle').style.display = 'none';
+  $('clipDetailFields').innerHTML = '<div style="color:#888;padding:12px 0;font-size:13px">No metadata for this image</div>';
+  clipDetailMarkers = []; clipDetailIdx = 0;
+  $('clipDetail').classList.add('open');
+}
+
+function openClipDetailFromImage(imgPath, silent = false) {
+  if (!clipsMetadata?.markers_metadata) {
+    if (!silent) alert('No clip metadata available.');
+    return false;
+  }
+  const marker = findMarkerForImage(imgPath);
+  if (!marker) { if (!silent) alert('No metadata found for this image.'); return false; }
+  const clipName = marker.clip_name;
+  const allMarkers = Object.values(clipsMetadata.markers_metadata)
+    .filter(m => m.clip_name === clipName)
+    .sort((a, b) => (a.timeline_frame || 0) - (b.timeline_frame || 0));
+  const startIdx = allMarkers.indexOf(marker);
+  _clipDetailPreviewSrc = imgUrl(imgPath);
+  _clipDetailGalleryImg = imgPath;
+  openClipDetail(clipName, marker.metadata || {}, marker.clip_properties || {},
+                 allMarkers, null, startIdx >= 0 ? startIdx : 0, -1);
+  return true;
+}
+
 // ─── Util ──────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
 function imgUrl(p) { return '/api/image/' + p.split('/').map(encodeURIComponent).join('/'); }
@@ -3658,13 +4232,16 @@ $('invertGalSelBtn').onclick = () => {
   queueSave(); renderGallery(); renderSelection();
 };
 $('exportBtn').onclick      = exportPDF;
+$('indivBtn').onclick       = exportIndivStills;
 $('csBtn').onclick   = openCS;
 $('edlBtn').onclick  = exportEDL;
-$('setTabWm').onclick   = () => { switchSettingsTab('wm');   renderWmPreview(); };
-$('setTabCS').onclick   = () => { switchSettingsTab('cs');   generateCSPreview(); };
+$('setTabWm').onclick    = () => { switchSettingsTab('wm');    renderWmPreview(); };
+$('setTabCS').onclick    = () => { switchSettingsTab('cs');    generateCSPreview(); };
+$('setTabIndiv').onclick = () => switchSettingsTab('indiv');
 $('setTabProd').onclick  = () => switchSettingsTab('prod');
 $('setTabPaths').onclick = () => switchSettingsTab('paths');
 $('setTabLive').onclick  = () => switchSettingsTab('live');
+$('indivDone').onclick   = closeWm;
 $('prodDone').onclick    = closeWm;
 $('pathsDone').onclick   = closeWm;
 $('liveDone').onclick    = () => { liveSave(); renderGallery(); closeWm(); };
@@ -3891,6 +4468,7 @@ $('prodLogoClear').addEventListener('click',  e => { e.stopPropagation(); clearL
 initProdForm();
 initPathsForm();
 initCsSettings();
+initIndivSettings();
 
 // ─── Theme toggle ──────────────────────────────────────────────────────────
 function applyTheme(t) {
@@ -3906,6 +4484,13 @@ applyTheme(localStorage.getItem('stills-theme') || 'dark');
 $('pathsGang').addEventListener('change', () => { updatePathsVis(); savePathsData(); });
 $('pathsCreateFolder').addEventListener('change', savePathsData);
 PATH_IDS.forEach(id => { const el = $('path_'+id); if (el) el.addEventListener('input', savePathsData); });
+$('indivFormat').addEventListener('change', () => { updateIndivUI(); saveIndivSettings(); });
+$('indivResolution').addEventListener('change', () => { updateIndivUI(); saveIndivSettings(); });
+$('indivQuality').addEventListener('input', () => { $('indivQualityVal').textContent = $('indivQuality').value; saveIndivSettings(); });
+$('indivCustomW').addEventListener('input', saveIndivSettings);
+$('indivWatermark').addEventListener('change', saveIndivSettings);
+$('indivCreateFolder').addEventListener('change', saveIndivSettings);
+$('indivSubfolder').addEventListener('input', saveIndivSettings);
 document.querySelectorAll('.paths-browse').forEach(btn => {
   btn.addEventListener('click', () => openPathPicker(btn.dataset.for));
 });
@@ -3924,7 +4509,7 @@ function csChanged() { csQueuePreview(); saveCsSettings(); }
 ['csBg','csTitleColor'].forEach(id => $(id).addEventListener('input', csChanged));
 ['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csChanged));
 $('csExportW').addEventListener('change', () => {
-  const isA4 = ['a4p','a4l'].includes($('csExportW').value);
+  const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
 });
 $('csSortScene').addEventListener('change', csChanged);
@@ -3958,6 +4543,27 @@ $('helpBtn').onclick   = () => $('helpModal').classList.add('open');
 $('helpClose').onclick = () => $('helpModal').classList.remove('open');
 $('helpDone').onclick  = () => $('helpModal').classList.remove('open');
 $('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open'); };
+
+// ── Thumbnail context menu ──
+$('ctxReveal').onclick = async () => {
+  const p = _ctxMenuImg;
+  closeThumbContextMenu();
+  if (!p) return;
+  const res = await apiPost('/api/reveal', { path: p });
+  if (res.error) alert(res.error);
+};
+$('ctxMeta').onclick = () => {
+  const p = _ctxMenuImg;
+  closeThumbContextMenu();
+  if (p) openClipDetailFromImage(p);
+};
+// Close on outside mousedown or Escape
+document.addEventListener('mousedown', e => {
+  if (!$('thumbContextMenu').contains(e.target)) closeThumbContextMenu();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeThumbContextMenu();
+}, true);
 
 $('modalClose').onclick  = closeModal;
 $('modalCancel').onclick = closeModal;
@@ -4116,7 +4722,7 @@ async function exportEDL() {
   // {prefix}_{ClipName.mxf}_{HH}_{MM}_{SS}_{FF}.ext
   function parseStillName(filename) {
     const base = filename.replace(/\.[^.]+$/, '');
-    const m = base.match(/([A-Z]\d+C\d+_\w+\.mxf)_(\d{2})_(\d{2})_(\d{2})_(\d{2})$/);
+    const m = base.match(/([A-Z]\d+C\d+_\w+\.(?:mxf|mov))_(\d{2})_(\d{2})_(\d{2})_(\d{2})$/i);
     if (!m) return null;
     return { clipName: m[1], sourceTc: `${m[2]}:${m[3]}:${m[4]}:${m[5]}` };
   }
@@ -4722,10 +5328,14 @@ document.addEventListener('keydown', async e => {
     else if (e.key === 'ArrowRight' && clipDetailIdx < clipDetailMarkers.length - 1) { clipDetailIdx++; updateClipDetailImage(); }
     else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
-      const cards = Array.from($('reportView').querySelectorAll('.clip-card:not(.hidden)'));
-      const cur = cards.findIndex(c => c.classList.contains('active'));
-      const next = cur + (e.key === 'ArrowDown' ? 1 : -1);
-      if (next >= 0 && next < cards.length) cards[next].click();
+      if (_clipDetailGalleryImg !== null) {
+        navigateClipDetailInGallery(e.key === 'ArrowDown' ? 1 : -1);
+      } else {
+        const cards = Array.from($('reportView').querySelectorAll('.clip-card:not(.hidden)'));
+        const cur = cards.findIndex(c => c.classList.contains('active'));
+        const next = cur + (e.key === 'ArrowDown' ? 1 : -1);
+        if (next >= 0 && next < cards.length) cards[next].click();
+      }
     }
   } else if ($('helpModal').classList.contains('open')) {
     if (e.key === 'Escape') $('helpModal').classList.remove('open');
