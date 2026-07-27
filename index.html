@@ -1401,6 +1401,13 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
             </div>
           </div>
           <div class="cs-field">
+            <label>Title background — <span id="csTitleBgOpacityVal">65</span>%</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="color" id="csTitleBgColor" value="#000000" title="Title background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+              <input type="range" id="csTitleBgOpacity" min="0" max="100" value="65" style="flex:1;">
+            </div>
+          </div>
+          <div class="cs-field">
             <label>Background</label>
             <input type="color" id="csBg" value="#0f0f0f">
           </div>
@@ -3478,7 +3485,7 @@ function getExportPath(type) {
 }
 
 // ─── Contact Sheet settings persistence ──────────────────────────────────────
-const CS_SETTING_IDS = ['csTitle','csTitleColor','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS'];
+const CS_SETTING_IDS = ['csTitle','csTitleColor','csTitleBgColor','csTitleBgOpacity','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS'];
 function loadCsSettings() { try { return JSON.parse(localStorage.getItem('stills-cs-settings') || '{}'); } catch { return {}; } }
 function saveCsSettings() {
   const d = {};
@@ -3488,6 +3495,7 @@ function saveCsSettings() {
 function initCsSettings() {
   const d = loadCsSettings();
   CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
+  $('csTitleBgOpacityVal').textContent = $('csTitleBgOpacity').value;
   const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
 }
@@ -3769,6 +3777,11 @@ function csTextColor(bgHex) {
   return (r*299 + g*587 + b*114) / 1000 > 128 ? '#111111' : '#ffffff';
 }
 
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3)||'0',16), g = parseInt(hex.slice(3,5)||'0',16), b = parseInt(hex.slice(5,7)||'0',16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 async function csDrawProdInfo(ctx, W, topY, margin, offsetX = 0, bgColor = '#000000') {
   const prod = loadProdData();
   const fs = Math.max(10, Math.round(W * 0.013));
@@ -3875,8 +3888,9 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
       const ty = headerH + tPad;
       const tw = ctx.measureText(title).width;
       const rph = Math.round(fs * 0.5), rpv = Math.round(fs * 0.3);
-      const isLightBg = csTextColor(bgColor) === '#111111';
-      ctx.fillStyle = isLightBg ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.82)';
+      const titleBgColor = $('csTitleBgColor').value || '#000000';
+      const titleBgOpacity = (parseInt($('csTitleBgOpacity').value, 10) ?? 65) / 100;
+      ctx.fillStyle = hexToRgba(titleBgColor, titleBgOpacity);
       ctxRoundRect(ctx, tx - rph, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
       ctx.fill();
       ctx.fillStyle = titleColor;
@@ -4506,7 +4520,8 @@ $('csNextPage').onclick = () => navigateCSPreview(1);
 // Live preview — CS modal settings (also auto-save)
 function csChanged() { csQueuePreview(); saveCsSettings(); }
 ['csTitle','csMargin','csA4Margin'].forEach(id => $(id).addEventListener('input', csChanged));
-['csBg','csTitleColor'].forEach(id => $(id).addEventListener('input', csChanged));
+['csBg','csTitleColor','csTitleBgColor'].forEach(id => $(id).addEventListener('input', csChanged));
+$('csTitleBgOpacity').addEventListener('input', () => { $('csTitleBgOpacityVal').textContent = $('csTitleBgOpacity').value; csChanged(); });
 ['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csChanged));
 $('csExportW').addEventListener('change', () => {
   const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
