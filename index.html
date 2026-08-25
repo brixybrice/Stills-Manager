@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.2.0</title>
+<title>Stills Manager v1.4.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -529,6 +529,36 @@ kbd {
   align-items: center; justify-content: center;
 }
 #wmModal.open { display: flex; }
+
+/* ── Export list modal (intermediate) ── */
+#expListModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3200;
+  align-items: center; justify-content: center;
+}
+#expListModal.open { display: flex; }
+
+/* ── Export detail modal (PDF / Stills / Contact Sheet / Color Palette / EDL) ── */
+#mainExportModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82); z-index: 3300;
+  align-items: center; justify-content: center;
+}
+#mainExportModal.open { display: flex; }
+
+.exp-box {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+  max-width: 96vw; max-height: 92vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+/* Size adapts to the settings shown: compact for text/simple-form panes, full for panes with a live preview */
+.exp-box.exp-sm { width: 480px; }
+.exp-box.exp-md { width: 560px; }
+.exp-box.exp-lg { width: 940px; height: 640px; }
+body.light .exp-box { background: #f7f7f7; border-color: #d8d8d8; }
+body.light .exp-box .modal-head { background: #fff; border-bottom-color: #e8e8e8; }
+body.light .exp-box .modal-head h3 { color: #222; }
+
 .wm-box {
   background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
   width: 940px; max-width: 96vw; height: 640px; max-height: 92vh;
@@ -693,7 +723,7 @@ body.light .live-rot-btn.active { border-color:#006D78; color:#006D78; backgroun
   flex: 1; display: flex; align-items: center; justify-content: center;
   background: #0a0a0a; padding: 14px; position: relative; overflow: hidden; min-width: 0;
 }
-#csCanvas { max-width: 100%; max-height: 100%; display: block; border-radius: 2px; }
+#csCanvas, #printCanvas { max-width: 100%; max-height: 100%; display: block; border-radius: 2px; }
 .cs-progress-wrap {
   position: absolute; bottom: 10px; left: 14px; right: 14px;
   height: 3px; background: #222; border-radius: 2px; overflow: hidden; display: none;
@@ -1267,19 +1297,14 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
       <div id="selList"></div>
       <div id="selFooter">
         <span id="selCount">0 images</span>
-        <button class="btn-success" id="exportBtn" disabled>Export PDF</button>
-        <button class="btn-teal" id="indivBtn" disabled>Export Stills</button>
-        <div id="indivProgressWrap"><div id="indivProgressFill"></div></div>
-        <span id="indivProgressLabel"></span>
-        <button class="btn-teal" id="csBtn" disabled>Contact Sheet</button>
-        <button class="btn-teal" id="edlBtn" disabled>EDL Marker</button>
+        <button class="btn-success" id="mainExportBtn" disabled>Export</button>
       </div>
     </div>
 
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.2.0</span>
+  <span id="appVersion">v1.4.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1331,15 +1356,13 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   <div id="lbFlash"></div>
 </div>
 
-<!-- Paramètres modal (Watermark + Contact Sheet) -->
+<!-- Paramètres modal (settings généraux) -->
 <div id="wmModal">
   <div class="wm-box">
     <div class="modal-head">
       <h3>Settings</h3>
       <div class="set-tabs">
         <button class="set-tab active" id="setTabProd">Production</button>
-        <button class="set-tab" id="setTabCS">Contact Sheet</button>
-        <button class="set-tab" id="setTabIndiv">Individual Still</button>
         <button class="set-tab" id="setTabWm">Watermark</button>
         <button class="set-tab" id="setTabPaths">Paths</button>
         <button class="set-tab" id="setTabLive">Live Mode</button>
@@ -1389,123 +1412,6 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
       </div>
     </div>
 
-    <!-- Contact Sheet pane -->
-    <div class="set-pane" id="setPaneCS" style="display:none">
-      <div class="cs-body">
-        <div class="cs-settings">
-          <div class="cs-field">
-            <label>Title</label>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input type="text" id="csTitle" placeholder="Optional…" style="flex:1;width:auto;">
-              <input type="color" id="csTitleColor" value="#ffffff" title="Title colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
-            </div>
-          </div>
-          <div class="cs-field">
-            <label>Title background — <span id="csTitleBgOpacityVal">65</span>%</label>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input type="color" id="csTitleBgColor" value="#000000" title="Title background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
-              <input type="range" id="csTitleBgOpacity" min="0" max="100" value="65" style="flex:1;">
-            </div>
-          </div>
-          <div class="cs-field">
-            <label>Background</label>
-            <input type="color" id="csBg" value="#0f0f0f">
-          </div>
-          <hr class="cs-sep">
-          <div class="cs-field">
-            <label>Columns</label>
-            <select id="csCols">
-              <option value="0">Auto</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
-          </div>
-          <div class="cs-field">
-            <label>Rows / page</label>
-            <select id="csRows">
-              <option value="0">Auto</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
-          </div>
-          <div class="cs-field">
-            <label>Gap (px)</label>
-            <input type="number" id="csMargin" value="6" min="0" max="80">
-          </div>
-          <div class="cs-field">
-            <label>A4 margin (mm)</label>
-            <input type="number" id="csA4Margin" value="10" min="0" max="40">
-          </div>
-          <hr class="cs-sep">
-          <div class="cs-field">
-            <label>Export format</label>
-            <select id="csExportW">
-              <option value="1280">HD — 1280 px</option>
-              <option value="1920" selected>Full HD — 1920 px</option>
-              <option value="3840">4K — 3840 px</option>
-              <option value="7680">8K — 7680 px</option>
-              <option value="a4p">A4 Portrait — 300 dpi</option>
-              <option value="a4l">A4 Landscape — 300 dpi</option>
-              <option value="a3p">A3 Portrait — 300 dpi</option>
-              <option value="a3l">A3 Landscape — 300 dpi</option>
-            </select>
-          </div>
-          <hr class="cs-sep">
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="csSortScene">
-            <label for="csSortScene">Sort by scene</label>
-          </div>
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="csColorPalette">
-            <label for="csColorPalette">Color palette</label>
-          </div>
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="csProdInfo">
-            <label for="csProdInfo">Production info</label>
-          </div>
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="csInvertLogo">
-            <label for="csInvertLogo">Invert logo</label>
-          </div>
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="csWmEnabled">
-            <label for="csWmEnabled">Apply watermark</label>
-          </div>
-        </div>
-        <div class="cs-preview-area">
-          <canvas id="csCanvas"></canvas>
-          <button class="cs-nav-btn cs-nav-prev" id="csPrevPage">&#8249;</button>
-          <button class="cs-nav-btn cs-nav-next" id="csNextPage">&#8250;</button>
-          <div class="cs-progress-wrap" id="csProgressWrap">
-            <div id="csProgressFill"></div>
-          </div>
-        </div>
-      </div>
-      <div class="cs-foot">
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;color:#777;font-size:12px">
-          <input type="checkbox" id="pdfAppendCS" style="accent-color:#006D78">
-          Append to PDF export
-        </label>
-        <span id="csStatus" style="margin-left:12px"></span>
-        <div class="cs-spacer"></div>
-        <button class="btn-secondary" id="csJpgBtn">↓ JPG</button>
-        <button class="btn-secondary" id="csPngBtn">↓ PNG</button>
-        <button class="btn-secondary" id="csPdfBtn">↓ PDF</button>
-      </div>
-    </div>
-
-
     <!-- Production pane -->
     <div class="set-pane" id="setPaneProd" style="display:none">
       <div class="prod-body">
@@ -1538,58 +1444,6 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
       </div>
     </div>
 
-    <!-- Individual Still pane -->
-    <div class="set-pane" id="setPaneIndiv" style="display:none">
-      <div class="wm-body" style="flex-direction:column;overflow-y:auto;padding:16px 20px;gap:0">
-        <div class="cs-settings">
-          <div class="cs-field">
-            <label>Format</label>
-            <select id="indivFormat">
-              <option value="jpeg">JPEG</option>
-              <option value="png">PNG</option>
-            </select>
-          </div>
-          <div class="cs-field" id="indivQualityRow">
-            <label>Quality — <span id="indivQualityVal">90</span>%</label>
-            <input type="range" id="indivQuality" min="1" max="100" value="90">
-          </div>
-          <div class="cs-field">
-            <label>Resolution</label>
-            <select id="indivResolution">
-              <option value="orig">Original</option>
-              <option value="hd">HD — 1280 px</option>
-              <option value="fhd" selected>Full HD — 1920 px</option>
-              <option value="4k">4K — 3840 px</option>
-              <option value="custom">Custom…</option>
-            </select>
-          </div>
-          <div class="cs-field" id="indivCustomWRow" style="display:none">
-            <label>Width (px)</label>
-            <input type="number" id="indivCustomW" value="1920" min="1" step="1">
-          </div>
-          <hr class="cs-sep">
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="indivWatermark">
-            <label for="indivWatermark">Apply watermark</label>
-          </div>
-          <hr class="cs-sep">
-          <div class="cs-field cs-wm-toggle">
-            <input type="checkbox" id="indivCreateFolder">
-            <label for="indivCreateFolder">Create folder from selection title</label>
-          </div>
-          <div class="cs-field">
-            <label>Subfolder</label>
-            <input type="text" id="indivSubfolder" placeholder="Optional…">
-          </div>
-        </div>
-      </div>
-      <div class="wm-foot">
-        Export path is configured in <button class="btn-ghost" onclick="switchSettingsTab('paths')" style="padding:2px 8px;font-size:12px">Paths</button>
-        <div style="flex:1"></div>
-        <button class="btn-primary" id="indivDone">Done</button>
-      </div>
-    </div>
-
     <!-- Paths pane -->
     <div class="set-pane" id="setPanePaths" style="display:none">
       <div class="paths-body">
@@ -1609,6 +1463,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           <div class="paths-entry"><span class="paths-lbl">PDF Stills</span><input type="text" class="paths-input" id="path_pdfStills" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_pdfStills">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Individual Stills</span><input type="text" class="paths-input" id="path_indivStills" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_indivStills">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Contact Sheet</span><input type="text" class="paths-input" id="path_contactSheet" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_contactSheet">…</button></div>
+          <div class="paths-entry"><span class="paths-lbl">Print</span><input type="text" class="paths-input" id="path_print" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_print">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Clips Report</span><input type="text" class="paths-input" id="path_clipsReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_clipsReport">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">Shoot Report</span><input type="text" class="paths-input" id="path_shootReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_shootReport">…</button></div>
           <div class="paths-entry"><span class="paths-lbl">QC Report</span><input type="text" class="paths-input" id="path_qcReport" placeholder="Default: Downloads"><button class="btn-secondary paths-browse" data-for="path_qcReport">…</button></div>
@@ -1744,6 +1599,408 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
         <span style="color:#555;font-size:12px">Settings saved in localStorage.</span>
         <div style="flex:1"></div>
         <button class="btn-primary" id="liveDone">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Export modal (PDF / Stills / Contact Sheet / Color Palette / EDL Marker) -->
+<!-- Export list modal (intermediate) -->
+<div id="expListModal">
+  <div class="export-box">
+    <div class="modal-head">
+      <h3>Export</h3>
+      <button class="btn-ghost" id="expListClose">✕</button>
+    </div>
+    <div class="export-body">
+      <div class="export-options">
+        <div class="export-option" id="expListPdf">
+          <div class="export-option-info">
+            <span class="export-option-name">PDF</span>
+            <span class="export-option-desc">One still per page, 16:9 landscape</span>
+          </div>
+        </div>
+        <div class="export-option" id="expListIndiv">
+          <div class="export-option-info">
+            <span class="export-option-name">Stills</span>
+            <span class="export-option-desc">Every image in the selection, individually (JPEG/PNG)</span>
+          </div>
+        </div>
+        <div class="export-option" id="expListCS">
+          <div class="export-option-info">
+            <span class="export-option-name">Contact Sheet</span>
+            <span class="export-option-desc">Configurable grid, multi-page — JPG, PNG or PDF</span>
+          </div>
+        </div>
+        <div class="export-option" id="expListPalette">
+          <div class="export-option-info">
+            <span class="export-option-name">Color Palette</span>
+            <span class="export-option-desc">Cinemascope strip of dominant colours</span>
+          </div>
+        </div>
+        <div class="export-option" id="expListPrint">
+          <div class="export-option-info">
+            <span class="export-option-name">Print</span>
+            <span class="export-option-desc">Print-ready contact sheet — real paper size, DPI, margins, crop</span>
+          </div>
+        </div>
+        <hr class="export-sep">
+        <div class="export-option" id="expListEdl">
+          <div class="export-option-info">
+            <span class="export-option-name">EDL Marker</span>
+            <span class="export-option-desc">DaVinci Resolve Markers EDL for the active selection</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export detail modal (single pane, no tabs — sized to the chosen export) -->
+<div id="mainExportModal">
+  <div class="exp-box" id="expDetailBox">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn-ghost" id="expBackBtn" title="Back">‹</button>
+        <h3 id="expDetailTitle">Export</h3>
+      </div>
+      <button class="btn-ghost" id="mainExportClose">✕</button>
+    </div>
+
+    <!-- PDF pane -->
+    <div class="set-pane" id="setPanePdf">
+      <div class="wm-body" style="align-items:center;justify-content:center;padding:30px">
+        <p style="color:#777;font-size:13px;max-width:420px;line-height:1.7;text-align:center">One still per page, 16:9 landscape.<br>Watermark is applied automatically when configured in <button class="btn-ghost" onclick="closeMainExport();openWm()" style="padding:2px 8px;font-size:12px">Settings → Watermark</button>.</p>
+      </div>
+      <div class="wm-foot">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;color:#777;font-size:12px">
+          <input type="checkbox" id="pdfAppendCS" style="accent-color:#006D78">
+          Append Contact Sheet to PDF export
+        </label>
+        <div style="flex:1"></div>
+        <button class="btn-success" id="exportBtn" style="width:auto;padding:9px 18px">Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Stills pane -->
+    <div class="set-pane" id="setPaneIndiv" style="display:none">
+      <div class="wm-body" style="flex-direction:column;overflow-y:auto;padding:16px 20px;gap:0">
+        <div class="cs-settings" style="width:100%;border-right:none;padding:0">
+          <div class="cs-field">
+            <label>Format</label>
+            <select id="indivFormat">
+              <option value="jpeg">JPEG</option>
+              <option value="png">PNG</option>
+            </select>
+          </div>
+          <div class="cs-field" id="indivQualityRow">
+            <label>Quality — <span id="indivQualityVal">90</span>%</label>
+            <input type="range" id="indivQuality" min="1" max="100" value="90">
+          </div>
+          <div class="cs-field">
+            <label>Resolution</label>
+            <select id="indivResolution">
+              <option value="orig">Original</option>
+              <option value="hd">HD — 1280 px</option>
+              <option value="fhd" selected>Full HD — 1920 px</option>
+              <option value="4k">4K — 3840 px</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div class="cs-field" id="indivCustomWRow" style="display:none">
+            <label>Width (px)</label>
+            <input type="number" id="indivCustomW" value="1920" min="1" step="1">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="indivWatermark">
+            <label for="indivWatermark">Apply watermark</label>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="indivCreateFolder">
+            <label for="indivCreateFolder">Create folder from selection title</label>
+          </div>
+          <div class="cs-field">
+            <label>Subfolder</label>
+            <input type="text" id="indivSubfolder" placeholder="Optional…">
+          </div>
+        </div>
+      </div>
+      <div class="wm-foot">
+        Export path is configured in <button class="btn-ghost" onclick="closeMainExport();openPaths()" style="padding:2px 8px;font-size:12px">Paths</button>
+        <div style="flex:1"></div>
+        <div id="indivProgressWrap" style="width:120px"><div id="indivProgressFill"></div></div>
+        <span id="indivProgressLabel"></span>
+        <button class="btn-teal" id="indivBtn" style="width:auto;padding:9px 18px">Export Stills</button>
+      </div>
+    </div>
+
+    <!-- Contact Sheet pane -->
+    <div class="set-pane" id="setPaneCS" style="display:none">
+      <div class="cs-body">
+        <div class="cs-settings">
+          <div class="cs-field">
+            <label>Title</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="csTitle" placeholder="Optional…" style="flex:1;width:auto;">
+              <input type="color" id="csTitleColor" value="#ffffff" title="Title colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+            </div>
+          </div>
+          <div class="cs-field">
+            <label>Title background — <span id="csTitleBgOpacityVal">65</span>%</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="color" id="csTitleBgColor" value="#000000" title="Title background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+              <input type="range" id="csTitleBgOpacity" min="0" max="100" value="65" style="flex:1;">
+            </div>
+          </div>
+          <div class="cs-field">
+            <label>Background</label>
+            <input type="color" id="csBg" value="#0f0f0f">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Columns</label>
+            <select id="csCols">
+              <option value="0">Auto</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Rows / page</label>
+            <select id="csRows">
+              <option value="0">Auto</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Gap (px)</label>
+            <input type="number" id="csMargin" value="6" min="0" max="80">
+          </div>
+          <div class="cs-field">
+            <label>A4 margin (mm)</label>
+            <input type="number" id="csA4Margin" value="10" min="0" max="40">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Export format</label>
+            <select id="csExportW">
+              <option value="1280">HD — 1280 px</option>
+              <option value="1920" selected>Full HD — 1920 px</option>
+              <option value="3840">4K — 3840 px</option>
+              <option value="7680">8K — 7680 px</option>
+              <option value="a4p">A4 Portrait — 300 dpi</option>
+              <option value="a4l">A4 Landscape — 300 dpi</option>
+              <option value="a3p">A3 Portrait — 300 dpi</option>
+              <option value="a3l">A3 Landscape — 300 dpi</option>
+            </select>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csSortScene">
+            <label for="csSortScene">Sort by scene</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csColorPalette">
+            <label for="csColorPalette">Color palette</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csProdInfo">
+            <label for="csProdInfo">Production info</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csInvertLogo">
+            <label for="csInvertLogo">Invert logo</label>
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csWmEnabled">
+            <label for="csWmEnabled">Apply watermark</label>
+          </div>
+        </div>
+        <div class="cs-preview-area">
+          <canvas id="csCanvas"></canvas>
+          <button class="cs-nav-btn cs-nav-prev" id="csPrevPage">&#8249;</button>
+          <button class="cs-nav-btn cs-nav-next" id="csNextPage">&#8250;</button>
+          <div class="cs-progress-wrap" id="csProgressWrap">
+            <div id="csProgressFill"></div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-foot">
+        <span id="csStatus"></span>
+        <div class="cs-spacer"></div>
+        <button class="btn-secondary" id="csJpgBtn">↓ JPG</button>
+        <button class="btn-secondary" id="csPngBtn">↓ PNG</button>
+        <button class="btn-secondary" id="csPdfBtn">↓ PDF</button>
+      </div>
+    </div>
+
+    <!-- Color Palette pane -->
+    <div class="set-pane" id="setPanePalette" style="display:none">
+      <div class="cs-body">
+        <div class="cs-settings">
+          <div class="cs-field">
+            <label>Aspect ratio</label>
+            <input type="text" value="2.39:1 — Scope" disabled style="opacity:.6">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Export resolution</label>
+            <select id="paletteExportW">
+              <option value="1280">HD — 1280 px</option>
+              <option value="1920" selected>Full HD — 1920 px</option>
+              <option value="3840">4K — 3840 px</option>
+              <option value="7680">8K — 7680 px</option>
+            </select>
+          </div>
+        </div>
+        <div class="cs-preview-area">
+          <canvas id="paletteCanvas"></canvas>
+        </div>
+      </div>
+      <div class="cs-foot">
+        <span id="paletteStatus"></span>
+        <div class="cs-spacer"></div>
+        <button class="btn-secondary" id="paletteJpgBtn">↓ JPG</button>
+        <button class="btn-secondary" id="palettePngBtn">↓ PNG</button>
+        <button class="btn-secondary" id="palettePdfBtn">↓ PDF</button>
+      </div>
+    </div>
+
+    <!-- Print pane -->
+    <div class="set-pane" id="setPanePrint" style="display:none">
+      <div class="cs-body">
+        <div class="cs-settings" style="width:340px">
+          <div class="cs-field">
+            <label>Paper preset</label>
+            <select id="printPreset">
+              <option value="a4p">A4 Portrait (210 × 297 mm)</option>
+              <option value="a4l">A4 Landscape (297 × 210 mm)</option>
+              <option value="letterp">US Letter Portrait (215.9 × 279.4 mm)</option>
+              <option value="custom">Custom (mm)</option>
+            </select>
+          </div>
+          <div id="printCustomSizeRow" style="display:none;gap:8px">
+            <div class="cs-field" style="flex:1"><label>Width (mm)</label><input type="number" id="printCustomW" value="210"></div>
+            <div class="cs-field" style="flex:1"><label>Height (mm)</label><input type="number" id="printCustomH" value="297"></div>
+          </div>
+          <div class="cs-field">
+            <label>Export resolution (DPI)</label>
+            <input type="number" id="printDpi" value="300" min="72" max="600">
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Columns</label>
+            <select id="printCols">
+              <option value="0">Auto</option>
+              <option value="1">1 (single column)</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Rows / page</label>
+            <select id="printRows">
+              <option value="0">Auto</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="cs-field">
+            <label>Gap (mm)</label>
+            <input type="number" id="printGap" value="6" min="0" max="40">
+          </div>
+          <div class="cs-field">
+            <label>Alignment</label>
+            <select id="printAlign">
+              <option value="left">Left</option>
+              <option value="center" selected>Centered</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+          <hr class="cs-sep">
+          <div style="display:flex;gap:8px">
+            <div class="cs-field" style="flex:1"><label>Margin top (mm)</label><input type="number" id="printMarginTop" value="15"></div>
+            <div class="cs-field" style="flex:1"><label>Margin bottom (mm)</label><input type="number" id="printMarginBottom" value="15"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="cs-field" style="flex:1"><label>Margin left (mm)</label><input type="number" id="printMarginLeft" value="15"></div>
+            <div class="cs-field" style="flex:1"><label>Margin right (mm)</label><input type="number" id="printMarginRight" value="15"></div>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field">
+            <label>Crop (applied to all photos)</label>
+            <select id="printCropMode">
+              <option value="aspect">Target aspect ratio</option>
+              <option value="pixels">Trim pixels (T/B/L/R)</option>
+            </select>
+          </div>
+          <div id="printAspectFields" style="display:flex;gap:8px">
+            <div class="cs-field" style="flex:1"><label>Ratio W</label><input type="number" id="printRatioW" value="2.39" step="0.01"></div>
+            <div class="cs-field" style="flex:1"><label>Ratio H</label><input type="number" id="printRatioH" value="1" step="0.01"></div>
+          </div>
+          <div id="printPixelFields" style="display:none;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:8px">
+              <div class="cs-field" style="flex:1"><label>Top (px)</label><input type="number" id="printTrimTop" value="0"></div>
+              <div class="cs-field" style="flex:1"><label>Bottom (px)</label><input type="number" id="printTrimBottom" value="0"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div class="cs-field" style="flex:1"><label>Left (px)</label><input type="number" id="printTrimLeft" value="0"></div>
+              <div class="cs-field" style="flex:1"><label>Right (px)</label><input type="number" id="printTrimRight" value="0"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cs-preview-area">
+          <canvas id="printCanvas"></canvas>
+          <button class="cs-nav-btn cs-nav-prev" id="printPrevPage">&#8249;</button>
+          <button class="cs-nav-btn cs-nav-next" id="printNextPage">&#8250;</button>
+          <div class="cs-progress-wrap" id="printProgressWrap">
+            <div id="printProgressFill"></div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-foot">
+        <span id="printStatus"></span>
+        <div class="cs-spacer"></div>
+        <button class="btn-secondary" id="printJpgBtn">↓ JPG</button>
+        <button class="btn-secondary" id="printPngBtn">↓ PNG</button>
+        <button class="btn-secondary" id="printPdfBtn">↓ PDF</button>
+      </div>
+    </div>
+
+    <!-- EDL Marker pane -->
+    <div class="set-pane" id="setPaneEdl" style="display:none">
+      <div class="wm-body" style="align-items:center;justify-content:center;padding:30px">
+        <p style="color:#777;font-size:13px;max-width:420px;line-height:1.7;text-align:center">Exports the active selection as a DaVinci Resolve Markers EDL (<code>.edl</code>). Timecodes come from the clip metadata file when present, otherwise from the timecode embedded in the filename.</p>
+      </div>
+      <div class="wm-foot">
+        <div style="flex:1"></div>
+        <button class="btn-teal" id="edlBtn" style="width:auto;padding:9px 18px">Export EDL Marker</button>
       </div>
     </div>
 
@@ -3028,9 +3285,9 @@ function renderSelection() {
   const sel    = curSel();
 
   $('selCount').textContent      = sel.length === 1 ? '1 image' : `${sel.length} images`;
+  $('mainExportBtn').disabled    = sel.length === 0;
   $('exportBtn').disabled        = sel.length === 0;
   $('indivBtn').disabled         = sel.length === 0;
-  $('csBtn').disabled            = sel.length === 0;
   $('edlBtn').disabled           = sel.length === 0;
   $('clearSelBtn').disabled      = sel.length === 0;
   $('shuffleSelBtn').disabled    = sel.length < 2;
@@ -3330,6 +3587,7 @@ async function exportIndivStills() {
   const exportPath = getExportPath('indivStills');
   if (!exportPath) {
     alert('No export path configured for Individual Stills.\nPlease set one in Settings → Paths.');
+    closeMainExport();
     openPaths();
     return;
   }
@@ -3394,8 +3652,6 @@ let wmPreviewTimer = null;
 
 function openWm()   { switchSettingsTab('wm');   $('wmModal').classList.add('open'); renderWmPreview(); }
 function closeWm()  { $('wmModal').classList.remove('open'); }
-function openCS()   { switchSettingsTab('cs');   $('wmModal').classList.add('open'); generateCSPreview(); }
-function closeCS()  { $('wmModal').classList.remove('open'); }
 function openProd()  { switchSettingsTab('prod');  $('wmModal').classList.add('open'); }
 function openPaths() { switchSettingsTab('paths'); $('wmModal').classList.add('open'); }
 
@@ -3440,7 +3696,7 @@ function clearLogo() {
 }
 
 function switchSettingsTab(tab) {
-  const map = { wm:['setTabWm','setPaneWm'], cs:['setTabCS','setPaneCS'], indiv:['setTabIndiv','setPaneIndiv'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'], live:['setTabLive','setPaneLive'] };
+  const map = { wm:['setTabWm','setPaneWm'], prod:['setTabProd','setPaneProd'], paths:['setTabPaths','setPanePaths'], live:['setTabLive','setPaneLive'] };
   Object.entries(map).forEach(([t,[tabId,paneId]]) => {
     $(tabId).classList.toggle('active', t === tab);
     $(paneId).style.display = t === tab ? 'flex' : 'none';
@@ -3453,11 +3709,39 @@ function openSettings() {
   switchSettingsTab(tab);
   $('wmModal').classList.add('open');
   if (tab === 'wm') renderWmPreview();
+}
+
+// ─── Export modal (list → single-export detail, no tabs) ──────────────────
+const EXPORT_PANES = { pdf:'setPanePdf', indiv:'setPaneIndiv', cs:'setPaneCS', palette:'setPanePalette', print:'setPanePrint', edl:'setPaneEdl' };
+const EXPORT_TITLES = { pdf:'Export PDF', indiv:'Export Stills', cs:'Contact Sheet', palette:'Color Palette', print:'Print', edl:'EDL Marker' };
+const EXPORT_SIZES  = { pdf:'exp-sm', indiv:'exp-md', cs:'exp-lg', palette:'exp-lg', print:'exp-lg', edl:'exp-sm' };
+
+function openExpList() { $('expListModal').classList.add('open'); }
+function closeExpList() { $('expListModal').classList.remove('open'); }
+
+function openExportDetail(tab) {
+  closeExpList();
+  Object.entries(EXPORT_PANES).forEach(([t, paneId]) => {
+    $(paneId).style.display = t === tab ? 'flex' : 'none';
+  });
+  $('expDetailTitle').textContent = EXPORT_TITLES[tab];
+  $('expDetailBox').className = 'exp-box ' + EXPORT_SIZES[tab];
+  $('mainExportModal').classList.add('open');
   if (tab === 'cs') generateCSPreview();
+  if (tab === 'palette') generatePalettePreview();
+  if (tab === 'print') generatePrintPreview();
+}
+function backToExpList() {
+  $('mainExportModal').classList.remove('open');
+  openExpList();
+}
+function closeMainExport() {
+  $('mainExportModal').classList.remove('open');
+  closeExpList();
 }
 
 // ─── Paths data ───────────────────────────────────────────────────────────────
-const PATH_IDS = ['gang','pdfStills','indivStills','contactSheet','clipsReport','shootReport','qcReport','ale','csv'];
+const PATH_IDS = ['gang','pdfStills','indivStills','contactSheet','print','clipsReport','shootReport','qcReport','ale','csv'];
 
 function loadPathsData() {
   try { return JSON.parse(localStorage.getItem('stills-paths') || '{}'); } catch { return {}; }
@@ -3655,7 +3939,7 @@ async function navigateCSPreview(delta) {
 }
 
 async function generateCSPreview() {
-  if (!$('wmModal').classList.contains('open') || $('setPaneCS').style.display === 'none') return;
+  if (!$('mainExportModal').classList.contains('open') || $('setPaneCS').style.display === 'none') return;
   if (csRendering) { csPendingPreview = true; return; }
   csRendering = true; csPendingPreview = false;
   csPreviewPage = 0; csPreviewLoaded = null; csPreviewGroups = null;
@@ -3999,6 +4283,346 @@ function extractDominantColors(img, n = 3) {
     .map(([k])=>{ const [r,g,b]=k.split(',').map(Number); return `rgb(${r},${g},${b})`; });
 }
 
+function avgColor(img) {
+  const sz = 24;
+  const tc = document.createElement('canvas'); tc.width = sz; tc.height = sz;
+  const tx = tc.getContext('2d'); tx.drawImage(img, 0, 0, sz, sz);
+  let data; try { data = tx.getImageData(0, 0, sz, sz).data; } catch { return '#808080'; }
+  let r=0,g=0,b=0,n=0;
+  for (let i=0;i<data.length;i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; }
+  return `rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
+}
+
+// ─── Color Palette ───────────────────────────────────────────────────────
+const PALETTE_SETTING_IDS = ['paletteExportW'];
+function loadPaletteSettings() { try { return JSON.parse(localStorage.getItem('stills-palette-settings') || '{}'); } catch { return {}; } }
+function savePaletteSettings() {
+  const d = {};
+  PALETTE_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.value; });
+  localStorage.setItem('stills-palette-settings', JSON.stringify(d));
+}
+function initPaletteSettings() {
+  const d = loadPaletteSettings();
+  PALETTE_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; el.value = d[id]; });
+}
+function paletteGetExportDims() {
+  const W = parseInt($('paletteExportW').value) || 1920;
+  return { W, H: Math.round(W / 2.39) };
+}
+
+async function paletteRender(canvas, W, H) {
+  const sel = curSel();
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#101010'; ctx.fillRect(0, 0, W, H);
+  if (!sel.length) return;
+
+  const segW = W / sel.length;
+  for (let i = 0; i < sel.length; i++) {
+    let img;
+    try { img = await loadImgForExport(imgUrl(sel[i])); } catch { continue; }
+    let colors = extractDominantColors(img, 3);
+    if (!colors.length) colors = [avgColor(img)];
+    const bx = i * segW;
+    const cw = segW / colors.length;
+    colors.forEach((c, ci) => { ctx.fillStyle = c; ctx.fillRect(bx + ci*cw, 0, cw + 1, H); });
+    if (i < sel.length - 1) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(bx+segW, 0); ctx.lineTo(bx+segW, H); ctx.stroke();
+    }
+  }
+}
+
+let palettePreviewTimer = null;
+function paletteQueuePreview() {
+  clearTimeout(palettePreviewTimer);
+  palettePreviewTimer = setTimeout(generatePalettePreview, 450);
+}
+async function generatePalettePreview() {
+  if (!$('mainExportModal').classList.contains('open') || $('setPanePalette').style.display === 'none') return;
+  const dims = paletteGetExportDims();
+  const prevW = 580, prevH = Math.round(prevW * dims.H / dims.W);
+  $('paletteStatus').textContent = 'Rendering…';
+  await paletteRender($('paletteCanvas'), prevW, prevH);
+  $('paletteStatus').textContent = curSel().length ? '' : 'No images in the active selection.';
+}
+
+async function exportPalette(fmt) {
+  const sel = curSel();
+  if (!sel.length) return;
+  const ids = { jpg:'paletteJpgBtn', png:'palettePngBtn', pdf:'palettePdfBtn' };
+  const btn = $(ids[fmt]); const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const dims = paletteGetExportDims();
+    const baseName = (activeSel||'palette').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'palette';
+    const canvas = document.createElement('canvas');
+    await paletteRender(canvas, dims.W, dims.H);
+
+    if (fmt === 'pdf') {
+      const { jsPDF } = window.jspdf;
+      const PW = 297, PH = Math.round(PW / 2.39 * 1000) / 1000;
+      const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation:'landscape' });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, PW, PH);
+      await pdfSave(pdf, `${baseName}_color_palette.pdf`, 'contactSheet');
+    } else {
+      const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+      const q = fmt === 'jpg' ? 0.92 : 1;
+      const fn = `${baseName}_color_palette.${fmt}`;
+      const uri = canvas.toDataURL(mime, q);
+      if (!await saveFileToServer(fn, uri, 'contactSheet')) {
+        const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+      }
+    }
+  } catch(e) { alert('Export error: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+}
+
+// ─── Print export ──────────────────────────────────────────────────────────
+const PRINT_SETTING_IDS = ['printPreset','printCustomW','printCustomH','printDpi','printCols','printRows','printGap','printAlign','printMarginTop','printMarginBottom','printMarginLeft','printMarginRight','printCropMode','printRatioW','printRatioH','printTrimTop','printTrimBottom','printTrimLeft','printTrimRight'];
+function loadPrintSettings() { try { return JSON.parse(localStorage.getItem('stills-print-settings') || '{}'); } catch { return {}; } }
+function savePrintSettings() {
+  const d = {};
+  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.value; });
+  localStorage.setItem('stills-print-settings', JSON.stringify(d));
+}
+function updatePrintFieldsVis() {
+  $('printCustomSizeRow').style.display = $('printPreset').value === 'custom' ? 'flex' : 'none';
+  $('printAspectFields').style.display  = $('printCropMode').value === 'aspect' ? 'flex' : 'none';
+  $('printPixelFields').style.display   = $('printCropMode').value === 'pixels' ? 'flex' : 'none';
+}
+function initPrintSettings() {
+  const d = loadPrintSettings();
+  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; el.value = d[id]; });
+  updatePrintFieldsVis();
+}
+function printChanged() { printQueuePreview(); savePrintSettings(); }
+
+function printGetPageDims() {
+  const preset = $('printPreset').value;
+  let wmm, hmm;
+  if (preset === 'a4p') { wmm = 210; hmm = 297; }
+  else if (preset === 'a4l') { wmm = 297; hmm = 210; }
+  else if (preset === 'letterp') { wmm = 215.9; hmm = 279.4; }
+  else { wmm = parseFloat($('printCustomW').value) || 210; hmm = parseFloat($('printCustomH').value) || 297; }
+  const dpi = parseFloat($('printDpi').value) || 300;
+  return { wmm, hmm, dpi, W: Math.round(wmm * dpi / 25.4), H: Math.round(hmm * dpi / 25.4) };
+}
+
+function printGetCropRect(img) {
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  if ($('printCropMode').value === 'pixels') {
+    const trimTop    = parseInt($('printTrimTop').value)    || 0;
+    const trimBottom = parseInt($('printTrimBottom').value) || 0;
+    const trimLeft   = parseInt($('printTrimLeft').value)   || 0;
+    const trimRight  = parseInt($('printTrimRight').value)  || 0;
+    const sx = Math.min(trimLeft, iw - 1);
+    const sy = Math.min(trimTop, ih - 1);
+    const sw = Math.max(1, iw - trimLeft - trimRight);
+    const sh = Math.max(1, ih - trimTop - trimBottom);
+    return { sx, sy, sw, sh };
+  }
+  const ratioW = parseFloat($('printRatioW').value) || 2.39;
+  const ratioH = parseFloat($('printRatioH').value) || 1;
+  const targetAspect = ratioW / ratioH;
+  const srcAspect = iw / ih;
+  let sx, sy, sw, sh;
+  if (srcAspect > targetAspect) { sh = ih; sw = ih * targetAspect; sx = (iw - sw) / 2; sy = 0; }
+  else { sw = iw; sh = iw / targetAspect; sx = 0; sy = (ih - sh) / 2; }
+  return { sx, sy, sw, sh };
+}
+
+async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0) {
+  const sel = curSel(); if (!sel.length) return null;
+  const dims = printGetPageDims();
+  const H = overrideH || Math.round(W * dims.hmm / dims.wmm);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+
+  const pxPerMm = W / dims.wmm;
+  const marginTop    = (parseFloat($('printMarginTop').value)    || 0) * pxPerMm;
+  const marginBottom = (parseFloat($('printMarginBottom').value) || 0) * pxPerMm;
+  const marginLeft   = (parseFloat($('printMarginLeft').value)   || 0) * pxPerMm;
+  const marginRight  = (parseFloat($('printMarginRight').value)  || 0) * pxPerMm;
+  const gap          = (parseFloat($('printGap').value) || 0) * pxPerMm;
+  const forceCols = parseInt($('printCols').value) || 0;
+  const forceRows = parseInt($('printRows').value) || 0;
+
+  const pw = $('printProgressWrap'), pf = $('printProgressFill');
+  const isFirstLoad = !preloadedImgs;
+  let loaded;
+  if (isFirstLoad) {
+    pw.style.display = 'block'; pf.style.width = '0%';
+    loaded = [];
+    for (let i = 0; i < sel.length; i++) {
+      loaded.push(await loadImgForExport(imgUrl(sel[i])));
+      pf.style.width = `${(i+1)/sel.length*50}%`;
+    }
+  } else {
+    loaded = preloadedImgs;
+  }
+
+  const crops = loaded.map(img => printGetCropRect(img));
+  const ars = crops.map(c => c.sw / c.sh);
+  const availW = W - marginLeft - marginRight;
+  const availH = H - marginTop - marginBottom;
+
+  let cols, rows, cellW, cellH;
+  if (forceCols > 0 && forceRows > 0) {
+    cols = forceCols; rows = forceRows;
+    cellW = (availW - (cols-1)*gap) / cols;
+    cellH = (availH - (rows-1)*gap) / rows;
+  } else if (forceCols > 0) {
+    cols = Math.min(forceCols, loaded.length);
+    rows = forceRows > 0 ? forceRows : Math.ceil(loaded.length / cols);
+    cellW = (availW - (cols-1)*gap) / cols;
+    cellH = (availH - (rows-1)*gap) / rows;
+  } else if (forceRows > 0) {
+    const auto = csCalcGrid(loaded.length, availW, availH, ars, gap);
+    cols = auto.cols; rows = forceRows;
+    cellW = (availW - (cols-1)*gap) / cols;
+    cellH = (availH - (rows-1)*gap) / rows;
+  } else {
+    ({ cols, rows, cellW, cellH } = csCalcGrid(loaded.length, availW, availH, ars, gap));
+  }
+
+  const itemsPerPage = cols * rows;
+  const totalPages = Math.ceil(loaded.length / itemsPerPage);
+  const start = pageIndex * itemsPerPage;
+  const pageImgs = loaded.slice(start, start + itemsPerPage);
+  const pageCrops = crops.slice(start, start + itemsPerPage);
+  const align = $('printAlign').value;
+
+  for (let i = 0; i < pageImgs.length; i++) {
+    const img = pageImgs[i], rect = pageCrops[i];
+    const col = i % cols, row = Math.floor(i / cols);
+    const cellX = marginLeft + col*(cellW+gap);
+    const cellY = marginTop + row*(cellH+gap);
+    const ar = rect.sw / rect.sh;
+    let w = cellW, h = cellH;
+    if (w/h > ar) w = h*ar; else h = w/ar;
+    const dx = align === 'left' ? cellX : align === 'right' ? cellX + (cellW-w) : cellX + (cellW-w)/2;
+    const dy = cellY + (cellH-h)/2;
+    ctx.drawImage(img, rect.sx, rect.sy, rect.sw, rect.sh, dx, dy, w, h);
+    ctx.strokeStyle = '#dddddd'; ctx.lineWidth = 1;
+    ctx.strokeRect(dx, dy, w, h);
+    if (isFirstLoad) pf.style.width = `${50 + (i+1)/pageImgs.length*50}%`;
+  }
+
+  if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+  return { loaded, cols, rows, itemsPerPage, totalPages };
+}
+
+let printPreviewTimer = null;
+function printQueuePreview() {
+  clearTimeout(printPreviewTimer);
+  printPreviewTimer = setTimeout(generatePrintPreview, 450);
+}
+let printRendering = false, printPendingPreview = false;
+let printPreviewPage = 0, printPreviewTotal = 1, printPreviewLoaded = null;
+
+// Fit the preview canvas entirely inside the visible preview area (contain-style),
+// rather than a fixed width — tall paper presets (A4/Letter Portrait) would otherwise
+// overflow the fixed-height exp-lg modal.
+function printCalcPreviewDims(dims) {
+  const area = document.querySelector('#setPanePrint .cs-preview-area');
+  const pad = 28; // matches .cs-preview-area's 14px padding on each side
+  const availW = Math.max(50, area ? area.clientWidth  - pad : 580);
+  const availH = Math.max(50, area ? area.clientHeight - pad : 580);
+  let w = availW, h = w * dims.hmm / dims.wmm;
+  if (h > availH) { h = availH; w = h * dims.wmm / dims.hmm; }
+  return { w: Math.round(w), h: Math.round(h) };
+}
+
+function updatePrintNavBtns() {
+  $('printPrevPage').style.display = printPreviewPage > 0                  ? 'block' : 'none';
+  $('printNextPage').style.display = printPreviewPage < printPreviewTotal - 1 ? 'block' : 'none';
+}
+function printPageLabel() {
+  if (printPreviewTotal <= 1) return '';
+  return `Page ${printPreviewPage + 1} / ${printPreviewTotal}`;
+}
+async function navigatePrintPreview(delta) {
+  const next = printPreviewPage + delta;
+  if (next < 0 || next >= printPreviewTotal || printRendering) return;
+  printRendering = true;
+  printPreviewPage = next;
+  try {
+    const dims = printGetPageDims();
+    const { w: prevW, h: prevH } = printCalcPreviewDims(dims);
+    await printRender($('printCanvas'), prevW, printPreviewLoaded, printPreviewPage, prevH);
+    $('printStatus').textContent = printPageLabel();
+  } finally {
+    printRendering = false;
+    updatePrintNavBtns();
+  }
+}
+async function generatePrintPreview() {
+  if (!$('mainExportModal').classList.contains('open') || $('setPanePrint').style.display === 'none') return;
+  if (printRendering) { printPendingPreview = true; return; }
+  printRendering = true; printPendingPreview = false;
+  printPreviewPage = 0; printPreviewLoaded = null;
+  $('printStatus').textContent = 'Rendering…';
+  try {
+    const dims = printGetPageDims();
+    const { w: prevW, h: prevH } = printCalcPreviewDims(dims);
+    const result = await printRender($('printCanvas'), prevW, null, 0, prevH);
+    if (result) { printPreviewLoaded = result.loaded; printPreviewTotal = result.totalPages; }
+    $('printStatus').textContent = curSel().length ? printPageLabel() : 'No images in the active selection.';
+  } finally {
+    printRendering = false;
+    updatePrintNavBtns();
+    if (printPendingPreview) generatePrintPreview();
+  }
+}
+
+async function exportPrint(fmt) {
+  const sel = curSel();
+  if (!sel.length) return;
+  const ids = { jpg:'printJpgBtn', png:'printPngBtn', pdf:'printPdfBtn' };
+  const btn = $(ids[fmt]); const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const dims = printGetPageDims();
+    const baseName = (activeSel||'print').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'print';
+    const suffix = `${baseName}_print`;
+
+    const canvas = document.createElement('canvas');
+    const result = await printRender(canvas, dims.W, null, 0, dims.H);
+    const { loaded, totalPages } = result;
+
+    if (fmt === 'pdf') {
+      const { jsPDF } = window.jspdf;
+      const PW = dims.wmm, PH = dims.hmm;
+      const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: PW>=PH?'landscape':'portrait' });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+      for (let p = 1; p < totalPages; p++) {
+        const c = document.createElement('canvas');
+        await printRender(c, dims.W, loaded, p, dims.H);
+        pdf.addPage();
+        pdf.addImage(c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+      }
+      await pdfSave(pdf, `${suffix}.pdf`, 'print');
+    } else {
+      const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+      const q = fmt === 'jpg' ? 0.95 : 1;
+      const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
+      for (let p = 0; p < totalPages; p++) {
+        if (p > 0) await new Promise(r => setTimeout(r, 300));
+        const c = p === 0 ? canvas : document.createElement('canvas');
+        if (p > 0) await printRender(c, dims.W, loaded, p, dims.H);
+        const fn = `${suffix}${pageLabel(p)}.${fmt}`;
+        const dataUri = c.toDataURL(mime, q);
+        if (!await saveFileToServer(fn, dataUri, 'print')) {
+          const a = document.createElement('a'); a.download = fn; a.href = dataUri; a.click();
+        }
+      }
+    }
+  } catch(e) { alert('Export error: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+}
+
 function ctxRoundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
@@ -4247,15 +4871,23 @@ $('invertGalSelBtn').onclick = () => {
 };
 $('exportBtn').onclick      = exportPDF;
 $('indivBtn').onclick       = exportIndivStills;
-$('csBtn').onclick   = openCS;
 $('edlBtn').onclick  = exportEDL;
+$('mainExportBtn').onclick = openExpList;
+$('expListClose').onclick  = closeExpList;
+$('expListModal').onclick  = e => { if (e.target === $('expListModal')) closeExpList(); };
+$('expListPdf').onclick     = () => openExportDetail('pdf');
+$('expListIndiv').onclick   = () => openExportDetail('indiv');
+$('expListCS').onclick      = () => openExportDetail('cs');
+$('expListPalette').onclick = () => openExportDetail('palette');
+$('expListPrint').onclick   = () => openExportDetail('print');
+$('expListEdl').onclick     = () => openExportDetail('edl');
+$('expBackBtn').onclick     = backToExpList;
+$('mainExportClose').onclick = closeMainExport;
+$('mainExportModal').onclick = e => { if (e.target === $('mainExportModal')) closeMainExport(); };
 $('setTabWm').onclick    = () => { switchSettingsTab('wm');    renderWmPreview(); };
-$('setTabCS').onclick    = () => { switchSettingsTab('cs');    generateCSPreview(); };
-$('setTabIndiv').onclick = () => switchSettingsTab('indiv');
 $('setTabProd').onclick  = () => switchSettingsTab('prod');
 $('setTabPaths').onclick = () => switchSettingsTab('paths');
 $('setTabLive').onclick  = () => switchSettingsTab('live');
-$('indivDone').onclick   = closeWm;
 $('prodDone').onclick    = closeWm;
 $('pathsDone').onclick   = closeWm;
 $('liveDone').onclick    = () => { liveSave(); renderGallery(); closeWm(); };
@@ -4516,6 +5148,11 @@ $('csPngBtn').onclick = () => exportCS('png');
 $('csPdfBtn').onclick = () => exportCS('pdf');
 $('csPrevPage').onclick = () => navigateCSPreview(-1);
 $('csNextPage').onclick = () => navigateCSPreview(1);
+$('paletteJpgBtn').onclick = () => exportPalette('jpg');
+$('palettePngBtn').onclick = () => exportPalette('png');
+$('palettePdfBtn').onclick = () => exportPalette('pdf');
+$('paletteExportW').addEventListener('change', () => { savePaletteSettings(); paletteQueuePreview(); });
+initPaletteSettings();
 
 // Live preview — CS modal settings (also auto-save)
 function csChanged() { csQueuePreview(); saveCsSettings(); }
@@ -4533,6 +5170,20 @@ $('csProdInfo').addEventListener('change', csChanged);
 $('csInvertLogo').addEventListener('change', csChanged);
 $('csWmEnabled').addEventListener('change', csChanged);
 $('pdfAppendCS').addEventListener('change', saveCsSettings);
+
+// Live preview — Print modal settings (also auto-save)
+$('printJpgBtn').onclick = () => exportPrint('jpg');
+$('printPngBtn').onclick = () => exportPrint('png');
+$('printPdfBtn').onclick = () => exportPrint('pdf');
+$('printPrevPage').onclick = () => navigatePrintPreview(-1);
+$('printNextPage').onclick = () => navigatePrintPreview(1);
+PRINT_SETTING_IDS.forEach(id => {
+  const evt = $(id).tagName === 'SELECT' ? 'change' : 'input';
+  $(id).addEventListener(evt, printChanged);
+});
+$('printPreset').addEventListener('change', updatePrintFieldsVis);
+$('printCropMode').addEventListener('change', updatePrintFieldsVis);
+initPrintSettings();
 
 // Report search
 $('reportSearchInput').addEventListener('input', e => filterReport(e.target.value));
@@ -5357,6 +6008,10 @@ document.addEventListener('keydown', async e => {
   } else if ($('wmModal').classList.contains('open')) {
     if (e.key === 'Escape') closeWm();
     if (e.key === 'Enter' && $('setPaneLive').style.display !== 'none') { e.preventDefault(); liveSave(); renderGallery(); closeWm(); }
+  } else if ($('mainExportModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeMainExport();
+  } else if ($('expListModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeExpList();
   } else if ($('exportModal').classList.contains('open')) {
     if (e.key === 'Escape') closeExportModal();
     if (e.key === 'Enter') { e.preventDefault(); runExports(); }
