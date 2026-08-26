@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.4.0</title>
+<title>Stills Manager v1.4.1</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1285,6 +1285,9 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
       <div id="selHeader">
         <h2>Selection</h2>
         <div id="selHeaderBtns">
+          <button class="sel-icon-btn" id="divideSceneBtn" disabled title="Divide by scene">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg>
+          </button>
           <button class="sel-icon-btn" id="shuffleSelBtn" disabled title="Shuffle">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><polyline points="18 2 22 6 18 10"/><path d="M2 6h1.9c1.5 0 2.9.9 3.5 2.2"/><path d="M22 18h-5.9c-1.3 0-2.5-.7-3.1-1.8l-.8-1.3"/><polyline points="18 14 22 18 18 22"/></svg>
           </button>
@@ -1304,7 +1307,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.4.0</span>
+  <span id="appVersion">v1.4.1</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1904,11 +1907,35 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           </div>
           <hr class="cs-sep">
           <div class="cs-field">
+            <label>Title</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="printTitle" placeholder="Optional…" style="flex:1;width:auto;">
+              <input type="color" id="printTitleColor" value="#000000" title="Title colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+            </div>
+            <div style="font-size:11px;color:#666;margin-top:2px;line-height:1.4">Tokens: <code>[Scene]</code>, <code>[page]</code>/<code>[pages]</code></div>
+          </div>
+          <div class="cs-field">
+            <label>Title size — <span id="printTitleSizeVal">20</span> pt</label>
+            <input type="range" id="printTitleSize" min="6" max="72" step="1" value="20">
+          </div>
+          <div class="cs-field">
+            <label>Title background — <span id="printTitleBgOpacityVal">0</span>%</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="color" id="printTitleBgColor" value="#000000" title="Title background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+              <input type="range" id="printTitleBgOpacity" min="0" max="100" value="0" style="flex:1;">
+            </div>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="printSortScene">
+            <label for="printSortScene">Sort by scene</label>
+          </div>
+          <div class="cs-field">
             <label>Columns</label>
             <select id="printCols">
               <option value="0">Auto</option>
               <option value="1">1 (single column)</option>
-              <option value="2">2</option>
+              <option value="2" selected>2</option>
               <option value="3">3</option>
               <option value="4">4</option>
               <option value="5">5</option>
@@ -1926,7 +1953,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
               <option value="3">3</option>
               <option value="4">4</option>
               <option value="5">5</option>
-              <option value="6">6</option>
+              <option value="6" selected>6</option>
               <option value="7">7</option>
               <option value="8">8</option>
             </select>
@@ -2095,7 +2122,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
         <p>Selections are organised as <strong>tabs</strong> at the top of the right panel. Each tab holds an ordered list of images and shows the image count in parentheses.</p>
         <p><strong>+</strong> creates a new tab pre-filled with a copy of the active selection — useful to branch off from an existing curation. <strong>Double-click</strong> a tab name to rename it · the remove button deletes the tab.</p>
         <p>Images within a selection can be reordered by <strong>drag and drop</strong>.</p>
-        <p>The <strong>shuffle icon</strong> in the selection header randomises the order of images in the active selection. The <strong>invert icon</strong> reverses the order (first becomes last).</p>
+        <p>The <strong>divide by scene icon</strong> in the selection header splits the active selection into one new tab per scene ("Scene [Scene]"), each pre-filled with that scene's images — the original selection is left untouched. The <strong>shuffle icon</strong> randomises the order of images in the active selection. The <strong>invert icon</strong> reverses the order (first becomes last).</p>
         <p>Selections are saved automatically to <strong>.stills-selections.json</strong> in the open folder (debounced at 350 ms).</p>
       </div>
 
@@ -2871,6 +2898,26 @@ function invertSel() {
   selections[activeSel] = curSel().reverse();
   queueSave(); renderGallery(); renderSelection();
 }
+function divideByScene() {
+  const s = curSel();
+  if (!s.length) return;
+  const groups = {}; // scene -> [filenames], in first-appearance order
+  const order  = [];
+  s.forEach(name => {
+    const scene = getImageScene(name) || 'Unknown';
+    if (!groups[scene]) { groups[scene] = []; order.push(scene); }
+    groups[scene].push(name);
+  });
+  pushHistory();
+  order.forEach(scene => {
+    const base = `Scene ${scene}`;
+    let name = base, n = 2;
+    while (selections[name] !== undefined) name = `${base} (${n++})`;
+    selections[name] = [...groups[scene]];
+    selOrder.push(name);
+  });
+  queueSave(); renderAll();
+}
 
 // ─── Tabs ──────────────────────────────────────────────────────────────────
 function renderTabs() {
@@ -3292,6 +3339,7 @@ function renderSelection() {
   $('clearSelBtn').disabled      = sel.length === 0;
   $('shuffleSelBtn').disabled    = sel.length < 2;
   $('invertSelBtn').disabled     = sel.length < 2;
+  $('divideSceneBtn').disabled   = sel.length === 0;
 
   if (sortable) { sortable.destroy(); sortable = null; }
 
@@ -4379,11 +4427,11 @@ async function exportPalette(fmt) {
 }
 
 // ─── Print export ──────────────────────────────────────────────────────────
-const PRINT_SETTING_IDS = ['printPreset','printCustomW','printCustomH','printDpi','printCols','printRows','printGap','printAlign','printMarginTop','printMarginBottom','printMarginLeft','printMarginRight','printCropMode','printRatioW','printRatioH','printTrimTop','printTrimBottom','printTrimLeft','printTrimRight'];
+const PRINT_SETTING_IDS = ['printPreset','printCustomW','printCustomH','printDpi','printTitle','printTitleColor','printTitleSize','printTitleBgColor','printTitleBgOpacity','printCols','printRows','printGap','printAlign','printSortScene','printMarginTop','printMarginBottom','printMarginLeft','printMarginRight','printCropMode','printRatioW','printRatioH','printTrimTop','printTrimBottom','printTrimLeft','printTrimRight'];
 function loadPrintSettings() { try { return JSON.parse(localStorage.getItem('stills-print-settings') || '{}'); } catch { return {}; } }
 function savePrintSettings() {
   const d = {};
-  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.value; });
+  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.type === 'checkbox' ? el.checked : el.value; });
   localStorage.setItem('stills-print-settings', JSON.stringify(d));
 }
 function updatePrintFieldsVis() {
@@ -4393,7 +4441,9 @@ function updatePrintFieldsVis() {
 }
 function initPrintSettings() {
   const d = loadPrintSettings();
-  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; el.value = d[id]; });
+  PRINT_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
+  $('printTitleBgOpacityVal').textContent = $('printTitleBgOpacity').value;
+  $('printTitleSizeVal').textContent = $('printTitleSize').value;
   updatePrintFieldsVis();
 }
 function printChanged() { printQueuePreview(); savePrintSettings(); }
@@ -4432,13 +4482,29 @@ function printGetCropRect(img) {
   return { sx, sy, sw, sh };
 }
 
-async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0) {
-  const sel = curSel(); if (!sel.length) return null;
+// Resolves the Title field for a given scene when "Set scene as title" is on:
+// the literal "[Scene]" token in the user's template is swapped for the
+// scene value (e.g. "Sc. [Scene] - ext-day" -> "Sc. 12 - ext-day"). Falls
+// back to the raw title text when the toggle is off.
+function printResolveTitle(sceneValue) {
+  const raw = $('printTitle').value.trim();
+  if (!raw.includes('[Scene]')) return raw;
+  const label = (sceneValue !== undefined && sceneValue !== null && sceneValue !== '') ? String(sceneValue) : '—';
+  return raw.split('[Scene]').join(label);
+}
+
+async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overrideH = 0, forcedImages = null, pageTitle = null) {
+  const isGroupOverride = forcedImages !== null;
+  let sel;
+  if (!isGroupOverride) {
+    const sel0 = curSel(); if (!sel0.length) return null;
+    sel = $('printSortScene').checked ? csSortByScene(sel0) : sel0;
+  }
   const dims = printGetPageDims();
   const H = overrideH || Math.round(W * dims.hmm / dims.wmm);
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); // page background is fixed white — real paper has no other option
 
   const pxPerMm = W / dims.wmm;
   const marginTop    = (parseFloat($('printMarginTop').value)    || 0) * pxPerMm;
@@ -4449,10 +4515,27 @@ async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overr
   const forceCols = parseInt($('printCols').value) || 0;
   const forceRows = parseInt($('printRows').value) || 0;
 
+  // Title — same look as Contact Sheet's title pill. Space is reserved here
+  // (needs only the font size, not the final text), but the actual text —
+  // which may reference [page]/[pages], only knowable once pagination for
+  // this render is computed below — is drawn further down, on every page.
+  const titleTemplate = pageTitle !== null ? String(pageTitle) : $('printTitle').value.trim();
+  const titleSizePt = parseFloat($('printTitleSize').value) || 14;
+  // Points are a physical unit (1pt = 1/72in) — convert via pxPerMm, same as
+  // margins/gap above, so the title comes out the same real-world size on
+  // paper regardless of preview resolution vs full-DPI export.
+  const fs = Math.max(2, Math.round(titleSizePt * (25.4 / 72) * pxPerMm));
+  const tPad = Math.round(gap * 1.2) || Math.round(W * 0.014);
+  const bottomExtra = Math.round(tPad * 0.8);
+  const titleH = titleTemplate ? (fs + tPad + tPad + bottomExtra) : 0;
+  const gridTop = marginTop + titleH;
+
   const pw = $('printProgressWrap'), pf = $('printProgressFill');
-  const isFirstLoad = !preloadedImgs;
+  const isFirstLoad = !preloadedImgs && !isGroupOverride;
   let loaded;
-  if (isFirstLoad) {
+  if (isGroupOverride) {
+    loaded = forcedImages;
+  } else if (isFirstLoad) {
     pw.style.display = 'block'; pf.style.width = '0%';
     loaded = [];
     for (let i = 0; i < sel.length; i++) {
@@ -4466,18 +4549,33 @@ async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overr
   const crops = loaded.map(img => printGetCropRect(img));
   const ars = crops.map(c => c.sw / c.sh);
   const availW = W - marginLeft - marginRight;
-  const availH = H - marginTop - marginBottom;
+  const availH = H - gridTop - marginBottom;
 
-  let cols, rows, cellW, cellH;
+  let cols, rows, cellW, cellH, vOffset = 0, rowGap = gap;
   if (forceCols > 0 && forceRows > 0) {
     cols = forceCols; rows = forceRows;
     cellW = (availW - (cols-1)*gap) / cols;
     cellH = (availH - (rows-1)*gap) / rows;
   } else if (forceCols > 0) {
+    // Rows = Auto with a fixed column count: size rows from the actual image
+    // aspect instead of an oversized uniform cell (availH / rows) — otherwise
+    // images cluster at the top of the page with a large dead zone below and
+    // don't respect the bottom margin visually. Pack rows at their natural
+    // height, gapped as configured, and center the resulting block vertically
+    // within the available (margin-bound) area. Shrink uniformly if it would
+    // overflow, so cells can never go negative and rows can never overlap.
     cols = Math.min(forceCols, loaded.length);
-    rows = forceRows > 0 ? forceRows : Math.ceil(loaded.length / cols);
+    rows = Math.ceil(loaded.length / cols);
     cellW = (availW - (cols-1)*gap) / cols;
-    cellH = (availH - (rows-1)*gap) / rows;
+    const ar0 = ars[0] || 1;
+    let rowH = cellW / ar0;
+    let totalContent = rows*rowH + (rows-1)*gap;
+    if (totalContent > availH) {
+      const scale = availH / totalContent;
+      rowH *= scale; rowGap = gap*scale; totalContent = availH;
+    }
+    cellH = rowH;
+    vOffset = Math.max(0, (availH - totalContent) / 2);
   } else if (forceRows > 0) {
     const auto = csCalcGrid(loaded.length, availW, availH, ars, gap);
     cols = auto.cols; rows = forceRows;
@@ -4494,11 +4592,30 @@ async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overr
   const pageCrops = crops.slice(start, start + itemsPerPage);
   const align = $('printAlign').value;
 
+  if (titleTemplate) {
+    const title = titleTemplate.split('[page]').join(String(pageIndex + 1)).split('[pages]').join(String(totalPages));
+    const sysFont = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+    ctx.font = `400 ${fs}px ${sysFont}`;
+    const leftOffset = Math.round(W * 0.018);
+    const tx = marginLeft + leftOffset;
+    const ty = marginTop + tPad;
+    const tw = ctx.measureText(title).width;
+    const rph = Math.round(fs * 0.5), rpv = Math.round(fs * 0.3);
+    const titleBgColor = $('printTitleBgColor').value || '#000000';
+    const titleBgOpacity = (parseInt($('printTitleBgOpacity').value, 10) ?? 65) / 100;
+    ctx.fillStyle = hexToRgba(titleBgColor, titleBgOpacity);
+    ctxRoundRect(ctx, tx - rph, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
+    ctx.fill();
+    ctx.fillStyle = $('printTitleColor').value || '#ffffff';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(title, tx, ty);
+  }
+
   for (let i = 0; i < pageImgs.length; i++) {
     const img = pageImgs[i], rect = pageCrops[i];
     const col = i % cols, row = Math.floor(i / cols);
     const cellX = marginLeft + col*(cellW+gap);
-    const cellY = marginTop + row*(cellH+gap);
+    const cellY = gridTop + vOffset + row*(cellH+rowGap);
     const ar = rect.sw / rect.sh;
     let w = cellW, h = cellH;
     if (w/h > ar) w = h*ar; else h = w/ar;
@@ -4521,6 +4638,10 @@ function printQueuePreview() {
 }
 let printRendering = false, printPendingPreview = false;
 let printPreviewPage = 0, printPreviewTotal = 1, printPreviewLoaded = null;
+// Scene mode: printPreviewFlat has one entry per *rendered page* across all scenes
+// (not one entry per scene), so navigation covers every page of every group.
+// printPreviewGroupImgs mirrors printPreviewGroups[i].images, preloaded once.
+let printPreviewGroups = null, printPreviewGroupImgs = null, printPreviewFlat = null;
 
 // Fit the preview canvas entirely inside the visible preview area (contain-style),
 // rather than a fixed width — tall paper presets (A4/Letter Portrait) would otherwise
@@ -4541,6 +4662,12 @@ function updatePrintNavBtns() {
 }
 function printPageLabel() {
   if (printPreviewTotal <= 1) return '';
+  if (printPreviewFlat) {
+    const f = printPreviewFlat[printPreviewPage];
+    const scene = (f.scene !== undefined && f.scene !== null && f.scene !== '') ? f.scene : '—';
+    const within = f.totalPagesInGroup > 1 ? ` (p${f.page + 1}/${f.totalPagesInGroup})` : '';
+    return `Scene ${scene}${within} — ${printPreviewPage + 1} / ${printPreviewTotal}`;
+  }
   return `Page ${printPreviewPage + 1} / ${printPreviewTotal}`;
 }
 async function navigatePrintPreview(delta) {
@@ -4551,7 +4678,13 @@ async function navigatePrintPreview(delta) {
   try {
     const dims = printGetPageDims();
     const { w: prevW, h: prevH } = printCalcPreviewDims(dims);
-    await printRender($('printCanvas'), prevW, printPreviewLoaded, printPreviewPage, prevH);
+    if (printPreviewFlat) {
+      const f = printPreviewFlat[printPreviewPage];
+      const imgs = printPreviewGroupImgs[f.groupIdx];
+      await printRender($('printCanvas'), prevW, null, f.page, prevH, imgs, printResolveTitle(f.scene));
+    } else {
+      await printRender($('printCanvas'), prevW, printPreviewLoaded, printPreviewPage, prevH);
+    }
     $('printStatus').textContent = printPageLabel();
   } finally {
     printRendering = false;
@@ -4563,12 +4696,43 @@ async function generatePrintPreview() {
   if (printRendering) { printPendingPreview = true; return; }
   printRendering = true; printPendingPreview = false;
   printPreviewPage = 0; printPreviewLoaded = null;
+  printPreviewGroups = null; printPreviewGroupImgs = null; printPreviewFlat = null;
   $('printStatus').textContent = 'Rendering…';
   try {
     const dims = printGetPageDims();
     const { w: prevW, h: prevH } = printCalcPreviewDims(dims);
-    const result = await printRender($('printCanvas'), prevW, null, 0, prevH);
-    if (result) { printPreviewLoaded = result.loaded; printPreviewTotal = result.totalPages; }
+    if ($('printSortScene').checked && clipsMetadata?.clips?.length) {
+      const groups = csGetSceneGroups(curSel());
+      const groupImgs = [];
+      for (const g of groups) groupImgs.push(await Promise.all(g.images.map(f => loadImgEl(imgUrl(f)))));
+
+      // Expand each group into one flat entry per page it actually needs —
+      // a scene overflowing one page must stay navigable, not get silently
+      // truncated to its first page like the old per-scene index did.
+      const flat = [];
+      const scratch = document.createElement('canvas');
+      for (let gi = 0; gi < groups.length; gi++) {
+        const imgs = groupImgs[gi];
+        if (!imgs.length) continue;
+        const r = await printRender(scratch, prevW, null, 0, prevH, imgs, printResolveTitle(groups[gi].scene));
+        const totalPagesInGroup = r ? r.totalPages : 1;
+        for (let p = 0; p < totalPagesInGroup; p++) {
+          flat.push({ groupIdx: gi, page: p, scene: groups[gi].scene, totalPagesInGroup });
+        }
+      }
+
+      printPreviewGroups = groups;
+      printPreviewGroupImgs = groupImgs;
+      printPreviewFlat = flat;
+      printPreviewTotal = flat.length || 1;
+      if (flat.length) {
+        const f0 = flat[0];
+        await printRender($('printCanvas'), prevW, null, f0.page, prevH, groupImgs[f0.groupIdx], printResolveTitle(f0.scene));
+      }
+    } else {
+      const result = await printRender($('printCanvas'), prevW, null, 0, prevH);
+      if (result) { printPreviewLoaded = result.loaded; printPreviewTotal = result.totalPages; }
+    }
     $('printStatus').textContent = curSel().length ? printPageLabel() : 'No images in the active selection.';
   } finally {
     printRendering = false;
@@ -4588,34 +4752,100 @@ async function exportPrint(fmt) {
     const baseName = (activeSel||'print').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_') || 'print';
     const suffix = `${baseName}_print`;
 
-    const canvas = document.createElement('canvas');
-    const result = await printRender(canvas, dims.W, null, 0, dims.H);
-    const { loaded, totalPages } = result;
+    if ($('printSortScene').checked && clipsMetadata?.clips?.length) {
+      // ── Scene-grouped export — one page (or more) per scene ────────
+      const groups = csGetSceneGroups(sel);
 
-    if (fmt === 'pdf') {
-      const { jsPDF } = window.jspdf;
-      const PW = dims.wmm, PH = dims.hmm;
-      const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: PW>=PH?'landscape':'portrait' });
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
-      for (let p = 1; p < totalPages; p++) {
-        const c = document.createElement('canvas');
-        await printRender(c, dims.W, loaded, p, dims.H);
-        pdf.addPage();
-        pdf.addImage(c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+      const allImgMap = new Map();
+      const pw = $('printProgressWrap'), pf = $('printProgressFill');
+      pw.style.display = 'block'; pf.style.width = '0%';
+      for (let i = 0; i < sel.length; i++) {
+        allImgMap.set(sel[i], await loadImgForExport(imgUrl(sel[i])));
+        pf.style.width = `${(i+1)/sel.length*100}%`;
       }
-      await pdfSave(pdf, `${suffix}.pdf`, 'print');
+      setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
+
+      if (fmt === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const PW = dims.wmm, PH = dims.hmm;
+        const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: PW>=PH?'landscape':'portrait' });
+        let firstPage = true;
+        for (const group of groups) {
+          const sceneImgs = group.images.map(f => allImgMap.get(f)).filter(Boolean);
+          if (!sceneImgs.length) continue;
+          const sceneTitle = printResolveTitle(group.scene);
+          const canvas = document.createElement('canvas');
+          const result = await printRender(canvas, dims.W, null, 0, dims.H, sceneImgs, sceneTitle);
+          if (!firstPage) pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+          firstPage = false;
+          for (let p = 1; p < result.totalPages; p++) {
+            const c = document.createElement('canvas');
+            await printRender(c, dims.W, null, p, dims.H, sceneImgs, sceneTitle);
+            pdf.addPage();
+            pdf.addImage(c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+          }
+        }
+        await pdfSave(pdf, `${suffix}.pdf`, 'print');
+      } else {
+        const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+        const q = fmt === 'jpg' ? 0.95 : 1;
+        for (const group of groups) {
+          const sceneImgs = group.images.map(f => allImgMap.get(f)).filter(Boolean);
+          if (!sceneImgs.length) continue;
+          const sceneTitle = printResolveTitle(group.scene);
+          const sceneLabel = group.scene ? `_scene${group.scene}` : '';
+          const canvas = document.createElement('canvas');
+          const result = await printRender(canvas, dims.W, null, 0, dims.H, sceneImgs, sceneTitle);
+          const subLabel = result.totalPages > 1 ? '_p1' : '';
+          const fn0 = `${suffix}${sceneLabel}${subLabel}.${fmt}`;
+          const uri0 = canvas.toDataURL(mime, q);
+          if (!await saveFileToServer(fn0, uri0, 'print')) {
+            const a = document.createElement('a'); a.download = fn0; a.href = uri0; a.click();
+          }
+          for (let p = 1; p < result.totalPages; p++) {
+            await new Promise(r => setTimeout(r, 300));
+            const c = document.createElement('canvas');
+            await printRender(c, dims.W, null, p, dims.H, sceneImgs, sceneTitle);
+            const fn = `${suffix}${sceneLabel}_p${p+1}.${fmt}`;
+            const uri = c.toDataURL(mime, q);
+            if (!await saveFileToServer(fn, uri, 'print')) {
+              const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+            }
+          }
+        }
+      }
     } else {
-      const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
-      const q = fmt === 'jpg' ? 0.95 : 1;
-      const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
-      for (let p = 0; p < totalPages; p++) {
-        if (p > 0) await new Promise(r => setTimeout(r, 300));
-        const c = p === 0 ? canvas : document.createElement('canvas');
-        if (p > 0) await printRender(c, dims.W, loaded, p, dims.H);
-        const fn = `${suffix}${pageLabel(p)}.${fmt}`;
-        const dataUri = c.toDataURL(mime, q);
-        if (!await saveFileToServer(fn, dataUri, 'print')) {
-          const a = document.createElement('a'); a.download = fn; a.href = dataUri; a.click();
+      // ── Standard export — all images, row-based pagination ─────────
+      const canvas = document.createElement('canvas');
+      const result = await printRender(canvas, dims.W, null, 0, dims.H);
+      const { loaded, totalPages } = result;
+
+      if (fmt === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const PW = dims.wmm, PH = dims.hmm;
+        const pdf = new jsPDF({ unit:'mm', format:[PW,PH], orientation: PW>=PH?'landscape':'portrait' });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+        for (let p = 1; p < totalPages; p++) {
+          const c = document.createElement('canvas');
+          await printRender(c, dims.W, loaded, p, dims.H);
+          pdf.addPage();
+          pdf.addImage(c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+        }
+        await pdfSave(pdf, `${suffix}.pdf`, 'print');
+      } else {
+        const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+        const q = fmt === 'jpg' ? 0.95 : 1;
+        const pageLabel = p => totalPages > 1 ? `_p${p+1}` : '';
+        for (let p = 0; p < totalPages; p++) {
+          if (p > 0) await new Promise(r => setTimeout(r, 300));
+          const c = p === 0 ? canvas : document.createElement('canvas');
+          if (p > 0) await printRender(c, dims.W, loaded, p, dims.H);
+          const fn = `${suffix}${pageLabel(p)}.${fmt}`;
+          const dataUri = c.toDataURL(mime, q);
+          if (!await saveFileToServer(fn, dataUri, 'print')) {
+            const a = document.createElement('a'); a.download = fn; a.href = dataUri; a.click();
+          }
         }
       }
     }
@@ -4858,6 +5088,7 @@ $('addTabBtn').onclick      = addNewSel;
 $('clearSelBtn').onclick    = clearSel;
 $('shuffleSelBtn').onclick  = shuffleSel;
 $('invertSelBtn').onclick   = invertSel;
+$('divideSceneBtn').onclick = divideByScene;
 $('selectAllBtn').onclick = () => {
   pushHistory();
   const allSelected = allImages.length > 0 && allImages.every(n => isInSel(n));
@@ -5178,9 +5409,12 @@ $('printPdfBtn').onclick = () => exportPrint('pdf');
 $('printPrevPage').onclick = () => navigatePrintPreview(-1);
 $('printNextPage').onclick = () => navigatePrintPreview(1);
 PRINT_SETTING_IDS.forEach(id => {
-  const evt = $(id).tagName === 'SELECT' ? 'change' : 'input';
-  $(id).addEventListener(evt, printChanged);
+  const el = $(id);
+  const evt = (el.tagName === 'SELECT' || el.type === 'checkbox') ? 'change' : 'input';
+  el.addEventListener(evt, printChanged);
 });
+$('printTitleBgOpacity').addEventListener('input', () => { $('printTitleBgOpacityVal').textContent = $('printTitleBgOpacity').value; });
+$('printTitleSize').addEventListener('input', () => { $('printTitleSizeVal').textContent = $('printTitleSize').value; });
 $('printPreset').addEventListener('change', updatePrintFieldsVis);
 $('printCropMode').addEventListener('change', updatePrintFieldsVis);
 initPrintSettings();
