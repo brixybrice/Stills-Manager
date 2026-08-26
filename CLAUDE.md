@@ -64,6 +64,8 @@ fileDates       // { relPath: mtime } chargé depuis /api/file-dates pour le tri
 - `toggleInSel(name)` / `removeFromSel(name)` / `clearSel()`
 - `addNewSel()` — crée un onglet en **dupliquant** la sélection courante
 - `switchSel(name)` / `renameSel()` / `deleteSel()`
+- `shuffleSel()` / `invertSel()` — randomise / inverse l'ordre de la sélection active (icônes header du panneau Selection)
+- `divideByScene()` — groupe les images de la sélection active par `getImageScene()` et crée un nouvel onglet par scène (`Scene [Scene]`, dédupliqué via suffixe `(2)`, `(3)`… en cas de collision de nom ; scène manquante → `Scene Unknown`) ; sélection initiale intacte, icône header (à gauche de shuffle)
 - `pushHistory()` / `undo()` / `redo()` — undo/redo complet
 
 ### Rendu

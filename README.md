@@ -28,6 +28,7 @@ A local web app for browsing, curating and exporting image stills from a film sh
 - **Multiple selections** via tabs — each tab shows its image count in parentheses; add, rename (double-click), reorder and delete
 - **Duplicate selection** — the **+** button creates a new tab pre-filled with a copy of the active selection
 - **Drag & drop** reordering of images within a selection
+- **Divide by scene** — splits the active selection into one new tab per scene (`Scene [Scene]`, read from clip metadata), each pre-filled with that scene's images; the original selection is left untouched (button in the selection panel header)
 - **Shuffle** — randomises the order of images in the active selection (button in the selection panel header)
 - **Invert order** — reverses the order of images in the active selection (button in the selection panel header)
 - **Reorder from fullscreen** — `Cmd`+`↑/↓` moves the current image (or group) up or down in the selection order
