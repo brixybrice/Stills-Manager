@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.4.1</title>
+<title>Stills Manager v1.5.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,13 +33,14 @@ a, label, select, input[type="checkbox"], input[type="radio"] { cursor: pointer;
 /* ── Header ── */
 #header {
   background: #1e1e1e;
-  padding: 12px 20px;
+  padding: 8px 20px;
+  margin-top: 6px;
   display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0; position: relative;
 }
 #header h1 { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; letter-spacing: 0.3px; }
-#appFooter { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:14px; padding:6px; border-top:1px solid #2a2a2a; }
+#appFooter { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:14px; padding:6px; margin-bottom: 6px; border-top:1px solid #2a2a2a; }
 #appVersion { font-size: 10px; color: #3a3a3a; white-space: nowrap; }
 #poweredBy { font-size: 10px; color: #3a3a3a; white-space: nowrap; }
 #poweredBy a { color: #3a3a3a; text-decoration: none; }
@@ -651,6 +652,14 @@ body.light .exp-box .modal-head h3 { color: #222; }
 .cs-wm-toggle { flex-direction: row !important; align-items: center; gap: 8px; }
 .cs-wm-toggle input[type=checkbox] { accent-color: #006D78; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
 .cs-wm-toggle label { text-transform: none !important; letter-spacing: 0 !important; color: #999; font-size: 12px; cursor: pointer; }
+
+.align-group { display: flex; gap: 2px; background: #1a1a1a; border-radius: 6px; padding: 2px; border: 1px solid #333; }
+.align-btn { flex: 1; display: flex; align-items: center; justify-content: center; padding: 5px 0; border: none; background: transparent; color: #777; border-radius: 4px; cursor: pointer; }
+.align-btn:hover { color: #ccc; }
+.align-btn.active { background: #006D78; color: #fff; }
+body.light .align-group { background: #eee; border-color: #ddd; }
+body.light .align-btn { color: #888; }
+body.light .align-btn.active { color: #fff; }
 
 .cs-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .cs-settings {
@@ -1307,7 +1316,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.4.1</span>
+  <span id="appVersion">v1.5.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1743,7 +1752,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
     <!-- Contact Sheet pane -->
     <div class="set-pane" id="setPaneCS" style="display:none">
       <div class="cs-body">
-        <div class="cs-settings">
+        <div class="cs-settings" style="width:340px">
           <div class="cs-field">
             <label>Title</label>
             <div style="display:flex;gap:6px;align-items:center;">
@@ -1751,11 +1760,73 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
               <input type="color" id="csTitleColor" value="#ffffff" title="Title colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
             </div>
           </div>
+          <div style="display:flex;gap:8px">
+            <div class="cs-field" style="flex:1;min-width:0">
+              <label>Size (pt)</label>
+              <input type="number" id="csTitleSize" value="14" min="4" max="72" step="0.1">
+            </div>
+            <div class="cs-field" style="flex:1;min-width:0">
+              <label>Position</label>
+              <div class="align-group" id="csTitleAlignGroup">
+                <button type="button" class="align-btn" data-align="left" title="Left">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M15 12H3"/><path d="M17 18H3"/></svg>
+                </button>
+                <button type="button" class="align-btn" data-align="center" title="Center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M17 12H7"/><path d="M19 18H5"/></svg>
+                </button>
+                <button type="button" class="align-btn" data-align="right" title="Right">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M21 12H9"/><path d="M21 18H7"/></svg>
+                </button>
+              </div>
+              <input type="hidden" id="csTitleAlign" value="left">
+            </div>
+          </div>
           <div class="cs-field">
             <label>Title background — <span id="csTitleBgOpacityVal">65</span>%</label>
             <div style="display:flex;gap:6px;align-items:center;">
               <input type="color" id="csTitleBgColor" value="#000000" title="Title background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
               <input type="range" id="csTitleBgOpacity" min="0" max="100" value="65" style="flex:1;">
+            </div>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csFooterOn">
+            <label for="csFooterOn">Footer</label>
+          </div>
+          <div id="csFooterFields" style="display:none">
+            <div class="cs-field">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input type="text" id="csFooterText" placeholder="Optional…" style="flex:1;width:auto;">
+                <input type="color" id="csFooterColor" value="#ffffff" title="Footer text colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div class="cs-field" style="flex:1;min-width:0">
+                <label>Size (pt)</label>
+                <input type="number" id="csFooterSize" value="14" min="4" max="72" step="0.1">
+              </div>
+              <div class="cs-field" style="flex:1;min-width:0">
+                <label>Position</label>
+                <div class="align-group" id="csFooterAlignGroup">
+                  <button type="button" class="align-btn" data-align="left" title="Left">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M15 12H3"/><path d="M17 18H3"/></svg>
+                  </button>
+                  <button type="button" class="align-btn" data-align="center" title="Center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M17 12H7"/><path d="M19 18H5"/></svg>
+                  </button>
+                  <button type="button" class="align-btn" data-align="right" title="Right">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 6H3"/><path d="M21 12H9"/><path d="M21 18H7"/></svg>
+                  </button>
+                </div>
+                <input type="hidden" id="csFooterAlign" value="left">
+              </div>
+            </div>
+            <div class="cs-field">
+              <label>Footer background — <span id="csFooterBgOpacityVal">65</span>%</label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input type="color" id="csFooterBgColor" value="#000000" title="Footer background colour" style="width:28px;height:28px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+                <input type="range" id="csFooterBgOpacity" min="0" max="100" value="65" style="flex:1;">
+              </div>
             </div>
           </div>
           <div class="cs-field">
@@ -1832,6 +1903,40 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           <div class="cs-field cs-wm-toggle">
             <input type="checkbox" id="csWmEnabled">
             <label for="csWmEnabled">Apply watermark</label>
+          </div>
+          <hr class="cs-sep">
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csCaptionMeta">
+            <label for="csCaptionMeta" style="flex:1">Caption: Scene/Shot-Take Cam</label>
+            <input type="color" id="csCaptionMetaColor" value="#ffffff" title="Caption colour" style="width:24px;height:24px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+          </div>
+          <div class="cs-field cs-wm-toggle">
+            <input type="checkbox" id="csCaptionFile">
+            <label for="csCaptionFile" style="flex:1">Caption: Filename</label>
+            <input type="color" id="csCaptionFileColor" value="#ffffff" title="Caption colour" style="width:24px;height:24px;padding:2px;border-radius:4px;border:1px solid #333;background:#252525;cursor:pointer;flex-shrink:0;">
+          </div>
+          <div id="csCaptionFields" style="display:none">
+            <div style="display:flex;gap:8px">
+              <div class="cs-field" style="flex:2;min-width:0">
+                <label>Position</label>
+                <select id="csCaptionPos">
+                  <option value="below-left">Below left</option>
+                  <option value="below-center" selected>Below center</option>
+                  <option value="below-right">Below right</option>
+                  <option value="above-left">Above left</option>
+                  <option value="above-center">Above center</option>
+                  <option value="above-right">Above right</option>
+                </select>
+              </div>
+              <div class="cs-field" style="flex:1;min-width:0">
+                <label>Size (pt)</label>
+                <input type="number" id="csCaptionSize" value="14" min="4" max="72" step="0.1">
+              </div>
+              <div class="cs-field" style="flex:1;min-width:0">
+                <label>Dist (px)</label>
+                <input type="number" id="csCaptionGap" value="4" min="0" max="200">
+              </div>
+            </div>
           </div>
         </div>
         <div class="cs-preview-area">
@@ -3065,6 +3170,37 @@ function getImageScene(filepath) {
   return findMarkerForImage(filepath)?.metadata?.Scene ?? '';
 }
 
+function getMarkerField(filepath, keys) {
+  const m = findMarkerForImage(filepath);
+  if (!m) return '';
+  const meta = m.metadata || {}, props = m.clip_properties || {};
+  for (const k of keys) {
+    const v = meta[k] ?? props[k];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+}
+
+// Caption used by the Contact Sheet "Scene/Shot-Take Camera" overlay, e.g. "12/3-2A".
+function getStillCaption(filepath) {
+  if (!filepath) return '';
+  const scene  = getImageScene(filepath);
+  const shot   = getMarkerField(filepath, ['Shot', 'Shot Number']);
+  const take   = getMarkerField(filepath, ['Take', 'Take Number']);
+  const camera = getMarkerField(filepath, ['Camera #', 'Camera', 'Camera Number']);
+  let left = scene;
+  if (shot) left += (left ? '/' : '') + shot;
+  const right = take + camera;
+  if (left && right) return `${left}-${right}`;
+  return left || right;
+}
+
+function getStillFilename(filepath) {
+  if (!filepath) return '';
+  const base = filepath.includes('/') ? filepath.split('/').pop() : filepath;
+  return base.replace(/\.[^.]+$/, '');
+}
+
 function _natCmp(a, b) {
   // Split into alternating non-digit / digit chunks (captured group keeps delimiters)
   // e.g. "27A" → ["", "27", "A"]  |  "AAAAA" → ["AAAAA"]
@@ -3544,6 +3680,7 @@ async function exportPDF() {
       const ctx2d = canvas.getContext('2d');
       ctx2d.drawImage(el, 0, 0);
       csDrawWatermark(ctx2d, canvas.width, canvas.height);
+      drawAppFiligrane(ctx2d, canvas.width, canvas.height);
       const data  = canvas.toDataURL('image/jpeg', 0.92);
       const scale = Math.min(PW / canvas.width, PH / canvas.height);
       const w = canvas.width * scale, h = canvas.height * scale;
@@ -3597,10 +3734,20 @@ async function exportPDF() {
   }
 }
 
+// Recovers the original relative path from a `/api/image/...` URL, so exports
+// can look up per-image metadata (e.g. the Contact Sheet caption) from the
+// loaded element alone, without threading a parallel path array everywhere.
+function pathFromImgUrl(url) {
+  const marker = '/api/image/';
+  const i = url.indexOf(marker);
+  if (i === -1) return '';
+  return url.slice(i + marker.length).split('/').map(decodeURIComponent).join('/');
+}
+
 function loadImgEl(url) {
   return new Promise((res, rej) => {
     const img = new Image();
-    img.onload = () => res(img); img.onerror = rej; img.src = url;
+    img.onload = () => { img._stillPath = pathFromImgUrl(url); res(img); }; img.onerror = rej; img.src = url;
   });
 }
 
@@ -3681,6 +3828,7 @@ async function exportIndivStills() {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(el, 0, 0, outW, outH);
       if (applyWm) csDrawWatermark(ctx, outW, outH);
+      drawAppFiligrane(ctx, outW, outH);
       const dataUri = canvas.toDataURL(mimeType, fmt === 'jpeg' ? quality : undefined);
       const base    = imgPath.includes('/') ? imgPath.split('/').pop() : imgPath;
       const outName = base.replace(/\.[^.]+$/, '') + '.' + ext;
@@ -3817,19 +3965,44 @@ function getExportPath(type) {
 }
 
 // ─── Contact Sheet settings persistence ──────────────────────────────────────
-const CS_SETTING_IDS = ['csTitle','csTitleColor','csTitleBgColor','csTitleBgOpacity','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS'];
+const CS_SETTING_IDS = ['csTitle','csTitleColor','csTitleSize','csTitleAlign','csTitleBgColor','csTitleBgOpacity','csFooterOn','csFooterText','csFooterColor','csFooterSize','csFooterAlign','csFooterBgColor','csFooterBgOpacity','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS','csCaptionMeta','csCaptionMetaColor','csCaptionFile','csCaptionFileColor','csCaptionPos','csCaptionSize','csCaptionGap'];
 function loadCsSettings() { try { return JSON.parse(localStorage.getItem('stills-cs-settings') || '{}'); } catch { return {}; } }
 function saveCsSettings() {
   const d = {};
   CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el) return; d[id] = el.type === 'checkbox' ? el.checked : el.value; });
   localStorage.setItem('stills-cs-settings', JSON.stringify(d));
 }
+function updateCsCaptionFieldsVis() {
+  $('csCaptionFields').style.display = ($('csCaptionMeta').checked || $('csCaptionFile').checked) ? '' : 'none';
+}
+function updateCsFooterFieldsVis() {
+  $('csFooterFields').style.display = $('csFooterOn').checked ? '' : 'none';
+}
+// Shared by the Title and Footer "Position" icon-button groups: each group
+// mirrors its choice into a hidden input (so it round-trips through the
+// generic CS_SETTING_IDS save/load loop like any other field) and toggles
+// which button looks active.
+function csUpdateAlignBtns(groupId, hiddenId) {
+  const hidden = $(hiddenId);
+  $(groupId).querySelectorAll('.align-btn').forEach(b => b.classList.toggle('active', b.dataset.align === hidden.value));
+}
+function csWireAlignGroup(groupId, hiddenId) {
+  const group = $(groupId), hidden = $(hiddenId);
+  group.querySelectorAll('.align-btn').forEach(b => {
+    b.addEventListener('click', () => { hidden.value = b.dataset.align; csUpdateAlignBtns(groupId, hiddenId); csChanged(); });
+  });
+}
 function initCsSettings() {
   const d = loadCsSettings();
   CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
   $('csTitleBgOpacityVal').textContent = $('csTitleBgOpacity').value;
+  $('csFooterBgOpacityVal').textContent = $('csFooterBgOpacity').value;
   const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
+  updateCsCaptionFieldsVis();
+  updateCsFooterFieldsVis();
+  csUpdateAlignBtns('csTitleAlignGroup', 'csTitleAlign');
+  csUpdateAlignBtns('csFooterAlignGroup', 'csFooterAlign');
 }
 function getExportSubfolder() {
   const d = loadPathsData();
@@ -4114,6 +4287,29 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+// App branding filigrane, applied to every canvas-rendered export (Contact
+// Sheet, Print, Color Palette, individual Stills, PDF Stills) — fixed text,
+// fixed 12% opacity, bottom-right, horizontal, not user-configurable. bgHex,
+// when the export has a known flat background, picks a readable color via
+// csTextColor(); omitted (individual stills over arbitrary photo content)
+// defaults to white, matching the existing custom-watermark convention.
+// Always anchored to the true bottom edge — deliberately overlaps a Contact
+// Sheet Footer when one is active, rather than being pushed clear of it.
+function drawAppFiligrane(ctx, W, H, bgHex) {
+  const color = bgHex ? csTextColor(bgHex) : '#ffffff';
+  const fs = Math.max(6, Math.round(W * 0.005));
+  const padX = Math.round(fs * 1.1);
+  const padY = Math.max(1, Math.round(fs * 0.15));
+  ctx.save();
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = color;
+  ctx.font = `400 ${fs}px -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('exported by stills-manager - be4post.com', W - padX, H - padY);
+  ctx.restore();
+}
+
 async function csDrawProdInfo(ctx, W, topY, margin, offsetX = 0, bgColor = '#000000') {
   const prod = loadProdData();
   const fs = Math.max(10, Math.round(W * 0.013));
@@ -4185,16 +4381,27 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
     sel = curSel(); if (!sel.length) return null;
     if ($('csSortScene').checked) sel = csSortByScene(sel);
   }
-  const margin    = parseInt($('csMargin').value) || 0;
   const bgColor   = $('csBg').value;
   const titleColor = $('csTitleColor').value || '#ffffff';
   const title     = pageTitle !== null ? String(pageTitle) : $('csTitle').value.trim();
   const forceCols = parseInt($('csCols').value) || 0;
   const forceRows = parseInt($('csRows').value) || 0;
   const dims = csGetExportDims();
+  // "Gap (px)" is defined relative to the actual selected export width —
+  // scaling by W/dims.W leaves it unchanged at real export time (W ===
+  // dims.W there) while shrinking it proportionally in the small live
+  // preview, so the gap no longer looks exaggerated on canvas vs. export.
+  const margin = Math.round((parseInt($('csMargin').value) || 0) * W / dims.W);
   // A4 page margin: convert mm → px using actual canvas width
   const a4MarginMm = dims.a4 ? (parseInt($('csA4Margin').value) || 0) : 0;
   const a4Margin = dims.a4 ? Math.round(a4MarginMm * W / dims.a4.PW) : 0;
+  // pt → px, shared by Title/Footer/Caption: real mm/dpi for A4/A3 (like
+  // Print's title), otherwise a 96dpi screen convention scaled to the chosen
+  // export width so HD/FHD/4K/8K stay visually consistent with each other.
+  // Purely proportional to W, so it also keeps the small live preview
+  // (rendered at a fraction of the real export width) WYSIWYG-accurate.
+  const pxPerPt = dims.a4 ? (25.4/72) * (W / dims.a4.PW) : (W / 1920) * (96/72);
+  const sysFont = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
 
   const H = overrideH || Math.round(W / csGetRatio());
   canvas.width = W; canvas.height = H;
@@ -4208,32 +4415,68 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
 
   let titleH = headerH;
   if (title) {
-    const fs  = Math.max(8, Math.round(W * 0.010));
+    // Floor of 2px (not a larger "stay legible" floor) so the ratio of text
+    // size to image size never distorts between the small live preview and
+    // the full-resolution export — see pxPerPt note above.
+    const fs  = Math.max(2, Math.round((parseFloat($('csTitleSize').value) || 14) * pxPerPt));
     const tPad = Math.round(margin * 1.2) || Math.round(W * 0.014);
     const bottomExtra = Math.round(tPad * 0.8);
     titleH = headerH + fs + tPad + tPad + bottomExtra;
     if (pageIndex === 0) {
-      const sysFont = `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
       ctx.font = `400 ${fs}px ${sysFont}`;
-      const leftOffset = Math.round(W * 0.018);
-      const tx = a4Margin + margin + leftOffset;
+      const align = $('csTitleAlign').value || 'left';
+      const sideOffset = Math.round(W * 0.018);
+      const tx = align === 'left' ? a4Margin + margin + sideOffset
+               : align === 'right' ? W - a4Margin - margin - sideOffset
+               : W / 2;
       const ty = headerH + tPad;
       const tw = ctx.measureText(title).width;
       const rph = Math.round(fs * 0.5), rpv = Math.round(fs * 0.3);
+      const pillX = align === 'left' ? tx - rph : align === 'right' ? tx - tw - rph : tx - tw/2 - rph;
       const titleBgColor = $('csTitleBgColor').value || '#000000';
       const titleBgOpacity = (parseInt($('csTitleBgOpacity').value, 10) ?? 65) / 100;
       ctx.fillStyle = hexToRgba(titleBgColor, titleBgOpacity);
-      ctxRoundRect(ctx, tx - rph, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
+      ctxRoundRect(ctx, pillX, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
       ctx.fill();
       ctx.fillStyle = titleColor;
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.textAlign = align; ctx.textBaseline = 'top';
       ctx.fillText(title, tx, ty);
+    }
+  }
+
+  const footerOn   = $('csFooterOn').checked;
+  const footerText = footerOn ? $('csFooterText').value.trim() : '';
+  let footerH = 0;
+  if (footerText) {
+    const fs = Math.max(2, Math.round((parseFloat($('csFooterSize').value) || 14) * pxPerPt));
+    const tPad = Math.round(margin * 1.2) || Math.round(W * 0.014);
+    const topExtra = Math.round(tPad * 0.8);
+    footerH = topExtra + tPad + fs + tPad;
+    if (pageIndex === 0) {
+      ctx.font = `400 ${fs}px ${sysFont}`;
+      const align = $('csFooterAlign').value || 'left';
+      const sideOffset = Math.round(W * 0.018);
+      const tx = align === 'left' ? a4Margin + margin + sideOffset
+               : align === 'right' ? W - a4Margin - margin - sideOffset
+               : W / 2;
+      const ty = H - a4Margin - tPad - fs;
+      const tw = ctx.measureText(footerText).width;
+      const rph = Math.round(fs * 0.5), rpv = Math.round(fs * 0.3);
+      const pillX = align === 'left' ? tx - rph : align === 'right' ? tx - tw - rph : tx - tw/2 - rph;
+      const footerBgColor = $('csFooterBgColor').value || '#000000';
+      const footerBgOpacity = (parseInt($('csFooterBgOpacity').value, 10) ?? 65) / 100;
+      ctx.fillStyle = hexToRgba(footerBgColor, footerBgOpacity);
+      ctxRoundRect(ctx, pillX, ty - rpv, tw + rph*2, fs + rpv*2, Math.round(fs * 0.3));
+      ctx.fill();
+      ctx.fillStyle = $('csFooterColor').value || '#ffffff';
+      ctx.textAlign = align; ctx.textBaseline = 'top';
+      ctx.fillText(footerText, tx, ty);
     }
   }
 
   const colorBandH = $('csColorPalette').checked ? Math.max(6, Math.round(H * 0.018)) : 0;
   const availW = W - 2*a4Margin - 2*margin;
-  const availH = H - titleH - a4Margin - 2*margin - (colorBandH > 0 ? colorBandH + margin : 0);
+  const availH = H - titleH - a4Margin - 2*margin - footerH - (colorBandH > 0 ? colorBandH + margin : 0);
 
   const pw = $('csProgressWrap'), pf = $('csProgressFill');
   const isFirstLoad = !preloadedImgs && !isSceneOverride;
@@ -4279,15 +4522,64 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
   const pageImgs = loaded.slice(start, start + itemsPerPage);
   const pageArs = allArs.slice(start, start + itemsPerPage);
 
+  const captionMetaOn = $('csCaptionMeta').checked;
+  const captionFileOn = $('csCaptionFile').checked;
+  const captionOn = captionMetaOn || captionFileOn;
+  const captionPos = $('csCaptionPos').value || 'below-center';
+  const captionAbove = captionPos.startsWith('above');
+  const captionAlign = captionPos.endsWith('left') ? 'left' : captionPos.endsWith('right') ? 'right' : 'center';
+  const captionMetaColor = $('csCaptionMetaColor').value || '#ffffff';
+  const captionFileColor = $('csCaptionFileColor').value || '#ffffff';
+  // Floor of 2px, not a larger "stay legible" floor — see pxPerPt note above
+  // (this was previously floored at 6px, which broke WYSIWYG between the
+  // small live preview and the full-resolution export for small pt values).
+  const captionFs = captionOn ? Math.max(2, Math.round((parseFloat($('csCaptionSize').value) || 14) * pxPerPt)) : 0;
+  const captionGap = captionOn ? (parseFloat($('csCaptionGap').value) || 0) : 0;
+  const captionLineH = Math.round(captionFs * 1.2);
+
+  // Captions are drawn in a second pass, after every image — a caption may
+  // extend past its own cell into a neighbouring row (see note below), and
+  // if it were drawn inline it could get painted over by that neighbour's
+  // drawImage() call later in the same loop. Collecting them first and
+  // drawing them last guarantees every caption stays on top.
+  const captionDraws = [];
   for (let i = 0; i < pageImgs.length; i++) {
     const img = pageImgs[i];
     const col = i % cols, row = Math.floor(i / cols);
     const cellX = a4Margin + margin + col*(cellW+margin);
     const cellY = margin + titleH + row*(cellH+margin);
+    // Image placement never depends on the caption — same cellW/cellH box,
+    // same centering, whether or not a caption is drawn. The caption is a
+    // pure overlay anchored to the image's own edge (it may sit in the
+    // gutter or overlap a neighbour at large gap/size — that's the trade-off
+    // for keeping every image pixel-identical with captions on or off).
     const ar = pageArs[i]; let w = cellW, h = cellH;
     if (w/h > ar) w = h*ar; else h = w/ar;
-    ctx.drawImage(img, cellX+(cellW-w)/2, cellY+(cellH-h)/2, w, h);
+    const ix = cellX + (cellW-w)/2, iy = cellY + (cellH-h)/2;
+    ctx.drawImage(img, ix, iy, w, h);
+    if (captionOn) {
+      // Scene/Shot-Take/Cam sits closest to the image; Filename stacks one
+      // more line further out. Both share the same position/size/distance —
+      // only their color can differ.
+      const lines = [];
+      if (captionMetaOn) { const t = getStillCaption(img._stillPath); if (t) lines.push({ text: t, color: captionMetaColor }); }
+      if (captionFileOn) { const t = getStillFilename(img._stillPath); if (t) lines.push({ text: t, color: captionFileColor }); }
+      if (lines.length) captionDraws.push({ ix, iy, w, h, lines });
+    }
     if (isFirstLoad) pf.style.width = `${50 + (i+1)/pageImgs.length*50}%`;
+  }
+  if (captionDraws.length) {
+    ctx.font = `500 ${captionFs}px -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`;
+    ctx.textAlign = captionAlign;
+    captionDraws.forEach(({ ix, iy, w, h, lines }) => {
+      const tx = captionAlign === 'left' ? ix : captionAlign === 'right' ? ix + w : ix + w/2;
+      lines.forEach((line, idx) => {
+        const offset = captionGap + idx * captionLineH;
+        ctx.fillStyle = line.color;
+        if (captionAbove) { ctx.textBaseline = 'bottom'; ctx.fillText(line.text, tx, iy - offset, w); }
+        else { ctx.textBaseline = 'top'; ctx.fillText(line.text, tx, iy + h + offset, w); }
+      });
+    });
   }
 
   if (colorBandH > 0 && pageImgs.length > 0) {
@@ -4308,6 +4600,8 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
   }
 
   if ($('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
+  // Only on the actual export render, never on the live preview canvas.
+  if (canvas !== $('csCanvas')) drawAppFiligrane(ctx, W, H, bgColor);
   if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
   return { loaded, cols, rows, itemsPerPage, totalPages };
 }
@@ -4379,6 +4673,8 @@ async function paletteRender(canvas, W, H) {
       ctx.beginPath(); ctx.moveTo(bx+segW, 0); ctx.lineTo(bx+segW, H); ctx.stroke();
     }
   }
+  // Only on the actual export render, never on the live preview canvas.
+  if (canvas !== $('paletteCanvas')) drawAppFiligrane(ctx, W, H, '#101010');
 }
 
 let palettePreviewTimer = null;
@@ -4627,6 +4923,8 @@ async function printRender(canvas, W, preloadedImgs = null, pageIndex = 0, overr
     if (isFirstLoad) pf.style.width = `${50 + (i+1)/pageImgs.length*50}%`;
   }
 
+  // Only on the actual export render, never on the live preview canvas.
+  if (canvas !== $('printCanvas')) drawAppFiligrane(ctx, W, H, '#ffffff');
   if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
   return { loaded, cols, rows, itemsPerPage, totalPages };
 }
@@ -5236,7 +5534,7 @@ function cropImgEl(el, cropW, cropH, sensorW, sensorH) {
   tmp.width = cw; tmp.height = ch;
   tmp.getContext('2d').drawImage(el, sx, sy, cw, ch, 0, 0, cw, ch);
 
-  if (rotation === '0') { tmp.naturalWidth = cw; tmp.naturalHeight = ch; return tmp; }
+  if (rotation === '0') { tmp.naturalWidth = cw; tmp.naturalHeight = ch; tmp._stillPath = el._stillPath; return tmp; }
 
   const c = document.createElement('canvas');
   const ctx = c.getContext('2d');
@@ -5252,6 +5550,7 @@ function cropImgEl(el, cropW, cropH, sensorW, sensorH) {
   }
   ctx.drawImage(tmp, 0, 0);
   c.naturalWidth = c.width; c.naturalHeight = c.height;
+  c._stillPath = el._stillPath;
   return c;
 }
 async function loadImgForExport(url) {
@@ -5389,7 +5688,14 @@ initPaletteSettings();
 function csChanged() { csQueuePreview(); saveCsSettings(); }
 ['csTitle','csMargin','csA4Margin'].forEach(id => $(id).addEventListener('input', csChanged));
 ['csBg','csTitleColor','csTitleBgColor'].forEach(id => $(id).addEventListener('input', csChanged));
+$('csTitleSize').addEventListener('input', csChanged);
 $('csTitleBgOpacity').addEventListener('input', () => { $('csTitleBgOpacityVal').textContent = $('csTitleBgOpacity').value; csChanged(); });
+csWireAlignGroup('csTitleAlignGroup', 'csTitleAlign');
+$('csFooterOn').addEventListener('change', () => { updateCsFooterFieldsVis(); csChanged(); });
+['csFooterText','csFooterColor','csFooterBgColor'].forEach(id => $(id).addEventListener('input', csChanged));
+$('csFooterSize').addEventListener('input', csChanged);
+$('csFooterBgOpacity').addEventListener('input', () => { $('csFooterBgOpacityVal').textContent = $('csFooterBgOpacity').value; csChanged(); });
+csWireAlignGroup('csFooterAlignGroup', 'csFooterAlign');
 ['csCols','csRows','csExportW'].forEach(id => $(id).addEventListener('change', csChanged));
 $('csExportW').addEventListener('change', () => {
   const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
@@ -5400,6 +5706,13 @@ $('csColorPalette').addEventListener('change', csChanged);
 $('csProdInfo').addEventListener('change', csChanged);
 $('csInvertLogo').addEventListener('change', csChanged);
 $('csWmEnabled').addEventListener('change', csChanged);
+$('csCaptionMeta').addEventListener('change', () => { updateCsCaptionFieldsVis(); csChanged(); });
+$('csCaptionFile').addEventListener('change', () => { updateCsCaptionFieldsVis(); csChanged(); });
+$('csCaptionMetaColor').addEventListener('input', csChanged);
+$('csCaptionFileColor').addEventListener('input', csChanged);
+$('csCaptionPos').addEventListener('change', csChanged);
+$('csCaptionSize').addEventListener('input', csChanged);
+$('csCaptionGap').addEventListener('input', csChanged);
 $('pdfAppendCS').addEventListener('change', saveCsSettings);
 
 // Live preview — Print modal settings (also auto-save)
