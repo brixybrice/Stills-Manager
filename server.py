@@ -17,6 +17,10 @@ def nat_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
 # ── Static ────────────────────────────────────────────────────────────────
+@app.route('/api/ping')
+def ping():
+    return jsonify({'ok': True})
+
 @app.route('/')
 @app.route('/stills')
 @app.route('/report')
@@ -150,10 +154,10 @@ def get_metadata():
                         if 'timeline' not in combined:
                             combined['timeline'] = data.get('timeline', '')
                     if 'markers_metadata' in data:
-                        # Prefix each frame key with the folder name to avoid
+                        # Prefix each frame key with the folder's relative path to avoid
                         # collisions when combining multiple days (each day
                         # restarts frame numbering from its own timeline origin)
-                        prefix = os.path.basename(dirpath) + '/'
+                        prefix = os.path.relpath(dirpath, current_dir).replace(os.sep, '/') + '/'
                         prefixed = {prefix + k: v for k, v in data['markers_metadata'].items()}
                         combined.setdefault('markers_metadata', {}).update(prefixed)
                 except Exception:
@@ -274,11 +278,15 @@ def save_file():
         return jsonify({'error': str(e)}), 500
 
 # ── Start ─────────────────────────────────────────────────────────────────
+# Not 5000: macOS AirPlay Receiver (ControlCenter) listens on it and answers 403, and browsers
+# keep reusing that connection after our server comes back.
+PORT = int(os.environ.get('STILLS_PORT', 5001))
+
 def _open_browser():
     import time; time.sleep(0.9)
-    webbrowser.open('http://127.0.0.1:5000')
+    webbrowser.open(f'http://127.0.0.1:{PORT}')
 
 if __name__ == '__main__':
-    print('\n  Stills Manager → http://127.0.0.1:5000\n  Ctrl+C to stop\n')
+    print(f'\n  Stills Manager → http://127.0.0.1:{PORT}\n  Ctrl+C to stop\n')
     threading.Thread(target=_open_browser, daemon=True).start()
-    app.run(host='127.0.0.1', port=5000, debug=False)
+    app.run(host='127.0.0.1', port=PORT, debug=False)

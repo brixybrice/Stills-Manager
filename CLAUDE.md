@@ -14,7 +14,7 @@ Stills-Manager/
 └── requirements.txt
 ```
 
-Le serveur tourne sur `http://localhost:5000`. Lancer avec `python server.py`.
+Le serveur tourne sur `http://127.0.0.1:5001` (pas 5000 : AirPlay Receiver macOS y répond 403 ; surchargeable via la variable `STILLS_PORT`). Lancer avec `python server.py`.
 
 ---
 

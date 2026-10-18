@@ -184,7 +184,7 @@ pip install -r requirements.txt
 python server.py
 ```
 
-The app opens automatically at `http://localhost:5000`. Stop the server with **Ctrl+C**.
+The app opens automatically at `http://127.0.0.1:5001`. Stop the server with **Ctrl+C**.
 
 > Works best in **Firefox** or any modern browser. All file operations go through the local Flask server — no browser File System Access API required.
 

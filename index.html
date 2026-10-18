@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.5.1</title>
+<title>Stills Manager v1.5.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1171,6 +1171,24 @@ body.light #thumbContextMenu button { color: #333; }
 body.light #thumbContextMenu button:hover:not(:disabled) { background: #006D78; color: #fff; }
 body.light #thumbContextMenu button:disabled { color: #ccc; }
 
+/* ── Server offline guard ── */
+#serverDownOverlay {
+  position: fixed; inset: 0; z-index: 99999; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+}
+#serverDownOverlay.show { display: flex; }
+#serverDownBox {
+  background: #1e1e1e; color: #ddd; border: 1px solid #444; border-radius: 10px;
+  padding: 26px 32px; max-width: 420px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  font-size: 13px; line-height: 1.5;
+}
+#serverDownBox h3 { margin: 0 0 8px; font-size: 16px; color: #ff8a80; }
+#serverDownBox code { background: #111; padding: 2px 6px; border-radius: 4px; }
+#serverDownBox .sd-sub { margin-top: 10px; font-size: 11px; color: #888; }
+body.light #serverDownBox { background: #fff; color: #333; border-color: #ccc; }
+body.light #serverDownBox code { background: #eee; }
+
 /* ── Sort & Merge controls ── */
 .sort-group { display: flex; }
 .sort-group .sort-btn { border-radius: 0; }
@@ -1195,6 +1213,8 @@ body.light #thumbContextMenu button:disabled { color: #ccc; }
   border: 1px solid #5c3f8f; border-radius: 4px; padding: 2px 8px; cursor: pointer;
 }
 #mergeBanner button:hover { color: #fff; border-color: #9c7fd4; }
+#americanSlatingLabel { font-size: 11px; color: #b39ddb; display: flex; align-items: center; gap: 4px; cursor: pointer; margin-left: auto; }
+#americanSlatingLabel input { accent-color: #9c7fd4; cursor: pointer; }
 #mergeFolderPicker {
   position: absolute; top: calc(100% + 4px); left: 0; z-index: 200;
   background: #1e1e2e; border: 1px solid #5c3f8f; border-radius: 6px;
@@ -1222,6 +1242,13 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
 </style>
 </head>
 <body>
+<div id="serverDownOverlay" role="alertdialog" aria-modal="true" aria-labelledby="serverDownTitle">
+  <div id="serverDownBox">
+    <h3 id="serverDownTitle">Server disconnected</h3>
+    <div>The Stills Manager server is not responding (or another program answers in its place).<br>Restart it with <code>python server.py</code>.</div>
+    <div class="sd-sub">The page is paused and will reload automatically once the server is back.</div>
+  </div>
+</div>
 
 <!-- Header -->
 <div id="header">
@@ -1273,6 +1300,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
               <button class="sort-btn" id="sortBtnDate" onclick="setSortMode('date')" title="Sort by date modified">Date</button>
             </div>
             <button class="sort-btn" id="sortBtnSource" onclick="setSortMode('source')" title="Sort by original selection order (Merge Mode only)" style="display:none">Source</button>
+            <button class="sort-btn" id="sortBtnSceneSource" onclick="setSortMode('scene-source')" title="Sort by scene, keeping the original selection order within each scene (Merge Mode only)" style="display:none">Scene+Source</button>
             <button class="sort-btn merge-btn" id="mergeBtn" onclick="toggleMergeMode()" title="Show selections from subfolders">Merge</button>
           </div>
         </div>
@@ -1282,6 +1310,9 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
             <button id="mergeFolderBtn" onclick="toggleFolderPicker()">Folders ▾</button>
             <div id="mergeFolderPicker" style="display:none"></div>
           </div>
+          <label id="americanSlatingLabel" title="Scene sort: ignore letters when a scene has digits (62, 62A, V62, V62B → 62). Scenes without digits (VAY) stay alphabetical.">
+            <input type="checkbox" id="americanSlating" onchange="setAmericanSlating(this.checked)"> American Slating
+          </label>
           <button onclick="exitMergeMode()">✕ Exit</button>
         </div>
         <div id="imageGrid"></div>
@@ -2380,7 +2411,8 @@ let mainView    = 'gallery'; // 'gallery' | 'report'
 
 let mergeMode     = false;  // Over-selection (Merge) mode
 let allImagesBase = [];     // Images before sort (from server or cumul entry)
-let sortMode      = 'none'; // 'none' | 'alpha' | 'scene' | 'date'
+let americanSlating = false; // Scene sort (Merge Mode): ignore letters when the scene contains digits
+let sortMode      = 'none'; // 'none' | 'alpha' | 'scene' | 'date' | 'source' | 'scene-source'
 let fileDates     = {};     // { relPath: mtime } for date sort
 let _markerLookup = null;   // cached lookup built from clipsMetadata
 let clipDetailMarkers  = [];
@@ -2447,9 +2479,41 @@ function redo() {
 
 // ─── API helpers ───────────────────────────────────────────────────────────
 async function api(url, opts = {}) {
-  const res = await fetch(url, opts);
-  return res.json();
+  let res;
+  try { res = await fetch(url, opts); }
+  catch (e) { setServerDown(true); throw e; }
+  try { return await res.json(); }
+  catch (e) { checkServer(); throw e; }  // non-JSON answer: maybe not our server any more
 }
+
+// ─── Server offline guard ──────────────────────────────────────────────────
+// Freezes the UI behind a modal while the server is unreachable; reloads once it is back
+// (a restarted server has lost its in-memory opened folder).
+let _serverDown = false;
+function setServerDown(down) {
+  if (down === _serverDown) return;
+  _serverDown = down;
+  $('serverDownOverlay').classList.toggle('show', down);
+  if (down) document.activeElement?.blur?.();
+  else location.reload();
+}
+document.addEventListener('keydown', e => { if (_serverDown) { e.preventDefault(); e.stopPropagation(); } }, true);
+async function checkServer() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3000);
+  try {
+    // Must be OUR server's JSON answer: another process squatting the port (e.g. macOS AirPlay
+    // Receiver answering 403 on a shared port) is an HTTP response too, but it is not Stills Manager.
+    const r = await fetch('/api/ping', { cache: 'no-store', signal: ctrl.signal });
+    const j = r.ok ? await r.json() : null;
+    setServerDown(!(j && j.ok === true));
+  } catch (e) {
+    setServerDown(true);
+  } finally {
+    clearTimeout(t);
+  }
+}
+setInterval(checkServer, 2000);
 async function apiPost(url, data) {
   return api(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
 }
@@ -2481,7 +2545,7 @@ async function loadFolder(path, recursive = false) {
   mergeMode = false; sortMode = 'none'; fileDates = {}; _markerLookup = null;
   _mergeAllImages = []; _mergeFolderMap = {}; _mergeFolders = [];
   _mergeExcluded = new Set(); _mergeImageOrder = {};
-  $('sortBtnSource').style.display = 'none';
+  $('sortBtnSource').style.display = 'none'; $('sortBtnSceneSource').style.display = 'none';
   updateMergeUI(); updateSortUI();
 
   folderName = res.name;
@@ -3166,8 +3230,13 @@ function findMarkerForImage(filepath) {
   return lu.byClipSrcTc[`${parsed.clipName}__${parsed.sourceTc}`] ?? null;
 }
 
+// Scene label without whitespace, zero-width / control characters (stray chars would break sorting & grouping).
+function cleanSceneLabel(v) {
+  return String(v ?? '').normalize('NFKC').replace(/[\s\u200B-\u200F\u2028-\u202F\u2060\uFEFF\x00-\x1F\x7F]/g, '');
+}
+
 function getImageScene(filepath) {
-  return findMarkerForImage(filepath)?.metadata?.Scene ?? '';
+  return cleanSceneLabel(findMarkerForImage(filepath)?.metadata?.Scene);
 }
 
 function getMarkerField(filepath, keys) {
@@ -3224,11 +3293,32 @@ function _natCmp(a, b) {
   return 0;
 }
 
+// American slating: "62", "62A", "V62", "V62B" → 62. No digit (e.g. "VAY") → null (alphabetical fallback).
+function _slateNum(scene) {
+  const m = String(scene).match(/\d+/);
+  return m ? parseInt(m[0], 10) : null;
+}
+
+function _sceneCmp(a, b) {
+  if (!americanSlating) return _natCmp(a, b);
+  const na = _slateNum(a), nb = _slateNum(b);
+  if (na !== null && nb !== null) return na - nb;
+  if (na !== null) return -1; // numbered scenes first, then alphabetical ones
+  if (nb !== null) return 1;
+  return _natCmp(a, b);
+}
+
+function setAmericanSlating(on) {
+  americanSlating = on;
+  if (sortMode === 'scene' || sortMode === 'scene-source') applySortToImages();
+}
+
 function updateSortUI() {
   $('sortBtnAlpha').classList.toggle('active',  sortMode === 'alpha');
   $('sortBtnScene').classList.toggle('active',  sortMode === 'scene');
   $('sortBtnDate').classList.toggle('active',   sortMode === 'date');
   $('sortBtnSource').classList.toggle('active', sortMode === 'source');
+  $('sortBtnSceneSource').classList.toggle('active', sortMode === 'scene-source');
 }
 
 async function applySortToImages() {
@@ -3245,10 +3335,13 @@ async function applySortToImages() {
   } else if (sortMode === 'scene') {
     allImages = base.sort((a, b) => {
       const sa = getImageScene(a), sb = getImageScene(b);
-      return _natCmp(sa, sb) || _natCmp(fname(a), fname(b));
+      return _sceneCmp(sa, sb) || _natCmp(fname(a), fname(b));
     });
   } else if (sortMode === 'date') {
     allImages = base.sort((a, b) => (fileDates[a] || 0) - (fileDates[b] || 0));
+  } else if (sortMode === 'scene-source') {
+    allImages = base.sort((a, b) =>
+      _sceneCmp(getImageScene(a), getImageScene(b)) || (_mergeImageOrder[a] ?? 0) - (_mergeImageOrder[b] ?? 0));
   } else if (sortMode === 'source') {
     allImages = base.sort((a, b) => (_mergeImageOrder[a] ?? 0) - (_mergeImageOrder[b] ?? 0));
   }
@@ -3278,6 +3371,7 @@ async function enterMergeMode() {
   allImagesBase = [..._mergeAllImages];
   sortMode = 'source'; fileDates = {}; _markerLookup = null;
   $('sortBtnSource').style.display = '';
+  $('sortBtnSceneSource').style.display = '';
   updateMergeUI();
   buildFolderPicker();
   updateSortUI();
@@ -3287,8 +3381,9 @@ async function enterMergeMode() {
 
 function exitMergeMode() {
   mergeMode = false;
-  if (sortMode === 'source') sortMode = 'none';
+  if (sortMode === 'source' || sortMode === 'scene-source') sortMode = 'none';
   $('sortBtnSource').style.display = 'none';
+  $('sortBtnSceneSource').style.display = 'none';
   api('/api/images').then(res => {
     allImages = res.images || [];
     allImagesBase = [...allImages];
