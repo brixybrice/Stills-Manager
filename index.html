@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.5.0</title>
+<title>Stills Manager v1.6.0</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,7 +15,10 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  -webkit-user-select: none; user-select: none;
 }
+/* Text stays selectable/editable only where typing is expected */
+input, textarea, select, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
 
 /* ── Buttons ── */
 button { cursor: pointer; border: none; font-family: inherit; font-size: 13px; border-radius: 5px; transition: background 0.15s; }
@@ -107,6 +110,57 @@ body.light #poweredBy a:hover { color: #888; }
 }
 #selectAllBtn:hover, #invertGalSelBtn:hover { color: #aaa; border-color: #555; }
 #invertGalSelBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+#multiAddBtn, .zoom-btn {
+  font-size: 11px; color: #555; background: transparent; border: 1px solid #333;
+  border-radius: 4px; padding: 2px 8px; cursor: pointer; margin-left: 8px; flex-shrink: 0;
+}
+#multiAddBtn:hover, .zoom-btn:hover { color: #aaa; border-color: #555; }
+#multiAddBtn { color: #f5a623; border-color: #f5a623; }
+.zoom-group { display: flex; align-items: center; }
+.zoom-group .zoom-btn { margin-left: 0; padding: 2px 9px; font-size: 13px; line-height: 1.2; }
+.zoom-group .zoom-btn + .zoom-btn { border-left: none; border-radius: 0 4px 4px 0; }
+.zoom-group .zoom-btn:first-child { border-radius: 4px 0 0 4px; }
+.thumb-wrap.multi { border-color: #f5a623; box-shadow: 0 0 0 1px #f5a623; }
+.thumb-wrap.multi.in-sel { border-color: #f5a623; }
+#selList.drop-over, #lbSelList.drop-over { box-shadow: inset 0 0 0 2px #006D78; }
+#selList.drop-end, #lbSelList.drop-end { box-shadow: inset 0 -3px 0 #006D78; }
+.sel-item.drop-before, .lb-sel-item.drop-before { box-shadow: 0 -2px 0 #006D78; }
+#lbImg { cursor: grab; }
+
+/* Fullscreen selection panel */
+#lbSelPanel {
+  position: fixed; top: 64px; right: 0; bottom: 0; width: 240px;
+  background: #181818; border-left: 1px solid #2a2a2a; z-index: 2001;
+  display: none; flex-direction: column;
+}
+#lightbox.sel-open #lbSelPanel { display: flex; }
+#lightbox.sel-open { padding-right: 240px; }
+#lightbox.sel-open #lbImg { max-width: calc(100vw - 576px); }
+#lightbox.sel-open #lbNext { right: 254px; }
+#lbSelHead { padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #666; border-bottom: 1px solid #2a2a2a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lbSelTools { display: flex; align-items: center; gap: 2px; padding: 4px 8px; border-bottom: 1px solid #2a2a2a; }
+#lbSelTools .btn-ghost { font-size: 12px; padding: 4px 8px; }
+.lb-sel-empty { color: #555; font-size: 12px; text-align: center; padding: 24px 12px; line-height: 1.6; }
+#lbSelList { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.lb-sel-item { display: flex; align-items: center; gap: 8px; padding: 4px; border: 1px solid transparent; border-radius: 4px; cursor: pointer; }
+.lb-sel-item:hover { background: #222; }
+.lb-sel-item.active { border-color: #006D78; background: #1f2a2c; }
+.lb-sel-item .lb-handle { color: #555; cursor: grab; font-size: 14px; padding: 0 2px; flex-shrink: 0; }
+.lb-sel-item .lb-handle:hover { color: #aaa; }
+.lb-sel-item.sortable-ghost { opacity: 0.4; }
+.lb-sel-item img { width: 64px; height: 36px; object-fit: cover; border-radius: 2px; flex-shrink: 0; background: #080808; }
+.lb-sel-item .n { font-size: 11px; color: #777; flex-shrink: 0; width: 22px; }
+.lb-sel-item .nm { font-size: 11px; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+#lbSelToggle {
+  position: fixed; top: 64px; right: 0; z-index: 2002;
+  background: rgba(0,0,0,0.55); color: #888; border: none; border-radius: 5px 0 0 5px;
+  padding: 8px 10px; font-size: 14px; line-height: 1; cursor: pointer;
+}
+#lbSelToggle:hover { color: #fff; background: rgba(0,0,0,0.8); }
+/* Open: sits in the panel header, right of the selection name */
+#lightbox.sel-open #lbSelToggle { background: transparent; border-radius: 0; height: 37px; }
+#lightbox.sel-open #lbSelHead { padding-right: 44px; }
+
 
 /* ── Image grid ── */
 
@@ -444,6 +498,28 @@ body.light #indivProgressLabel { color: #aaa; }
 }
 
 /* ── Help modal ── */
+#wmBatchModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3500;
+  align-items: center; justify-content: center;
+}
+#wmBatchModal.open { display: flex; }
+.wmb-list { flex: 1; overflow-y: auto; padding: 4px 24px 12px; display: flex; flex-direction: column; gap: 2px; }
+.wmb-list label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #ccc; padding: 6px 0; cursor: pointer; }
+.wmb-bar { display: flex; align-items: center; gap: 6px; padding: 12px 24px; border-bottom: 1px solid #2a2a2a; font-size: 12px; color: #888; }
+.wmb-bar button { padding: 5px 12px; font-size: 12px; }
+.wmb-box input[type=checkbox] { accent-color: #006D78; width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+.wmb-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid #2a2a2a; }
+.wmb-foot button { width: auto; padding: 9px 18px; }
+.wmb-rows { display: flex; flex-direction: column; gap: 6px; }
+.wmb-row { display: flex; gap: 6px; }
+.wmb-row input[type=text] { flex: 1; }
+.wmb-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.wmb-tools button { padding: 5px 10px; font-size: 12px; }
+body.light .export-box.wmb-box, body.light .wmb-box { background: #fff; border-color: #d8d8d8; }
+body.light .wmb-list label { color: #333; }
+body.light .wmb-bar { border-bottom-color: #e8e8e8; }
+body.light .wmb-foot { border-top-color: #e8e8e8; }
 #helpModal {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.7); z-index: 3100;
@@ -1292,8 +1368,13 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
             <h2 id="galleryTitle">Images</h2>
             <button id="selectAllBtn">Select all</button>
             <button id="invertGalSelBtn">Inverse</button>
+            <button id="multiAddBtn" style="display:none"></button>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
+            <div class="zoom-group">
+              <button class="zoom-btn" id="zoomOutBtn" title="Smaller thumbnails">−</button>
+              <button class="zoom-btn" id="zoomInBtn" title="Larger thumbnails">+</button>
+            </div>
             <div class="sort-group">
               <button class="sort-btn" id="sortBtnAlpha" onclick="setSortMode('alpha')" title="Alphabetical sort">A-Z</button>
               <button class="sort-btn" id="sortBtnScene" onclick="setSortMode('scene')" title="Sort by scene (metadata.Scene)">Scene</button>
@@ -1347,7 +1428,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.5.0</span>
+  <span id="appVersion">v1.6.0</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -1397,6 +1478,18 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
     <button id="lbCompareBtn" class="btn-secondary">A/B</button>
   </div>
   <div id="lbFlash"></div>
+  <button id="lbSelToggle" title="Show / hide selection panel">›</button>
+  <div id="lbSelPanel">
+    <div id="lbSelHead"><span id="lbSelName"></span></div>
+    <div id="lbSelTools">
+      <button class="sel-icon-btn" id="lbDivideBtn" title="Divide by scene"></button>
+      <button class="sel-icon-btn" id="lbShuffleBtn" title="Shuffle"></button>
+      <button class="sel-icon-btn" id="lbInvertBtn" title="Invert selection"></button>
+      <div style="flex:1"></div>
+      <button class="btn-ghost" id="lbClearBtn">Clear</button>
+    </div>
+    <div id="lbSelList"></div>
+  </div>
 </div>
 
 <!-- Paramètres modal (settings généraux) -->
@@ -1442,6 +1535,21 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           <div class="wm-field">
             <label>Angle — <span id="csWmAngleVal">-30</span>°</label>
             <input type="range" id="csWmAngle" min="-90" max="90" value="-30">
+          </div>
+          <div class="wm-field">
+            <label>Line spacing — <span id="csWmSpacingVal">3</span>×</label>
+            <input type="range" id="csWmSpacing" min="1" max="6" step="0.25" value="3">
+          </div>
+          <div class="wm-field">
+            <label>Batch watermarks</label>
+            <div class="wmb-rows" id="wmBatchRows"></div>
+            <div class="wmb-tools">
+              <button class="btn-secondary" id="wmBatchAdd" title="Add a name">+</button>
+              <button class="btn-secondary" id="wmBatchImport">Import JSON</button>
+              <button class="btn-secondary" id="wmBatchExport">Export JSON</button>
+              <input type="file" id="wmBatchFile" accept=".json,application/json" style="display:none">
+            </div>
+            <span style="font-size:11px;color:#666">If filled, PDF / Stills / Contact Sheet exports ask which names to generate (one file set per name, name added to the filename).</span>
           </div>
         </div>
         <div class="wm-preview-area">
@@ -2213,6 +2321,25 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   <button id="ctxMeta">Show clip metadata</button>
 </div>
 
+<div id="wmBatchModal">
+  <div class="exp-box exp-sm wmb-box">
+    <div class="modal-head">
+      <h3>Batch watermark export</h3>
+      <button class="btn-ghost" id="wmbClose">✕</button>
+    </div>
+    <div class="wmb-bar">
+      <span id="wmbCount"></span>
+      <div style="flex:1"></div>
+      <button class="btn-secondary" id="wmbCheckAll">Check all</button>
+      <button class="btn-secondary" id="wmbUncheckAll">Uncheck all</button>
+    </div>
+    <div class="wmb-list" id="wmbList"></div>
+    <div class="wmb-foot">
+      <button class="btn-secondary" id="wmbCancel">Cancel</button>
+      <button class="btn-teal" id="wmbGo">Export</button>
+    </div>
+  </div>
+</div>
 <div id="helpModal">
   <div class="help-box">
     <div class="modal-head">
@@ -2245,9 +2372,9 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
 
       <div class="help-section">
         <h4>Gallery</h4>
-        <p><strong>Click</strong> a thumbnail to add or remove the image from the active selection.</p>
-        <p><strong>Shift+click</strong> a second thumbnail to add or remove every image between the last clicked one and the current one in one action.</p>
-        <p><strong>Cmd+click</strong> or the expand button on a thumbnail to open the image fullscreen.</p>
+        <p><strong>Click</strong> a thumbnail to mark it (amber border). <strong>Shift+click</strong> marks every image between the last clicked one and the current one. Marked images can be dragged into the Selection panel, or added with <kbd>Enter</kbd> / the "Add N to selection" button.</p>
+        <p><strong>Cmd+click</strong> a thumbnail to add or remove it from the active selection directly.</p>
+        <p><strong>Double-click</strong> a thumbnail (or its expand button) to open the image fullscreen.</p>
         <p>Selected images show a teal border and a numbered badge indicating their position in the current selection.</p>
         <p>The <strong>Select all</strong> button (next to the image count) adds all images in order to the active selection. It becomes <strong>Deselect all</strong> when every image is already selected.</p>
         <p>The <strong>Inverse</strong> button (next to Select all) swaps the selection: images not in the current selection become selected, and those that were selected are removed.</p>
@@ -2304,10 +2431,14 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           <span><kbd>←</kbd> <kbd>↑</kbd></span>                              <span class="kb-desc">Previous image (fullscreen)</span>
           <span><kbd>→</kbd> <kbd>↓</kbd></span>                              <span class="kb-desc">Next image (fullscreen)</span>
           <span><kbd>Space</kbd></span>                                        <span class="kb-desc">Add / remove from selection (fullscreen)</span>
+          <span><kbd>Del</kbd> <kbd>⌫</kbd></span>                            <span class="kb-desc">Remove current image (or move group) from selection (fullscreen)</span>
           <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image (or group) up in selection (fullscreen)</span>
           <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image (or group) down in selection (fullscreen)</span>
           <span><kbd>Shift</kbd>+<kbd>click</kbd> carousel</span>             <span class="kb-desc">Add / remove image from move group (fullscreen, selection)</span>
           <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></span>          <span class="kb-desc">Clear move group (fullscreen)</span>
+          <span><kbd>Shift</kbd>+<kbd>←</kbd> <kbd>→</kbd></span>            <span class="kb-desc">Extend marked images one still at a time (grid)</span>
+          <span><kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>↓</kbd></span>            <span class="kb-desc">Extend marked images one row at a time (grid)</span>
+          <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Add marked images to selection (grid) · <kbd>Esc</kbd> clears it</span>
           <span><kbd>Esc</kbd></span>                                          <span class="kb-desc">Close fullscreen or modal</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Open selected folder (folder browser)</span>
           <span><kbd>Cmd</kbd>+<kbd>Z</kbd></span>                            <span class="kb-desc">Undo</span>
@@ -2383,6 +2514,34 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   </div>
 </div>
 
+<script>
+// ─── Prefs sync: mirror localStorage `stills-*` keys to ~/.stills-manager/settings.json ───
+// localStorage is lost when the origin changes (port) or the app is reinstalled;
+// the server-side file survives. Runs first, synchronously, before any init reads.
+(function () {
+  const isPref = k => k.startsWith('stills-') && k !== 'stills-lastPath';
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/prefs', false);
+    xhr.send();
+    if (xhr.status === 200) {
+      const saved = JSON.parse(xhr.responseText) || {};
+      Object.entries(saved).forEach(([k, v]) => { if (localStorage.getItem(k) === null) localStorage.setItem(k, v); });
+    }
+  } catch {}
+  let timer = null;
+  function push() {
+    const d = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (isPref(k)) d[k] = localStorage.getItem(k); }
+    fetch('/api/prefs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) }).catch(() => {});
+  }
+  const queue = () => { clearTimeout(timer); timer = setTimeout(push, 500); };
+  const origSet = Storage.prototype.setItem, origRem = Storage.prototype.removeItem;
+  Storage.prototype.setItem = function (k, v) { origSet.call(this, k, v); if (this === localStorage && isPref(String(k))) queue(); };
+  Storage.prototype.removeItem = function (k) { origRem.call(this, k); if (this === localStorage && isPref(String(k))) queue(); };
+  queue();
+})();
+</script>
 <script src="/vendor/sortable.min.js"></script>
 <script src="/vendor/jspdf.umd.min.js"></script>
 <script>
@@ -2404,6 +2563,9 @@ let lastRangeAnchor  = null; // { idx, adding } for shift+click range
 let lbCompareMode   = false;
 let lbCompareNameA  = null;
 let lbMultiSel      = new Set(); // filenames selected for group move in lightbox
+let gridMulti       = new Set(); // filenames marked in the grid (multi-select), draggable into the selection
+let gridAnchor      = null;      // index in allImages: start of the Shift range
+let gridCursor      = null;      // index in allImages: moving end of the Shift range
 let browserPath = '';
 let folderName  = '';
 let clipsMetadata = null;
@@ -2457,8 +2619,15 @@ function restoreSnapshot(snap) {
 function syncLightboxToSel() {
   if (!$('lightbox').classList.contains('open') || lbContext === 'gallery') return;
   const newSel = (selections[lbContext] || []);
-  if (newSel.length === 0) { closeLb(); return; }
   const currentName = lbImages[lbIdx];
+  if (newSel.length === 0) {
+    // Selection emptied: keep the lightbox open on the gallery rather than closing it
+    lbContext = 'gallery'; lbImages = [...allImages];
+    lbIdx = Math.max(0, lbImages.indexOf(currentName));
+    lbMultiSel.clear();
+    updateLb();
+    return;
+  }
   lbImages = [...newSel];
   const newIdx = lbImages.indexOf(currentName);
   lbIdx = newIdx !== -1 ? newIdx : Math.min(lbIdx, lbImages.length - 1);
@@ -3475,6 +3644,9 @@ function renderGallery() {
   btn.textContent = allSelected ? 'Deselect all' : 'Select all';
   $('invertGalSelBtn').disabled = allImages.length === 0;
 
+  { const present = new Set(allImages); for (const n of gridMulti) if (!present.has(n)) gridMulti.delete(n); }
+  updateMultiUI();
+
   if (!allImages.length) {
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No images found<br>(jpg, png, tif)</p></div>';
     return;
@@ -3487,27 +3659,28 @@ function renderGallery() {
     let wrapCls = 'thumb-wrap' + (inSel ? ' in-sel' : '');
     if (lastToggled && lastToggled.name === name)
       wrapCls += lastToggled.adding ? ' gal-flash-add' : ' gal-flash-remove';
+    if (gridMulti.has(name)) wrapCls += ' multi';
     wrap.className = wrapCls;
+    wrap.dataset.name = name;
+    wrap.draggable = true;
+    wrap.addEventListener('dragstart', e => {
+      const names = gridMulti.has(name) ? allImages.filter(n => gridMulti.has(n)) : [name];
+      e.dataTransfer.setData(GRID_DND_TYPE, JSON.stringify(names));
+      e.dataTransfer.effectAllowed = 'copy';
+    });
     wrap.addEventListener('contextmenu', e => openThumbContextMenu(e, name));
+    // click = amber multi-mark · Shift+click = amber range · Cmd/Ctrl+click = toggle in selection · double-click = fullscreen
     wrap.onclick = e => {
-      if (e.metaKey || e.ctrlKey) { openLightbox(allImages, i); return; }
-      if (e.shiftKey && lastRangeAnchor !== null) {
-        pushHistory();
-        const s      = curSel();
-        const adding = lastRangeAnchor.adding;
-        const lo     = Math.min(lastRangeAnchor.idx, i);
-        const hi     = Math.max(lastRangeAnchor.idx, i);
-        for (let j = lo; j <= hi; j++) {
-          const n = allImages[j];
-          if (adding && !s.includes(n)) s.push(n);
-          else if (!adding) { const k = s.indexOf(n); if (k !== -1) s.splice(k, 1); }
-        }
-        selections[activeSel] = s;
-        queueSave(); renderGallery(); renderSelection();
-      } else {
+      if (e.metaKey || e.ctrlKey) {
+        gridAnchor = gridCursor = i;
         toggleInSel(name);
+        return;
       }
+      if (e.shiftKey && gridAnchor !== null) { gridSelectRange(gridAnchor, i); return; }
+      if (gridMulti.has(name)) gridMulti.delete(name); else gridMulti.add(name);
+      gridAnchor = gridCursor = i; refreshGridMulti();
     };
+    wrap.ondblclick = e => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey) openLightbox(allImages, i); };
 
     const img = document.createElement('img');
     img.className = 'thumb-img';
@@ -3536,7 +3709,7 @@ function renderGallery() {
 
     // Zoom button (Shift+click shortcut reminder)
     const zb = document.createElement('button');
-    zb.className = 'thumb-zoom'; zb.innerHTML = '⤢'; zb.title = 'View large (Cmd+click)';
+    zb.className = 'thumb-zoom'; zb.innerHTML = '⤢'; zb.title = 'View large (double-click)';
     zb.onclick = e => { e.stopPropagation(); openLightbox(allImages, i); };
     wrap.appendChild(zb);
 
@@ -3557,6 +3730,110 @@ function renderGallery() {
   });
 }
 
+// ─── Grid: multi-select, zoom, drag & drop ────────────────────────────────
+const GRID_DND_TYPE = 'application/x-stills-images';
+
+function updateMultiUI() {
+  const b = $('multiAddBtn');
+  b.style.display = gridMulti.size ? '' : 'none';
+  b.textContent = `Add ${gridMulti.size} to selection`;
+}
+// Class-only refresh: avoids rebuilding every thumbnail on each Shift+arrow.
+function refreshGridMulti() {
+  $('imageGrid').querySelectorAll('.thumb-wrap').forEach(w => w.classList.toggle('multi', gridMulti.has(w.dataset.name)));
+  updateMultiUI();
+}
+function gridSelectRange(a, b) {
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  gridMulti = new Set(allImages.slice(lo, hi + 1));
+  gridCursor = b;
+  refreshGridMulti();
+  const w = $('imageGrid').querySelector(`.thumb-wrap[data-name="${CSS.escape(allImages[b])}"]`);
+  if (w) w.scrollIntoView({ block: 'nearest' });
+}
+function clearGridMulti() { gridMulti.clear(); refreshGridMulti(); }
+function addGridMultiToSel(insertAt) {
+  const s = curSel();
+  const names = allImages.filter(n => gridMulti.has(n) && !s.includes(n));
+  if (!names.length) { clearGridMulti(); return; }
+  pushHistory();
+  if (insertAt === undefined || insertAt >= s.length) s.push(...names); else s.splice(insertAt, 0, ...names);
+  selections[activeSel] = s;
+  gridMulti.clear();
+  queueSave(); renderGallery(); renderSelection();
+}
+function gridColCount() {
+  return getComputedStyle($('imageGrid')).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+}
+function gridNavKey(e) {
+  if (!e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return false;
+  const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -gridColCount(), ArrowDown: gridColCount() }[e.key];
+  if (step === undefined || !allImages.length) return false;
+  e.preventDefault();
+  if (gridCursor === null) { gridAnchor = gridCursor = Math.max(0, lastRangeAnchor ? lastRangeAnchor.idx : 0); }
+  const next = Math.max(0, Math.min(allImages.length - 1, gridCursor + step));
+  gridSelectRange(gridAnchor, next);
+  return true;
+}
+function setGridCols(n) {
+  n = Math.max(2, Math.min(12, n));
+  $('imageGrid').style.setProperty('--cols', n);
+  try { localStorage.setItem('stills-grid-cols', String(n)); } catch {}
+}
+function zoomGrid(delta) {
+  // delta > 0 = larger thumbnails = fewer columns
+  setGridCols(gridColCount() - delta);
+}
+$('zoomInBtn').onclick  = () => zoomGrid(+1);
+$('zoomOutBtn').onclick = () => zoomGrid(-1);
+{ const c = parseInt(localStorage.getItem('stills-grid-cols') || '', 10); if (c) setGridCols(c); }
+$('multiAddBtn').onclick  = () => addGridMultiToSel();
+
+// Drop images (grid thumbnails, or the fullscreen image) onto a selection list.
+// rowSel = row class inside the list; after() refreshes whatever else shows the selection.
+function setupSelDrop(list, rowSel, after) {
+  const clearMarks = () => {
+    list.classList.remove('drop-over', 'drop-end');
+    list.querySelectorAll('.drop-before').forEach(x => x.classList.remove('drop-before'));
+  };
+  const insertIndex = y => {
+    const items = [...list.querySelectorAll(rowSel)];
+    for (let i = 0; i < items.length; i++) {
+      const r = items[i].getBoundingClientRect();
+      if (y < r.top + r.height / 2) return i;
+    }
+    return items.length;
+  };
+  const isOurs = e => e.dataTransfer && [...e.dataTransfer.types].includes(GRID_DND_TYPE);
+  list.addEventListener('dragover', e => {
+    if (!isOurs(e)) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+    clearMarks();
+    const idx = insertIndex(e.clientY), items = list.querySelectorAll(rowSel);
+    if (idx < items.length) items[idx].classList.add('drop-before');
+    else list.classList.add(items.length ? 'drop-end' : 'drop-over');
+  });
+  list.addEventListener('dragleave', e => { if (e.target === list) clearMarks(); });
+  list.addEventListener('drop', e => {
+    if (!isOurs(e)) return;
+    e.preventDefault();
+    const idx = insertIndex(e.clientY);
+    clearMarks();
+    let names; try { names = JSON.parse(e.dataTransfer.getData(GRID_DND_TYPE)); } catch { return; }
+    const s = curSel();
+    names = names.filter(n => !s.includes(n));
+    if (!names.length) return;
+    pushHistory();
+    s.splice(idx, 0, ...names);
+    selections[activeSel] = s;
+    gridMulti.clear();
+    queueSave(); renderGallery(); renderSelection();
+    if (after) after();
+  });
+  document.addEventListener('dragend', clearMarks);
+}
+setupSelDrop($('selList'), '.sel-item');
+
 // ─── Selection panel ───────────────────────────────────────────────────────
 function renderSelection() {
   const listEl = $('selList');
@@ -3571,6 +3848,7 @@ function renderSelection() {
   $('shuffleSelBtn').disabled    = sel.length < 2;
   $('invertSelBtn').disabled     = sel.length < 2;
   $('divideSceneBtn').disabled   = sel.length === 0;
+  renderLbSelPanel();
 
   if (sortable) { sortable.destroy(); sortable = null; }
 
@@ -3633,8 +3911,8 @@ function renderAll() { renderTabs(); renderGallery(); renderSelection(); }
 function openLightbox(images, idx, context = 'gallery') {
   lbCompareMode = false; lbCompareNameA = null; lbMultiSel.clear();
   lbImages = images; lbIdx = idx; lbContext = context;
+  $('lightbox').classList.add('open');   // before updateLb(): renderLbSelPanel() skips a closed lightbox
   updateLb();
-  $('lightbox').classList.add('open');
 }
 function closeLb() {
   lbCompareMode = false; lbCompareNameA = null; lbMultiSel.clear();
@@ -3646,6 +3924,79 @@ function flashLb(adding) {
   void el.offsetWidth; // reflow to restart animation
   el.classList.add(adding ? 'flash-add' : 'flash-remove');
 }
+let lbSelOpen = (() => { try { return localStorage.getItem('stills-lb-sel-open') !== '0'; } catch { return true; } })();
+function applyLbSelOpen() {
+  $('lightbox').classList.toggle('sel-open', lbSelOpen);
+  $('lbSelToggle').textContent = lbSelOpen ? '›' : '‹';
+}
+function renderLbSelPanel() {
+  if (!lbSelOpen || !$('lightbox').classList.contains('open')) return;
+  const sel = curSel(), cur = lbImages[lbIdx];
+  $('lbSelName').textContent = `${activeSel} · ${sel.length}`;
+  $('lbDivideBtn').disabled  = sel.length === 0;
+  $('lbShuffleBtn').disabled = sel.length < 2;
+  $('lbInvertBtn').disabled  = sel.length < 2;
+  $('lbClearBtn').disabled   = sel.length === 0;
+  const list = $('lbSelList');
+  list.innerHTML = '';
+  if (!sel.length) list.innerHTML = '<div class="lb-sel-empty">Selection is empty<br>Press Space to add the current image</div>';
+  sel.forEach((name, i) => {
+    const row = document.createElement('div');
+    row.className = 'lb-sel-item' + (name === cur ? ' active' : '');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1;
+    const img = document.createElement('img'); img.src = imgUrl(name); img.loading = 'lazy'; img.draggable = false;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = name.split('/').pop(); nm.title = name;
+    const dh = document.createElement('span'); dh.className = 'lb-handle'; dh.textContent = '⠿'; dh.title = 'Drag to reorder';
+    row.append(dh, n, img, nm);
+    row.onclick = e => {
+      if (e.target === dh) return;
+      const k = lbImages.indexOf(name);
+      if (k !== -1) { lbIdx = k; updateLb(); }
+    };
+    list.appendChild(row);
+    if (name === cur) requestAnimationFrame(() => row.scrollIntoView({ block: 'nearest' }));
+  });
+}
+new Sortable($('lbSelList'), {
+  handle: '.lb-handle', animation: 150, ghostClass: 'sortable-ghost',
+  onEnd: evt => {
+    if (evt.oldIndex === evt.newIndex) return;
+    pushHistory();
+    const s = curSel();
+    const [m] = s.splice(evt.oldIndex, 1);
+    s.splice(evt.newIndex, 0, m);
+    selections[activeSel] = s;
+    queueSave(); renderGallery(); renderSelection();
+    if (lbContext !== 'gallery') syncLightboxToSel(); else updateLb();
+  }
+});
+$('lbSelToggle').onclick = () => {
+  lbSelOpen = !lbSelOpen;
+  try { localStorage.setItem('stills-lb-sel-open', lbSelOpen ? '1' : '0'); } catch {}
+  applyLbSelOpen(); renderLbSelPanel();
+};
+applyLbSelOpen();
+
+// Drag the fullscreen image into the panel's selection list
+$('lbImg').draggable = true;
+$('lbImg').addEventListener('dragstart', e => {
+  const n = lbImages[lbIdx]; if (!n) { e.preventDefault(); return; }
+  e.dataTransfer.setData(GRID_DND_TYPE, JSON.stringify([n]));
+  e.dataTransfer.effectAllowed = 'copy';
+});
+setupSelDrop($('lbSelList'), '.lb-sel-item', () => { if (lbContext !== 'gallery') syncLightboxToSel(); else updateLb(); });
+
+// Selection tools in the fullscreen panel: same actions as the main panel, then resync the lightbox
+[['lbDivideBtn','divideSceneBtn',divideByScene], ['lbShuffleBtn','shuffleSelBtn',shuffleSel], ['lbInvertBtn','invertSelBtn',invertSel]].forEach(([id, src, fn]) => {
+  $(id).innerHTML = $(src).innerHTML;
+  $(id).onclick = () => lbSelTool(fn);
+});
+$('lbClearBtn').onclick = () => lbSelTool(clearSel);
+function lbSelTool(fn) {
+  fn();
+  if (lbContext !== 'gallery') syncLightboxToSel(); else updateLb();
+}
+
 function renderCarousel() {
   const el = $('lbCarousel');
   el.innerHTML = '';
@@ -3710,6 +4061,7 @@ function updateLb() {
     ? `${lbCompareNameA}  ·  ${name}`
     : `${name}   ${lbIdx + 1} / ${lbImages.length}`;
   renderCarousel();
+  renderLbSelPanel();
   const ctxEl = $('lbContext');
   if (lbContext === 'gallery') {
     ctxEl.textContent = 'Galerie';
@@ -3899,7 +4251,7 @@ async function exportIndivStills() {
     const quality  = parseFloat($('indivQuality').value) / 100;
     const resMode  = $('indivResolution').value;
     const customW  = parseInt($('indivCustomW').value) || 1920;
-    const applyWm  = $('indivWatermark').checked;
+    const applyWm  = !!wmBatch || $('indivWatermark').checked;
     const createFolder = $('indivCreateFolder').checked;
     const subInput = $('indivSubfolder').value.trim();
 
@@ -3940,6 +4292,115 @@ async function exportIndivStills() {
 
 // ─── Watermark modal ───────────────────────────────────────────────────────
 let wmPreviewTimer = null;
+
+// ─── Batch watermark export ───────────────────────────────────────────────
+// wmBatch = { text, tag } while a batch entry is being exported: forces the
+// watermark on with that text and appends `_tag` to every output filename.
+let wmBatch = null;
+function wmName(fn) {
+  if (!wmBatch) return fn;
+  const i = fn.lastIndexOf('.');
+  return i > 0 ? fn.slice(0, i) + '_' + wmBatch.tag + fn.slice(i) : fn + '_' + wmBatch.tag;
+}
+function loadWmBatch() {
+  let d; try { d = JSON.parse(localStorage.getItem('stills-wm-batch') || '{}'); } catch { d = {}; }
+  if (typeof d.list === 'string') d.list = d.list.split('\n');   // legacy textarea format
+  if (!Array.isArray(d.list)) d.list = [];
+  return d;
+}
+function wmBatchNames() {
+  return [...new Set(loadWmBatch().list.map(t => String(t).trim()).filter(Boolean))];
+}
+function saveWmBatchList() {
+  const d = loadWmBatch();
+  d.list = [...$('wmBatchRows').querySelectorAll('input')].map(i => i.value);
+  localStorage.setItem('stills-wm-batch', JSON.stringify(d));
+}
+function addWmBatchRow(value = '', focus = false) {
+  const row = document.createElement('div'); row.className = 'wmb-row';
+  const inp = document.createElement('input'); inp.type = 'text'; inp.value = value; inp.placeholder = 'Watermark name';
+  inp.addEventListener('input', saveWmBatchList);
+  const del = document.createElement('button'); del.className = 'btn-ghost'; del.textContent = '✕'; del.title = 'Remove';
+  del.onclick = () => { row.remove(); saveWmBatchList(); };
+  row.append(inp, del);
+  $('wmBatchRows').appendChild(row);
+  if (focus) inp.focus();
+}
+function renderWmBatchRows(list) {
+  $('wmBatchRows').innerHTML = '';
+  (list.length ? list : ['']).forEach(v => addWmBatchRow(v));
+}
+function exportWmBatchJson() {
+  downloadText(JSON.stringify({ watermarks: wmBatchNames() }, null, 2), 'stills-watermarks.json', 'application/json');
+}
+function importWmBatchJson(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const j = JSON.parse(r.result);
+      const arr = Array.isArray(j) ? j : j.watermarks;
+      if (!Array.isArray(arr)) throw new Error('expected {"watermarks": [...]}');
+      const list = [...new Set(arr.map(t => String(t).trim()).filter(Boolean))];
+      renderWmBatchRows(list); saveWmBatchList();
+    } catch (e) { alert('Import failed: ' + e.message); }
+  };
+  r.readAsText(file);
+}
+// Resolves to the checked names, or null if cancelled.
+function openWmBatchDialog(names, main) {
+  const checked = loadWmBatch().checked || {};
+  const list = $('wmbList');
+  list.innerHTML = '';
+  names.forEach(n => {
+    const l = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = n in checked ? !!checked[n] : true;
+    l.append(cb, document.createTextNode(n));
+    if (n === main) { const t = document.createElement('span'); t.textContent = 'main watermark'; t.style.cssText = 'font-size:11px;color:#666;margin-left:auto'; l.appendChild(t); }
+    list.appendChild(l);
+    cb.addEventListener('change', syncAll);
+  });
+  const boxes = () => [...list.querySelectorAll('input')];
+  function syncAll() {
+    const n = boxes().filter(x => x.checked).length;
+    $('wmbCount').textContent = `${n} / ${names.length} selected`;
+    $('wmbGo').disabled = n === 0;
+  }
+  syncAll();
+  $('wmbCheckAll').onclick   = () => { boxes().forEach(x => x.checked = true);  syncAll(); };
+  $('wmbUncheckAll').onclick = () => { boxes().forEach(x => x.checked = false); syncAll(); };
+  $('wmBatchModal').classList.add('open');
+  return new Promise(resolve => {
+    const done = v => {
+      $('wmBatchModal').classList.remove('open');
+      $('wmbGo').onclick = $('wmbCancel').onclick = $('wmbClose').onclick = null;
+      resolve(v);
+    };
+    $('wmbGo').onclick = () => {
+      const picked = names.filter((n, i) => boxes()[i].checked);
+      const d = loadWmBatch(); d.checked = Object.fromEntries(names.map((n, i) => [n, boxes()[i].checked]));
+      localStorage.setItem('stills-wm-batch', JSON.stringify(d));
+      done(picked);
+    };
+    $('wmbCancel').onclick = $('wmbClose').onclick = () => done(null);
+  });
+}
+async function runWithWmBatch(fn) {
+  const listed = wmBatchNames();
+  if (!listed.length) return fn();
+  const main = $('csWmText').value.trim();
+  const names = main ? [main, ...listed.filter(n => n !== main)] : listed;
+  const picked = await openWmBatchDialog(names, main);
+  if (!picked || !picked.length) return;
+  try {
+    for (const n of picked) {
+      const tag = n.replace(/[\/\\:*?"<>|]/g, '').trim() || 'wm';   // keep the name as typed, minus filesystem-illegal chars
+      wmBatch = { text: n, tag };
+      await fn();
+    }
+  } finally { wmBatch = null; }
+}
 
 function openWm()   { switchSettingsTab('wm');   $('wmModal').classList.add('open'); renderWmPreview(); }
 function closeWm()  { $('wmModal').classList.remove('open'); }
@@ -4060,7 +4521,7 @@ function getExportPath(type) {
 }
 
 // ─── Contact Sheet settings persistence ──────────────────────────────────────
-const CS_SETTING_IDS = ['csTitle','csTitleColor','csTitleSize','csTitleAlign','csTitleBgColor','csTitleBgOpacity','csFooterOn','csFooterText','csFooterColor','csFooterSize','csFooterAlign','csFooterBgColor','csFooterBgOpacity','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','pdfAppendCS','csCaptionMeta','csCaptionMetaColor','csCaptionFile','csCaptionFileColor','csCaptionPos','csCaptionSize','csCaptionGap'];
+const CS_SETTING_IDS = ['csTitle','csTitleColor','csTitleSize','csTitleAlign','csTitleBgColor','csTitleBgOpacity','csFooterOn','csFooterText','csFooterColor','csFooterSize','csFooterAlign','csFooterBgColor','csFooterBgOpacity','csBg','csCols','csRows','csMargin','csA4Margin','csExportW','csSortScene','csColorPalette','csProdInfo','csInvertLogo','csWmEnabled','csWmText','csWmFont','csWmOpacity','csWmSize','csWmAngle','csWmSpacing','pdfAppendCS','csCaptionMeta','csCaptionMetaColor','csCaptionFile','csCaptionFileColor','csCaptionPos','csCaptionSize','csCaptionGap'];
 function loadCsSettings() { try { return JSON.parse(localStorage.getItem('stills-cs-settings') || '{}'); } catch { return {}; } }
 function saveCsSettings() {
   const d = {};
@@ -4092,6 +4553,7 @@ function initCsSettings() {
   CS_SETTING_IDS.forEach(id => { const el = $(id); if (!el || !(id in d)) return; if (el.type === 'checkbox') el.checked = d[id]; else el.value = d[id]; });
   $('csTitleBgOpacityVal').textContent = $('csTitleBgOpacity').value;
   $('csFooterBgOpacityVal').textContent = $('csFooterBgOpacity').value;
+  [['csWmOpacity','csWmOpacityVal'],['csWmSize','csWmSizeVal'],['csWmAngle','csWmAngleVal'],['csWmSpacing','csWmSpacingVal']].forEach(([id,l]) => { $(l).textContent = $(id).value; });
   const isA4 = ['a4p','a4l','a3p','a3l'].includes($('csExportW').value);
   $('csA4Margin').closest('.cs-field').style.display = isA4 ? '' : 'none';
   updateCsCaptionFieldsVis();
@@ -4105,6 +4567,7 @@ function getExportSubfolder() {
   return (clipsMetadata?.timeline || activeSel || '').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
 }
 async function saveFileToServer(filename, dataUri, type, subOverride) {
+  filename = wmName(filename);
   const dir = getExportPath(type);
   if (!dir) return false;
   const sub = subOverride !== undefined ? subOverride : getExportSubfolder();
@@ -4120,7 +4583,7 @@ async function saveFileToServer(filename, dataUri, type, subOverride) {
 }
 async function pdfSave(doc, filename, type) {
   const uri = doc.output('datauristring');
-  if (!await saveFileToServer(filename, uri, type)) doc.save(filename);
+  if (!await saveFileToServer(filename, uri, type)) doc.save(wmName(filename));
 }
 async function textSave(content, filename, mime, type) {
   const uri = `data:${mime};charset=utf-8,` + encodeURIComponent(content);
@@ -4694,7 +5157,7 @@ async function csRender(canvas, W, preloadedImgs = null, pageIndex = 0, override
     });
   }
 
-  if ($('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
+  if (wmBatch || $('csWmEnabled').checked) csDrawWatermark(ctx, W, H);
   // Only on the actual export render, never on the live preview canvas.
   if (canvas !== $('csCanvas')) drawAppFiligrane(ctx, W, H, bgColor);
   if (isFirstLoad) setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 500);
@@ -4810,7 +5273,7 @@ async function exportPalette(fmt) {
       const fn = `${baseName}_color_palette.${fmt}`;
       const uri = canvas.toDataURL(mime, q);
       if (!await saveFileToServer(fn, uri, 'contactSheet')) {
-        const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+        const a = document.createElement('a'); a.download = wmName(fn); a.href = uri; a.click();
       }
     }
   } catch(e) { alert('Export error: ' + e.message); }
@@ -5194,7 +5657,7 @@ async function exportPrint(fmt) {
           const fn0 = `${suffix}${sceneLabel}${subLabel}.${fmt}`;
           const uri0 = canvas.toDataURL(mime, q);
           if (!await saveFileToServer(fn0, uri0, 'print')) {
-            const a = document.createElement('a'); a.download = fn0; a.href = uri0; a.click();
+            const a = document.createElement('a'); a.download = wmName(fn0); a.href = uri0; a.click();
           }
           for (let p = 1; p < result.totalPages; p++) {
             await new Promise(r => setTimeout(r, 300));
@@ -5203,7 +5666,7 @@ async function exportPrint(fmt) {
             const fn = `${suffix}${sceneLabel}_p${p+1}.${fmt}`;
             const uri = c.toDataURL(mime, q);
             if (!await saveFileToServer(fn, uri, 'print')) {
-              const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+              const a = document.createElement('a'); a.download = wmName(fn); a.href = uri; a.click();
             }
           }
         }
@@ -5237,7 +5700,7 @@ async function exportPrint(fmt) {
           const fn = `${suffix}${pageLabel(p)}.${fmt}`;
           const dataUri = c.toDataURL(mime, q);
           if (!await saveFileToServer(fn, dataUri, 'print')) {
-            const a = document.createElement('a'); a.download = fn; a.href = dataUri; a.click();
+            const a = document.createElement('a'); a.download = wmName(fn); a.href = dataUri; a.click();
           }
         }
       }
@@ -5256,7 +5719,7 @@ function ctxRoundRect(ctx, x, y, w, h, r) {
 }
 
 function csDrawWatermark(ctx, W, H) {
-  const text = $('csWmText').value.trim();
+  const text = wmBatch ? wmBatch.text : $('csWmText').value.trim();
   if (!text) return;
   const opacity   = parseFloat($('csWmOpacity').value) / 100;
   const fontFace  = $('csWmFont').value;
@@ -5273,7 +5736,7 @@ function csDrawWatermark(ctx, W, H) {
 
   const textW   = ctx.measureText(text).width + fontSize;
   const spacingX = textW;
-  const spacingY = fontSize * 3;
+  const spacingY = fontSize * (parseFloat($('csWmSpacing').value) || 3);
   const diag    = Math.sqrt(W * W + H * H);
   const cols    = Math.ceil(diag / spacingX) + 2;
   const rows    = Math.ceil(diag / spacingY) + 2;
@@ -5351,7 +5814,7 @@ async function exportCS(fmt) {
           const fn0 = `${suffix}${sceneLabel}${subLabel}.${fmt}`;
           const uri0 = canvas.toDataURL(mime, q);
           if (!await saveFileToServer(fn0, uri0, 'contactSheet')) {
-            const a = document.createElement('a'); a.download = fn0; a.href = uri0; a.click();
+            const a = document.createElement('a'); a.download = wmName(fn0); a.href = uri0; a.click();
           }
           for (let p = 1; p < result.totalPages; p++) {
             await new Promise(r => setTimeout(r, 300));
@@ -5360,7 +5823,7 @@ async function exportCS(fmt) {
             const fn = `${suffix}${sceneLabel}_p${p+1}.${fmt}`;
             const uri = c.toDataURL(mime, q);
             if (!await saveFileToServer(fn, uri, 'contactSheet')) {
-              const a = document.createElement('a'); a.download = fn; a.href = uri; a.click();
+              const a = document.createElement('a'); a.download = wmName(fn); a.href = uri; a.click();
             }
           }
         }
@@ -5396,7 +5859,7 @@ async function exportCS(fmt) {
           const dataUri = c.toDataURL(mime, q);
           if (!await saveFileToServer(fn, dataUri, 'contactSheet')) {
             const a = document.createElement('a');
-            a.download = fn; a.href = dataUri; a.click();
+            a.download = wmName(fn); a.href = dataUri; a.click();
           }
         }
       }
@@ -5493,8 +5956,8 @@ $('invertGalSelBtn').onclick = () => {
   selections[activeSel] = allImages.filter(n => !isInSel(n));
   queueSave(); renderGallery(); renderSelection();
 };
-$('exportBtn').onclick      = exportPDF;
-$('indivBtn').onclick       = exportIndivStills;
+$('exportBtn').onclick      = () => runWithWmBatch(exportPDF);
+$('indivBtn').onclick       = () => runWithWmBatch(exportIndivStills);
 $('edlBtn').onclick  = exportEDL;
 $('mainExportBtn').onclick = openExpList;
 $('expListClose').onclick  = closeExpList;
@@ -5768,9 +6231,9 @@ document.querySelectorAll('.paths-browse').forEach(btn => {
 $('ppSelect').onclick = () => { if(ppTargetId){ $(ppTargetId).value = ppCurrentPath; savePathsData(); } $('pathPicker').classList.remove('open'); };
 $('ppCancel').onclick = () => $('pathPicker').classList.remove('open');
 $('pathPicker').addEventListener('click', e => { if(e.target===$('pathPicker')) $('pathPicker').classList.remove('open'); });
-$('csJpgBtn').onclick = () => exportCS('jpg');
-$('csPngBtn').onclick = () => exportCS('png');
-$('csPdfBtn').onclick = () => exportCS('pdf');
+$('csJpgBtn').onclick = () => runWithWmBatch(() => exportCS('jpg'));
+$('csPngBtn').onclick = () => runWithWmBatch(() => exportCS('png'));
+$('csPdfBtn').onclick = () => runWithWmBatch(() => exportCS('pdf'));
 $('csPrevPage').onclick = () => navigateCSPreview(-1);
 $('csNextPage').onclick = () => navigateCSPreview(1);
 $('paletteJpgBtn').onclick = () => exportPalette('jpg');
@@ -5840,10 +6303,15 @@ $('cdNext').onclick = e => { e.stopPropagation(); if (clipDetailIdx < clipDetail
 $('wmClose').onclick = closeWm;
 $('wmDone').onclick  = closeWm;
 $('wmModal').onclick = e => { if (e.target === $('wmModal')) closeWm(); };
-function wmChanged() { wmQueuePreview(); csQueuePreview(); }
+function wmChanged() { wmQueuePreview(); csQueuePreview(); saveCsSettings(); }
 $('csWmText').addEventListener('input',  wmChanged);
+renderWmBatchRows(loadWmBatch().list);
+$('wmBatchAdd').onclick = () => addWmBatchRow('', true);
+$('wmBatchExport').onclick = exportWmBatchJson;
+$('wmBatchImport').onclick = () => $('wmBatchFile').click();
+$('wmBatchFile').onchange = e => { importWmBatchJson(e.target.files[0]); e.target.value = ''; };
 $('csWmFont').addEventListener('change', wmChanged);
-[['csWmOpacity','csWmOpacityVal'], ['csWmSize','csWmSizeVal'], ['csWmAngle','csWmAngleVal']].forEach(([id, lblId]) => {
+[['csWmOpacity','csWmOpacityVal'], ['csWmSize','csWmSizeVal'], ['csWmAngle','csWmAngleVal'], ['csWmSpacing','csWmSpacingVal']].forEach(([id, lblId]) => {
   $(id).addEventListener('input', () => { $(lblId).textContent = $(id).value; wmChanged(); });
 });
 
@@ -5913,7 +6381,19 @@ function lbToggleSel() {
   const adding = !isInSel(n);
   toggleInSel(n);
   flashLb(adding);
-  if (!adding) syncLightboxToSel(); else updateLb();
+  // syncLightboxToSel() only handles selection contexts; the gallery context still needs a refresh after a removal
+  if (!adding && lbContext !== 'gallery') syncLightboxToSel(); else updateLb();
+}
+// Delete / Backspace: remove the move group (if any) or the current image from the selection
+function lbRemoveFromSel() {
+  const s = curSel();
+  const names = (lbContext !== 'gallery' && lbMultiSel.size) ? [...lbMultiSel].filter(f => s.includes(f)) : [lbImages[lbIdx]].filter(f => f && s.includes(f));
+  if (!names.length) return;
+  pushHistory();
+  selections[activeSel] = s.filter(f => !names.includes(f));
+  queueSave(); renderGallery(); renderSelection();
+  flashLb(false);
+  if (lbContext !== 'gallery') syncLightboxToSel(); else updateLb();
 }
 $('lbAddBtn').onclick  = lbToggleSel;
 $('lbCompareBtn').onclick = () => {
@@ -6619,6 +7099,14 @@ document.addEventListener('keydown', async e => {
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'N') {
     e.preventDefault(); addNewSel(); return;
   }
+  if (!document.querySelector('#lightbox.open, #clipDetail.open, #helpModal.open, #wmModal.open, #mainExportModal.open, #expListModal.open, #exportModal.open, #modal.open, #wmBatchModal.open, #pathPicker.open') && mainView === 'gallery') {
+    const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+    if (!typing) {
+      if (gridNavKey(e)) return;
+      if (e.key === 'Enter' && gridMulti.size) { e.preventDefault(); addGridMultiToSel(); return; }
+      if (e.key === 'Escape' && gridMulti.size) { e.preventDefault(); clearGridMulti(); return; }
+    }
+  }
   if ($('lightbox').classList.contains('open')) {
     if (e.key === 'Escape') closeLb();
     // Navigate prev/next — left/right arrows and up/down arrows
@@ -6630,6 +7118,7 @@ document.addEventListener('keydown', async e => {
     // Cmd/Ctrl+Shift+A — clear multi-select group
     if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') { e.preventDefault(); lbMultiSel.clear(); updateLb(); }
     if (e.key === ' ') { e.preventDefault(); lbToggleSel(); }
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); lbRemoveFromSel(); }
   } else if ($('clipDetail').classList.contains('open')) {
     if (e.key === 'Escape') { closeClipDetail(); }
     else if (e.key === 'ArrowLeft'  && clipDetailIdx > 0) { clipDetailIdx--; updateClipDetailImage(); }
@@ -6661,6 +7150,9 @@ document.addEventListener('keydown', async e => {
     if (e.key === 'Escape') closeModal();
   }
 });
+
+// A focused button (e.g. "Add to selection" after a click) would also fire its own click on Space keyup and undo the toggle
+document.addEventListener('keyup', e => { if (e.key === ' ' && $('lightbox').classList.contains('open')) e.preventDefault(); });
 
 // ─── Auto-restore folder from URL on load ─────────────────────────────────
 (async () => {

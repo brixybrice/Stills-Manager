@@ -79,7 +79,15 @@ fileDates       // { relPath: mtime } chargé depuis /api/file-dates pour le tri
 - `updateCumulUI(folderCount, imageCount)` / `updateSortUI()` — mise à jour de l'UI des boutons
 - `parseStillNameUtil(filename)` — extrait clipName + sourceTc du nom de fichier (pattern ARRI/Sony)
 
+### Grille : multi-sélection, zoom, drag & drop
+- `gridMulti` (Set) / `gridAnchor` / `gridCursor` — marquage **distinct** de la sélection active : surlignage ambre (`.thumb-wrap.multi`), jamais persisté. Clic = marquer/démarquer ; Shift+clic = étendre depuis `gridAnchor` ; **Cmd/Ctrl+clic = ajouter/retirer de la sélection active** (`toggleInSel`) ; **double-clic = lightbox**
+- `gridNavKey(e)` — Maj+←/→ (±1) et Maj+↑/↓ (±nb de colonnes réel via `gridColCount()`, lu dans `getComputedStyle`) étendent `gridMulti` ; `refreshGridMulti()` ne touche que les classes (pas de re-render des vignettes). Entrée = `addGridMultiToSel()`, Échap = vider. Handler dans le keydown global, seulement si aucune modale/lightbox n'est ouverte et `mainView === 'gallery'`
+- Zoom : boutons −/+ → `setGridCols(n)` écrase `--cols` en inline (prime sur les media queries), persisté `stills-grid-cols`
+- Drag & drop : chaque `.thumb-wrap` est `draggable`, payload `GRID_DND_TYPE` (liste de noms : tout `gridMulti` si la vignette en fait partie, sinon la vignette seule) ; `#selList` gère `dragover`/`drop` (index d'insertion calculé au milieu des `.sel-item`, repère `.drop-before`/`.drop-end`)
+- `body { user-select: none }` — réactivé uniquement sur input/textarea/select/contenteditable
+
 ### Lightbox
+- `#lbSelPanel` — volet de sélection (droite), replié/déplié par `#lbSelToggle`, état `stills-lb-sel-open` ; `renderLbSelPanel()` appelé par `updateLb()` ; clic sur une ligne = naviguer vers cette image si elle est dans `lbImages`
 - `openLightbox(images, idx, context)` / `closeLb()`
 - `updateLb()` — met à jour tout l'UI du lightbox
 - `renderCarousel()` — 7 slots (±3 autour de lbIdx) ; Shift+click → `lbMultiSel`
@@ -197,4 +205,4 @@ Généré par le script DaVinci Resolve **DaVinci-Resolve-Stills-Markers**.
 
 Film/DIT professionnel, francophone. Utilise DaVinci Resolve. Nommage clips : `A207C001_260504K9.mxf` (convention ARRI/Sony). Timecodes au format `HH:MM:SS:FF`.
 
-## Version actuelle : v1.3.1
+## Version actuelle : v1.6.0

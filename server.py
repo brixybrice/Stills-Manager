@@ -16,6 +16,32 @@ JSON_FILE      = '.stills-selections.json'
 def nat_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
+# ── Persistent prefs (survive updates / port changes) ─────────────────────
+# localStorage is per-origin (host:port) and the app folder may be replaced on
+# update, so the UI mirrors its `stills-*` keys into a file in the user's home.
+PREFS_FILE = os.path.join(os.path.expanduser('~'), '.stills-manager', 'settings.json')
+
+@app.route('/api/prefs', methods=['GET'])
+def get_prefs():
+    try:
+        with open(PREFS_FILE, encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except (OSError, ValueError):
+        return jsonify({})
+
+@app.route('/api/prefs', methods=['POST'])
+def save_prefs():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'invalid'}), 400
+    data = {k: v for k, v in data.items() if k.startswith('stills-') and isinstance(v, str)}
+    os.makedirs(os.path.dirname(PREFS_FILE), exist_ok=True)
+    tmp = PREFS_FILE + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+    os.replace(tmp, PREFS_FILE)
+    return jsonify({'ok': True})
+
 # ── Static ────────────────────────────────────────────────────────────────
 @app.route('/api/ping')
 def ping():
