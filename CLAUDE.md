@@ -205,4 +205,4 @@ Généré par le script DaVinci Resolve **DaVinci-Resolve-Stills-Markers**.
 
 Film/DIT professionnel, francophone. Utilise DaVinci Resolve. Nommage clips : `A207C001_260504K9.mxf` (convention ARRI/Sony). Timecodes au format `HH:MM:SS:FF`.
 
-## Version actuelle : v1.6.0
+## Version actuelle : v1.6.1

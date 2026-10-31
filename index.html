@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stills Manager v1.6.0</title>
+<title>Stills Manager v1.6.1</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1428,7 +1428,7 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
   </div>
 </div>
 <div id="appFooter">
-  <span id="appVersion">v1.6.0</span>
+  <span id="appVersion">v1.6.1</span>
   <span id="poweredBy">powered by <a href="https://be4post.com" target="_blank" rel="noopener">Be4Post.com</a></span>
 </div>
 
@@ -2434,8 +2434,9 @@ body.light #mergeFolderPicker label:hover { background: rgba(124,92,191,0.08); }
           <span><kbd>Del</kbd> <kbd>⌫</kbd></span>                            <span class="kb-desc">Remove current image (or move group) from selection (fullscreen)</span>
           <span><kbd>Cmd</kbd>+<kbd>↑</kbd></span>                            <span class="kb-desc">Move image (or group) up in selection (fullscreen)</span>
           <span><kbd>Cmd</kbd>+<kbd>↓</kbd></span>                            <span class="kb-desc">Move image (or group) down in selection (fullscreen)</span>
-          <span><kbd>Shift</kbd>+<kbd>click</kbd> carousel</span>             <span class="kb-desc">Add / remove image from move group (fullscreen, selection)</span>
-          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></span>          <span class="kb-desc">Clear move group (fullscreen)</span>
+          <span><kbd>Shift</kbd>+<kbd>click</kbd> carousel</span>             <span class="kb-desc">Mark / unmark image in amber (fullscreen: move group on a selection, grid marks on the gallery)</span>
+          <span><kbd>Cmd</kbd>+<kbd>A</kbd></span>                            <span class="kb-desc">Mark all images in amber (grid; fullscreen on a selection: whole move group)</span>
+          <span><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></span>          <span class="kb-desc">Clear the amber marks (grid; fullscreen: move group)</span>
           <span><kbd>Shift</kbd>+<kbd>←</kbd> <kbd>→</kbd></span>            <span class="kb-desc">Extend marked images one still at a time (grid)</span>
           <span><kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>↓</kbd></span>            <span class="kb-desc">Extend marked images one row at a time (grid)</span>
           <span><kbd>Enter</kbd></span>                                        <span class="kb-desc">Add marked images to selection (grid) · <kbd>Esc</kbd> clears it</span>
@@ -3676,7 +3677,7 @@ function renderGallery() {
         toggleInSel(name);
         return;
       }
-      if (e.shiftKey && gridAnchor !== null) { gridSelectRange(gridAnchor, i); return; }
+      if (e.shiftKey && gridAnchor !== null) { gridSelectRange(gridAnchor, i, true); return; }   // adds to the existing marks
       if (gridMulti.has(name)) gridMulti.delete(name); else gridMulti.add(name);
       gridAnchor = gridCursor = i; refreshGridMulti();
     };
@@ -3743,9 +3744,10 @@ function refreshGridMulti() {
   $('imageGrid').querySelectorAll('.thumb-wrap').forEach(w => w.classList.toggle('multi', gridMulti.has(w.dataset.name)));
   updateMultiUI();
 }
-function gridSelectRange(a, b) {
+function gridSelectRange(a, b, add = false) {
   const lo = Math.min(a, b), hi = Math.max(a, b);
-  gridMulti = new Set(allImages.slice(lo, hi + 1));
+  const range = allImages.slice(lo, hi + 1);
+  gridMulti = add ? new Set([...gridMulti, ...range]) : new Set(range);
   gridCursor = b;
   refreshGridMulti();
   const w = $('imageGrid').querySelector(`.thumb-wrap[data-name="${CSS.escape(allImages[b])}"]`);
@@ -3917,6 +3919,7 @@ function openLightbox(images, idx, context = 'gallery') {
 function closeLb() {
   lbCompareMode = false; lbCompareNameA = null; lbMultiSel.clear();
   $('lightbox').classList.remove('open');
+  refreshGridMulti();
 }
 function flashLb(adding) {
   const el = $('lbFlash');
@@ -3997,11 +4000,13 @@ function lbSelTool(fn) {
   if (lbContext !== 'gallery') syncLightboxToSel(); else updateLb();
 }
 
+// Amber marks shown in the carousel: the move group on a selection, the grid marks in the gallery context
+function lbAmberSet() { return lbContext !== 'gallery' ? lbMultiSel : gridMulti; }
 function renderCarousel() {
   const el = $('lbCarousel');
   el.innerHTML = '';
   const spread = 3;
-  const inSelCtx = lbContext !== 'gallery';
+  const amber = lbAmberSet();
   for (let offset = -spread; offset <= spread; offset++) {
     const i = lbIdx + offset;
     const slot = document.createElement('div');
@@ -4012,17 +4017,18 @@ function renderCarousel() {
       let cls = 'lb-car-slot';
       if (offset === 0)                cls += ' lb-car-active';
       else if (Math.abs(offset) === 1) cls += ' lb-car-near';
-      if (inSelCtx && lbMultiSel.has(imgName)) cls += ' lb-car-checked';
+      if (amber.has(imgName)) cls += ' lb-car-checked';
       slot.className = cls;
       const img = document.createElement('img');
       img.draggable = false;
       applyLbCrop(img, imgName);
       const captured = i;
       slot.onclick = e => {
-        if (inSelCtx && e.shiftKey) {
-          // Shift+click toggles multi-select without navigating
-          if (lbMultiSel.has(lbImages[captured])) lbMultiSel.delete(lbImages[captured]);
-          else lbMultiSel.add(lbImages[captured]);
+        if (e.shiftKey) {
+          // Shift+click toggles the amber mark without navigating
+          const set = lbAmberSet();
+          if (set.has(lbImages[captured])) set.delete(lbImages[captured]);
+          else set.add(lbImages[captured]);
           updateLb();
         } else if (offset !== 0) {
           lbIdx = captured; updateLb();
@@ -4386,7 +4392,9 @@ function openWmBatchDialog(names, main) {
     $('wmbCancel').onclick = $('wmbClose').onclick = () => done(null);
   });
 }
-async function runWithWmBatch(fn) {
+// `wmOn` = the export's own "Apply watermark" toggle; when unticked, export once without any batch dialog.
+async function runWithWmBatch(fn, wmOn) {
+  if (wmOn && !wmOn()) return fn();
   const listed = wmBatchNames();
   if (!listed.length) return fn();
   const main = $('csWmText').value.trim();
@@ -5957,7 +5965,7 @@ $('invertGalSelBtn').onclick = () => {
   queueSave(); renderGallery(); renderSelection();
 };
 $('exportBtn').onclick      = () => runWithWmBatch(exportPDF);
-$('indivBtn').onclick       = () => runWithWmBatch(exportIndivStills);
+$('indivBtn').onclick       = () => runWithWmBatch(exportIndivStills, () => $('indivWatermark').checked);
 $('edlBtn').onclick  = exportEDL;
 $('mainExportBtn').onclick = openExpList;
 $('expListClose').onclick  = closeExpList;
@@ -6231,9 +6239,9 @@ document.querySelectorAll('.paths-browse').forEach(btn => {
 $('ppSelect').onclick = () => { if(ppTargetId){ $(ppTargetId).value = ppCurrentPath; savePathsData(); } $('pathPicker').classList.remove('open'); };
 $('ppCancel').onclick = () => $('pathPicker').classList.remove('open');
 $('pathPicker').addEventListener('click', e => { if(e.target===$('pathPicker')) $('pathPicker').classList.remove('open'); });
-$('csJpgBtn').onclick = () => runWithWmBatch(() => exportCS('jpg'));
-$('csPngBtn').onclick = () => runWithWmBatch(() => exportCS('png'));
-$('csPdfBtn').onclick = () => runWithWmBatch(() => exportCS('pdf'));
+$('csJpgBtn').onclick = () => runWithWmBatch(() => exportCS('jpg'), () => $('csWmEnabled').checked);
+$('csPngBtn').onclick = () => runWithWmBatch(() => exportCS('png'), () => $('csWmEnabled').checked);
+$('csPdfBtn').onclick = () => runWithWmBatch(() => exportCS('pdf'), () => $('csWmEnabled').checked);
 $('csPrevPage').onclick = () => navigateCSPreview(-1);
 $('csNextPage').onclick = () => navigateCSPreview(1);
 $('paletteJpgBtn').onclick = () => exportPalette('jpg');
@@ -7075,6 +7083,26 @@ $('exportModalRun').onclick    = runExports;
 $('exportModal').onclick = e => { if (e.target === $('exportModal')) closeExportModal(); };
 EXPORT_OPT_IDS.forEach(id => $(id).addEventListener('change', saveExportOpts));
 
+// Cmd/Ctrl+A = mark all (amber), Cmd/Ctrl+Shift+A = clear the marks — grid and fullscreen.
+// Marks only (gridMulti, or lbMultiSel for fullscreen on a selection); the definitive selection is untouched.
+function selectAllShortcut(e) {
+  if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== 'a') return false;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return false;
+  const lbOpen = $('lightbox').classList.contains('open');
+  if (!lbOpen && (mainView !== 'gallery' || document.querySelector('#clipDetail.open, #helpModal.open, #wmModal.open, #mainExportModal.open, #expListModal.open, #exportModal.open, #modal.open, #wmBatchModal.open, #pathPicker.open'))) return false;
+  e.preventDefault();
+  if (lbOpen && lbContext !== 'gallery') {
+    if (e.shiftKey) lbMultiSel.clear(); else lbMultiSel = new Set(lbImages);
+    updateLb();
+    return true;
+  }
+  if (e.shiftKey) gridMulti.clear(); else gridMulti = new Set(allImages);
+  gridAnchor = gridCursor = null;
+  refreshGridMulti();
+  if (lbOpen) updateLb();
+  return true;
+}
 document.addEventListener('keydown', async e => {
   if ($('modal').classList.contains('open')) {
     if (e.key === 'Enter')  { e.preventDefault(); const rec = $('modalRecursive').checked; closeModal(); await loadFolder(browserPath, rec); }
@@ -7099,6 +7127,7 @@ document.addEventListener('keydown', async e => {
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'N') {
     e.preventDefault(); addNewSel(); return;
   }
+  if (selectAllShortcut(e)) return;
   if (!document.querySelector('#lightbox.open, #clipDetail.open, #helpModal.open, #wmModal.open, #mainExportModal.open, #expListModal.open, #exportModal.open, #modal.open, #wmBatchModal.open, #pathPicker.open') && mainView === 'gallery') {
     const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
     if (!typing) {
@@ -7115,8 +7144,6 @@ document.addEventListener('keydown', async e => {
     // Reorder in selection — Cmd/Ctrl + up/down
     if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowUp'   && lbContext !== 'gallery') { e.preventDefault(); lbMoveGroup(-1); }
     if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowDown'  && lbContext !== 'gallery') { e.preventDefault(); lbMoveGroup(+1); }
-    // Cmd/Ctrl+Shift+A — clear multi-select group
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') { e.preventDefault(); lbMultiSel.clear(); updateLb(); }
     if (e.key === ' ') { e.preventDefault(); lbToggleSel(); }
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); lbRemoveFromSel(); }
   } else if ($('clipDetail').classList.contains('open')) {
